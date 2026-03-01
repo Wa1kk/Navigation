@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:IndoorNav.Controls"
+             xmlns:models="clr-namespace:IndoorNav.Models"
+             xmlns:conv="clr-namespace:IndoorNav.Converters"
+             xmlns:vm="clr-namespace:IndoorNav.ViewModels"
+             x:Class="IndoorNav.Pages.AdminPage"
+             x:DataType="vm:AdminViewModel"
+             Title="Редактор графа"
+             BackgroundColor="#F1F5F9">
+
+    <ContentPage.Resources>
+        <conv:BoolToColorConverter x:Key="BoolToColorConverter" />
+        <conv:NullToBoolConverter  x:Key="NullToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{OnIdiom Phone=0, Default=238}" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════════════════════════════
+             SIDEBAR  (deep navy)
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="0" BackgroundColor="#0F172A"
+              RowDefinitions="Auto,Auto,Auto,*"
+              IsVisible="{OnIdiom Phone=False, Default=True}">
+
+            <!-- Header -->
+            <VerticalStackLayout Grid.Row="0" Padding="20,22,20,14" Spacing="2">
+                <Label Text="Редактор графа"
+                       FontSize="17" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Управление узлами и рёбрами"
+                       FontSize="11" TextColor="#475569" />
+            </VerticalStackLayout>
+
+            <!-- Buildings -->
+            <VerticalStackLayout Grid.Row="1" Padding="10,0,10,0">
+                <Label Text="ЗДАНИЕ" FontSize="10" CharacterSpacing="1.5"
+                       TextColor="#334155" Margin="8,0,0,8" />
+                <CollectionView ItemsSource="{Binding Buildings}"
+                                SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
+                                SelectionMode="Single" HeightRequest="90">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Building">
+                            <Border Padding="12,9" Margin="0,2"
+                                    StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                                    BackgroundColor="Transparent">
+                                <Label Text="{Binding Name}" FontSize="14" TextColor="#94A3B8" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#1D4ED8" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <!-- Floors -->
+            <VerticalStackLayout Grid.Row="2" Padding="10,12,10,0">
+                <Label Text="ЭТАЖ" FontSize="10" CharacterSpacing="1.5"
+                       TextColor="#334155" Margin="8,0,0,8" />
+                <CollectionView ItemsSource="{Binding Floors}"
+                                SelectedItem="{Binding SelectedFloor, Mode=TwoWay}"
+                                SelectionMode="Single" HeightRequest="100">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Floor">
+                            <Border Padding="12,9" Margin="0,2"
+                                    StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                                    BackgroundColor="Transparent">
+                                <Label Text="{Binding Name}" FontSize="14" TextColor="#94A3B8" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#1D4ED8" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <!-- Scrollable action buttons -->
+            <ScrollView Grid.Row="3">
+                <VerticalStackLayout Padding="10,6,10,20" Spacing="5">
+
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+
+                    <!-- ADD section -->
+                    <Label Text="ДОБАВИТЬ" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+
+                    <Button Text="+ Узел"
+                            Command="{Binding SetAddModeCommand}"
+                            BackgroundColor="{Binding IsAddMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#1E293B'}"
+                            TextColor="{Binding IsAddMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="🚶 Лестница / Лифт"
+                            Command="{Binding SetTransitionModeCommand}"
+                            BackgroundColor="{Binding IsTransitionMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7C3AED|#1E293B'}"
+                            TextColor="{Binding IsTransitionMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="🛤 Нарисовать коридор"
+                            Command="{Binding SetCorridorModeCommand}"
+                            BackgroundColor="{Binding IsCorridorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#0F766E|#1E293B'}"
+                            TextColor="{Binding IsCorridorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="✓ Завершить коридор"
+                            Command="{Binding FinishCorridorCommand}"
+                            IsVisible="{Binding IsCorridorMode}"
+                            BackgroundColor="#064E3B" TextColor="#6EE7B7"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="34" />
+
+                    <!-- EDIT section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+                    <Label Text="РЕДАКТИРОВАТЬ" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+
+                    <Button Text="✏️ Переместить"
+                            Command="{Binding SetMoveModeCommand}"
+                            BackgroundColor="{Binding IsMoveMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7C3AED|#1E293B'}"
+                            TextColor="{Binding IsMoveMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="✓ Подтвердить перемещение"
+                            Command="{Binding ConfirmMoveCommand}"
+                            IsVisible="{Binding IsMoveMode}"
+                            BackgroundColor="#4C1D95" TextColor="#C4B5FD"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="34" />
+
+                    <Button Text="↔ Соединить"
+                            Command="{Binding SetConnectModeCommand}"
+                            BackgroundColor="{Binding IsConnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#15803D|#1E293B'}"
+                            TextColor="{Binding IsConnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="✕ Разъединить"
+                            Command="{Binding SetDisconnectModeCommand}"
+                            BackgroundColor="{Binding IsDisconnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#C2410C|#1E293B'}"
+                            TextColor="{Binding IsDisconnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="✏ Переименовать"
+                            Command="{Binding RenameSelectedCommand}"
+                            BackgroundColor="#1E293B" TextColor="#94A3B8"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <!-- BOUNDARY section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+                    <Label Text="ГРАНИЦЫ" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+
+                    <Button Text="📐 Граница"
+                            Command="{Binding SetBoundaryModeCommand}"
+                            BackgroundColor="{Binding IsBoundaryMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#D97706|#1E293B'}"
+                            TextColor="{Binding IsBoundaryMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="✓ Замкнуть"
+                            Command="{Binding FinishBoundaryCommand}"
+                            IsVisible="{Binding IsBoundaryMode}"
+                            BackgroundColor="#92400E" TextColor="#FDE68A"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="34" />
+
+                    <Button Text="🗑 Удалить границу"
+                            Command="{Binding ClearBoundaryCommand}"
+                            BackgroundColor="#1E293B" TextColor="#F87171"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <!-- MANAGE section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+                    <Label Text="УПРАВЛЕНИЕ" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+
+                    <Button Text="🗑 Удалить  [Del]"
+                            Command="{Binding DeleteSelectedCommand}"
+                            BackgroundColor="#1E293B" TextColor="#F87171"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="⚠ Сбросить граф"
+                            Command="{Binding ResetGraphCommand}"
+                            BackgroundColor="#450A0A" TextColor="#FCA5A5"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <!-- CONTROL section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,8,4,10" />
+
+                    <Button Text="Сброс режима"
+                            Command="{Binding CancelActionCommand}"
+                            BackgroundColor="#1E293B" TextColor="#64748B"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="💾 Сохранить граф"
+                            Command="{Binding SaveCommand}"
+                            BackgroundColor="#2563EB" TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="8" HeightRequest="42" />
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             MAIN AREA
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,Auto,Auto,*,Auto">
+
+            <!-- ═══ PHONE TOP BAR (hidden on desktop) ═══ -->
+            <Grid Grid.Row="0" BackgroundColor="#0F172A" Padding="10,8,10,8"
+                  ColumnDefinitions="Auto,*,*" ColumnSpacing="6"
+                  IsVisible="{OnIdiom Phone=True, Default=False}">
+                <Button Grid.Column="0"
+                        Text="←"
+                        Clicked="OnExitAdminClicked"
+                        BackgroundColor="#1E3A5F" TextColor="#93C5FD"
+                        FontSize="16" FontAttributes="Bold"
+                        WidthRequest="44" HeightRequest="44" CornerRadius="8"
+                        Padding="0" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding Buildings}"
+                        SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Здание" TitleColor="#475569"
+                        TextColor="White" BackgroundColor="#1E293B" />
+                <Picker Grid.Column="2"
+                        ItemsSource="{Binding Floors}"
+                        SelectedItem="{Binding SelectedFloor, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Этаж" TitleColor="#475569"
+                        TextColor="White" BackgroundColor="#1E293B" />
+            </Grid>
+
+            <!-- Status bar -->
+            <Border Grid.Row="1"
+                    BackgroundColor="#FFF7ED"
+                    StrokeShape="RoundRectangle 8"
+                    Stroke="#FED7AA" StrokeThickness="1"
+                    Padding="14,8" Margin="0,0,0,8">
+                <Label Text="{Binding StatusText}" FontSize="13" TextColor="#92400E" />
+            </Border>
+
+            <!-- Selected node info badge -->
+            <Border Grid.Row="2"
+                    BackgroundColor="#EFF6FF"
+                    StrokeShape="RoundRectangle 8"
+                    Stroke="#BFDBFE" StrokeThickness="1"
+                    Padding="14,8" Margin="0,0,0,8"
+                    IsVisible="{Binding SelectedNode, Converter={StaticResource NullToBoolConverter}}">
+                <HorizontalStackLayout Spacing="16">
+                    <Label Text="{Binding SelectedNode.Name, StringFormat='• {0}'}"
+                           FontSize="13" FontAttributes="Bold" TextColor="#1D4ED8" />
+                    <Label Text="{Binding SelectedNode.X, StringFormat='x={0:F0}'}"
+                           FontSize="12" TextColor="#64748B" VerticalOptions="Center" />
+                    <Label Text="{Binding SelectedNode.Y, StringFormat='y={0:F0}'}"
+                           FontSize="12" TextColor="#64748B" VerticalOptions="Center" />
+                    <Border Padding="6,2" StrokeShape="RoundRectangle 4"
+                            BackgroundColor="#EDE9FE" StrokeThickness="0"
+                            IsVisible="{Binding SelectedNode.IsTransition}">
+                        <Label Text="переход" FontSize="11" TextColor="#7C3AED" />
+                    </Border>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Canvas -->
+            <Border Grid.Row="3"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="#E2E8F0" StrokeThickness="1"
+                    BackgroundColor="White" Padding="0">
+                <controls:SvgView x:Name="AdminCanvas"
+                                  FloorSvgPath="{Binding SelectedFloor.SvgPath}"
+                                  Nodes="{Binding CurrentNodes}"
+                                  Edges="{Binding CurrentEdges}"
+                                  SelectedNode="{Binding SelectedNode}"
+                                  BoundaryPreview="{Binding BoundaryPreview}"
+                                  ShowGraph="True"
+                                  IsAdminMode="True"
+                                  IsDragMode="{Binding IsMoveMode}"
+                                  HorizontalOptions="Fill"
+                                  VerticalOptions="Fill" />
+            </Border>
+
+            <!-- ═══ PHONE BOTTOM TOOLBAR (hidden on desktop) ═══ -->
+            <Border Grid.Row="4" BackgroundColor="#0F172A" Padding="8,6"
+                    StrokeThickness="0"
+                    IsVisible="{OnIdiom Phone=True, Default=False}">
+                <ScrollView Orientation="Horizontal">
+                    <HorizontalStackLayout Spacing="5" Padding="0,2">
+                        <Button Text="+ Узел"
+                                Command="{Binding SetAddModeCommand}"
+                                BackgroundColor="{Binding IsAddMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#1E293B'}"
+                                TextColor="{Binding IsAddMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="🚶 Лест."
+                                Command="{Binding SetTransitionModeCommand}"
+                                BackgroundColor="{Binding IsTransitionMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7C3AED|#1E293B'}"
+                                TextColor="{Binding IsTransitionMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="🛤 Кор."
+                                Command="{Binding SetCorridorModeCommand}"
+                                BackgroundColor="{Binding IsCorridorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#0F766E|#1E293B'}"
+                                TextColor="{Binding IsCorridorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="✓ Кор."
+                                Command="{Binding FinishCorridorCommand}"
+                                IsVisible="{Binding IsCorridorMode}"
+                                BackgroundColor="#064E3B" TextColor="#6EE7B7"
+                                FontSize="12" FontAttributes="Bold" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="✏️ Движ"
+                                Command="{Binding SetMoveModeCommand}"
+                                BackgroundColor="{Binding IsMoveMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7C3AED|#1E293B'}"
+                                TextColor="{Binding IsMoveMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="✓ Перем."
+                                Command="{Binding ConfirmMoveCommand}"
+                                IsVisible="{Binding IsMoveMode}"
+                                BackgroundColor="#4C1D95" TextColor="#C4B5FD"
+                                FontSize="12" FontAttributes="Bold" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="↔ Join"
+                                Command="{Binding SetConnectModeCommand}"
+                                BackgroundColor="{Binding IsConnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#15803D|#1E293B'}"
+                                TextColor="{Binding IsConnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="✕ Разъед"
+                                Command="{Binding SetDisconnectModeCommand}"
+                                BackgroundColor="{Binding IsDisconnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#C2410C|#1E293B'}"
+                                TextColor="{Binding IsDisconnectMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="86" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="📐 Гран."
+                                Command="{Binding SetBoundaryModeCommand}"
+                                BackgroundColor="{Binding IsBoundaryMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#D97706|#1E293B'}"
+                                TextColor="{Binding IsBoundaryMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="✓ Гран."
+                                Command="{Binding FinishBoundaryCommand}"
+                                IsVisible="{Binding IsBoundaryMode}"
+                                BackgroundColor="#92400E" TextColor="#FDE68A"
+                                FontSize="12" FontAttributes="Bold" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="🗑 Удал"
+                                Command="{Binding DeleteSelectedCommand}"
+                                BackgroundColor="#1E293B" TextColor="#F87171"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="↺ Сброс"
+                                Command="{Binding CancelActionCommand}"
+                                BackgroundColor="#1E293B" TextColor="#64748B"
+                                FontSize="12" WidthRequest="78" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="💾 Сохр."
+                                Command="{Binding SaveCommand}"
+                                BackgroundColor="#2563EB" TextColor="White"
+                                FontSize="12" FontAttributes="Bold" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                    </HorizontalStackLayout>
+                </ScrollView>
+            </Border>
+
+        </Grid>
+    </Grid>
+</ContentPage>

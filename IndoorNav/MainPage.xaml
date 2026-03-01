@@ -1,0 +1,487 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:IndoorNav.Controls"
+             xmlns:models="clr-namespace:IndoorNav.Models"
+             xmlns:conv="clr-namespace:IndoorNav.Converters"
+             xmlns:vm="clr-namespace:IndoorNav.ViewModels"
+             x:Class="IndoorNav.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="Навигация"
+             BackgroundColor="#F1F5F9">
+
+    <ContentPage.Resources>
+        <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
+        <conv:NullToBoolInvertConverter x:Key="NullToBoolInvertConverter" />
+        <conv:BoolToColorConverter x:Key="BoolToColorConverter" />
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{OnIdiom Phone=0, Default=218}" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════════════════════════════
+             SIDEBAR  (deep navy)
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="0" BackgroundColor="#0F172A"
+              RowDefinitions="Auto,Auto,*,Auto"
+              IsVisible="{OnIdiom Phone=False, Default=True}">
+
+            <!-- Logo -->
+            <VerticalStackLayout Grid.Row="0" Padding="20,24,20,16" Spacing="2">
+                <Label Text="IndoorNav"
+                       FontSize="18" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Навигация по зданиям"
+                       FontSize="11" TextColor="#475569" />
+            </VerticalStackLayout>
+
+            <!-- Buildings -->
+            <VerticalStackLayout Grid.Row="1" Padding="10,0,10,0">
+                <Label Text="ЗДАНИЕ" FontSize="10" CharacterSpacing="1.5"
+                       TextColor="#334155" Margin="8,0,0,8" />
+                <CollectionView ItemsSource="{Binding Buildings}"
+                                SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
+                                SelectionMode="Single" HeightRequest="88">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Building">
+                            <Border Padding="12,9" Margin="0,2"
+                                    StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                                    BackgroundColor="Transparent">
+                                <Label Text="{Binding Name}" FontSize="14" TextColor="#94A3B8" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#1D4ED8" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <!-- Floors -->
+            <VerticalStackLayout Grid.Row="2" Padding="10,14,10,8">
+                <Label Text="ЭТАЖ" FontSize="10" CharacterSpacing="1.5"
+                       TextColor="#334155" Margin="8,0,0,8" />
+                <CollectionView ItemsSource="{Binding Floors}"
+                                SelectedItem="{Binding SelectedFloor, Mode=TwoWay}"
+                                SelectionMode="Single">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Floor">
+                            <Border Padding="12,10" Margin="0,2"
+                                    StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                                    BackgroundColor="Transparent">
+                                <Label Text="{Binding Name}" FontSize="14" TextColor="#94A3B8" />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="Transparent" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="BackgroundColor" Value="#1D4ED8" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <!-- Admin button -->
+            <Border Grid.Row="3" Padding="10,8,10,20" BackgroundColor="Transparent" StrokeThickness="0">
+                <Button Text="⚙ Администратор"
+                        Command="{Binding GoToAdminCommand}"
+                        BackgroundColor="#1E293B" TextColor="#64748B"
+                        FontSize="13" CornerRadius="8" HeightRequest="38" />
+            </Border>
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             MAIN AREA
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,*,Auto">
+
+            <!-- ═══ PHONE TOP BAR (hidden on desktop) ═══ -->
+            <Grid Grid.Row="0" BackgroundColor="#0F172A" Padding="10,8,10,8"
+                  ColumnDefinitions="*,*,Auto" ColumnSpacing="6"
+                  IsVisible="{OnIdiom Phone=True, Default=False}">
+                <Picker Grid.Column="0"
+                        ItemsSource="{Binding Buildings}"
+                        SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Здание" TitleColor="#475569"
+                        TextColor="White" BackgroundColor="#1E293B" />
+                <Picker Grid.Column="1"
+                        ItemsSource="{Binding Floors}"
+                        SelectedItem="{Binding SelectedFloor, Mode=TwoWay}"
+                        ItemDisplayBinding="{Binding Name}"
+                        Title="Этаж" TitleColor="#475569"
+                        TextColor="White" BackgroundColor="#1E293B" />
+                <Button Grid.Column="2" Text="⚙"
+                        Command="{Binding GoToAdminCommand}"
+                        BackgroundColor="#1E293B" TextColor="#64748B"
+                        WidthRequest="44" HeightRequest="44"
+                        CornerRadius="8" Padding="0" />
+            </Grid>
+
+            <!-- Canvas card -->
+            <Border Grid.Row="1"
+                    StrokeShape="RoundRectangle 14"
+                    Stroke="#E2E8F0" StrokeThickness="1"
+                    BackgroundColor="White" Padding="0">
+                <Grid>
+
+                    <!-- Placeholder removed: building loads automatically on startup -->
+
+                    <!-- Map -->
+                    <controls:SvgView x:Name="MainCanvas"
+                                      FloorSvgPath="{Binding SelectedFloor.SvgPath}"
+                                      Nodes="{Binding NodesOnCurrentFloor}"
+                                      Edges="{Binding EdgesOnCurrentFloor}"
+                                      RouteNodes="{Binding RouteNodesOnFloor}"
+                                      ShowGraph="True"
+                                      HorizontalOptions="Fill" VerticalOptions="Fill" />
+
+                    <!-- Loading overlay -->
+                    <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12"
+                                         IsVisible="{Binding IsLoading}">
+                        <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                           Color="#2563EB" WidthRequest="36" HeightRequest="36"
+                                           HorizontalOptions="Center" />
+                        <Label Text="Загрузка планов..."
+                               FontSize="13" TextColor="#94A3B8" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+
+                    <!-- Error overlay -->
+                    <Border HorizontalOptions="Center" VerticalOptions="Center"
+                            Padding="20,16" Margin="20"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="#FEF2F2" Stroke="#FECACA"
+                            IsVisible="{Binding HasLoadError}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="⚠ Ошибка загрузки" FontSize="14" FontAttributes="Bold"
+                                   TextColor="#DC2626" HorizontalOptions="Center" />
+                            <Label Text="{Binding LoadError}" FontSize="12" TextColor="#7F1D1D"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Breadcrumb pill (top-left overlay) -->
+                    <Border HorizontalOptions="Start" VerticalOptions="Start"
+                            Margin="12" Padding="12,6"
+                            StrokeShape="RoundRectangle 20"
+                            BackgroundColor="#CC0F172A"
+                            StrokeThickness="0"
+                            IsVisible="{Binding SelectedFloor, Converter={StaticResource NullToBoolConverter}}">
+                        <HorizontalStackLayout Spacing="6">
+                            <Label Text="{Binding SelectedBuilding.Name}"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="White" VerticalOptions="Center" />
+                            <Label Text="›" FontSize="14" TextColor="#64748B" VerticalOptions="Center" />
+                            <Label Text="{Binding SelectedFloor.Name}"
+                                   FontSize="12" TextColor="#94A3B8" VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+
+                </Grid>
+            </Border>
+
+            <!-- ─── Bottom panel ─── -->
+            <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="{OnIdiom Phone='10,8,10,10', Default='0,10,0,0'}">
+
+                <!-- Route input bar (PHONE – vertical stack) -->
+                <Border Padding="12,12"
+                        IsVisible="{OnIdiom Phone=True, Default=False}"
+                        StrokeShape="{OnIdiom Phone='RoundRectangle 0', Default='RoundRectangle 12'}"
+                        BackgroundColor="White"
+                        Stroke="#E2E8F0" StrokeThickness="{OnIdiom Phone=0, Default=1}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="ОТ" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#94A3B8" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="12,12"
+                                    StrokeShape="RoundRectangle 10" Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                <Label Text="{Binding StartNodeDisplay}" FontSize="14" TextColor="#334155"
+                                       LineBreakMode="TailTruncation" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </Grid>
+                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#94A3B8" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="12,12"
+                                    StrokeShape="RoundRectangle 10" Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                <Label Text="{Binding EndNodeDisplay}" FontSize="14" TextColor="#334155"
+                                       LineBreakMode="TailTruncation" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenEndPickerCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Button Grid.Column="0" Text="Построить маршрут"
+                                    Command="{Binding BuildRouteCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="14" HeightRequest="48" CornerRadius="10" />
+                            <Button Grid.Column="1" Text="✕"
+                                    Command="{Binding ClearRouteCommand}"
+                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                    TextColor="White" FontSize="15"
+                                    WidthRequest="48" HeightRequest="48" CornerRadius="10" Padding="0" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Route input bar (DESKTOP – horizontal) -->
+                <Border Padding="16,12"
+                        IsVisible="{OnIdiom Phone=False, Default=True}"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="White"
+                        Stroke="#E2E8F0" StrokeThickness="1">
+                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="14">
+
+                        <!-- Откуда field -->
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="ОТ" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
+                            <Border Padding="10,8"
+                                    StrokeShape="RoundRectangle 8"
+                                    Stroke="#E2E8F0" StrokeThickness="1"
+                                    BackgroundColor="#F8FAFC">
+                                <Label Text="{Binding StartNodeDisplay}"
+                                       FontSize="13" TextColor="#334155"
+                                       LineBreakMode="TailTruncation" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Куда field -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="ДО" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
+                            <Border Padding="10,8"
+                                    StrokeShape="RoundRectangle 8"
+                                    Stroke="#E2E8F0" StrokeThickness="1"
+                                    BackgroundColor="#F8FAFC">
+                                <Label Text="{Binding EndNodeDisplay}"
+                                       FontSize="13" TextColor="#334155"
+                                       LineBreakMode="TailTruncation" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenEndPickerCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Build + Clear buttons -->
+                        <Grid Grid.Column="2" ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="End">
+                            <Button Grid.Column="0"
+                                    Text="Построить маршрут"
+                                    Command="{Binding BuildRouteCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="13" Padding="18,9" CornerRadius="8" />
+                            <Button Grid.Column="1"
+                                    Text="✕"
+                                    Command="{Binding ClearRouteCommand}"
+                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                    TextColor="White"
+                                    FontSize="14" WidthRequest="38" HeightRequest="38"
+                                    CornerRadius="8" Padding="0" />
+                        </Grid>
+
+                    </Grid>
+                </Border>
+
+                <!-- Floor switcher (multi-floor route) -->
+                <Border Padding="14,10"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="#EFF6FF"
+                        Stroke="#BFDBFE" StrokeThickness="1"
+                        IsVisible="{Binding IsMultiFloorRoute}">
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Label Text="Маршрут через несколько этажей · Перейти:"
+                               FontSize="12" TextColor="#3B82F6" VerticalOptions="Center" />
+                        <CollectionView ItemsSource="{Binding RouteFloors}" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Null}">
+                                    <Button Text="{Binding Name}" FontSize="12"
+                                            Padding="14,6" CornerRadius="20"
+                                            BackgroundColor="#2563EB" TextColor="White"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.GoToFloorCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Route instructions -->
+                <Border Padding="14,10"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="White"
+                        Stroke="#E2E8F0" StrokeThickness="1"
+                        IsVisible="{Binding HasRoute}">
+                    <ScrollView MaximumHeightRequest="140">
+                        <CollectionView ItemsSource="{Binding RouteInstructions}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" FontSize="13"
+                                           LineBreakMode="WordWrap" Padding="0,2"
+                                           TextColor="#334155" />
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </ScrollView>
+                </Border>
+
+            </VerticalStackLayout>
+
+            <!-- ─── Node picker overlay ─── -->
+
+            <!-- Backdrop: semi-transparent, tap to close -->
+            <BoxView Grid.RowSpan="3"
+                     Color="#55000000"
+                     IsVisible="{Binding IsPickerOpen}">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ClosePickerCommand}" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <!-- Popup card -->
+            <Border Grid.Row="1" VerticalOptions="End"
+                    Padding="0"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="White"
+                    Stroke="#E2E8F0" StrokeThickness="1"
+                    IsVisible="{Binding IsPickerOpen}">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+
+                    <!-- Header -->
+                    <Grid Grid.Row="0" Padding="16,10,8,10" ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0"
+                               Text="{Binding PickerTitle}"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="#0F172A" VerticalOptions="Center" />
+                        <Button Grid.Column="1"
+                                Text="✕"
+                                Command="{Binding ClosePickerCommand}"
+                                BackgroundColor="Transparent" TextColor="#64748B"
+                                FontSize="15" HeightRequest="34" WidthRequest="34"
+                                Padding="0" />
+                    </Grid>
+
+                    <!-- Divider -->
+                    <BoxView Grid.Row="1" BackgroundColor="#E2E8F0" HeightRequest="1" />
+
+                    <!-- Search bar -->
+                    <Border Grid.Row="2" Padding="12,8"
+                            BackgroundColor="#F8FAFC" StrokeThickness="0">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="🔍"
+                                   FontSize="14" VerticalOptions="Center"
+                                   TextColor="#94A3B8" />
+                            <Entry Grid.Column="1"
+                                   Text="{Binding PickerSearchText, Mode=TwoWay}"
+                                   Placeholder="Поиск аудитории..."
+                                   PlaceholderColor="#94A3B8"
+                                   FontSize="13" TextColor="#1E293B"
+                                   BackgroundColor="Transparent"
+                                   ClearButtonVisibility="WhileEditing"
+                                   ReturnType="Search" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Divider -->
+                    <BoxView Grid.Row="3" BackgroundColor="#E2E8F0" HeightRequest="1" />
+
+                    <!-- Collapsible floor groups -->
+                    <ScrollView Grid.Row="4" MaximumHeightRequest="280">
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding NodesByFloor}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:FloorNodeGroup">
+                                    <VerticalStackLayout Spacing="0">
+
+                                        <!-- Floor header row — tap to expand / collapse -->
+                                        <Border Padding="16,10,16,10"
+                                                BackgroundColor="#F8FAFC"
+                                                StrokeThickness="0">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding FloorName}"
+                                                       FontSize="11" FontAttributes="Bold"
+                                                       CharacterSpacing="1.2"
+                                                       TextColor="#64748B"
+                                                       VerticalOptions="Center" />
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding ChevronText}"
+                                                       FontSize="11" TextColor="#94A3B8"
+                                                       VerticalOptions="Center" />
+                                            </Grid>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding ToggleExpandCommand}" />
+                                            </Border.GestureRecognizers>
+                                        </Border>
+
+                                        <!-- Node items — shown only when floor is expanded -->
+                                        <VerticalStackLayout Spacing="0"
+                                                             BindableLayout.ItemsSource="{Binding VisibleNodes}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="{x:Null}">
+                                                    <Border Padding="22,11,16,11"
+                                                            BackgroundColor="Transparent"
+                                                            StrokeThickness="0">
+                                                        <Label Text="{Binding Name}"
+                                                               FontSize="14" TextColor="#1E293B" />
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPickerNodeCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+
+                                        <!-- Thin separator between floors -->
+                                        <BoxView BackgroundColor="#F1F5F9" HeightRequest="1" />
+
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                </Grid>
+            </Border>
+
+        </Grid>
+
+    </Grid>
+</ContentPage>

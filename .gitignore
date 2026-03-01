@@ -1,0 +1,30 @@
+# Build outputs
+**/bin/
+**/obj/
+*.user
+
+# VS / Rider
+.vs/
+.idea/
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+**/packages/
+!**/packages/build/
+
+# Android keystore (secrets)
+*.keystore
+*.jks
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Large SVG source files (1 GB total — не пригодны для Git)
+# Для работы приложения используются WebP в Resources/Raw/FloorImages/
+**/Resources/Raw/SvgFloors/
