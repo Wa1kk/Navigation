@@ -340,23 +340,49 @@
                     </HorizontalStackLayout>
                 </Border>
 
-                <!-- Route instructions -->
-                <Border Padding="14,10"
+                <!-- Route step card -->
+                <Border Padding="16,14"
                         StrokeShape="RoundRectangle 10"
                         BackgroundColor="White"
                         Stroke="#E2E8F0" StrokeThickness="1"
                         IsVisible="{Binding HasRoute}">
-                    <ScrollView MaximumHeightRequest="140">
-                        <CollectionView ItemsSource="{Binding RouteInstructions}" SelectionMode="None">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="x:String">
-                                    <Label Text="{Binding .}" FontSize="13"
-                                           LineBreakMode="WordWrap" Padding="0,2"
-                                           TextColor="#334155" />
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </ScrollView>
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+
+                        <!-- Step counter: "Шаг 1 из 3" -->
+                        <Label Grid.Row="0"
+                               Text="{Binding StepCounterText}"
+                               FontSize="11" TextColor="#94A3B8"
+                               IsVisible="{Binding IsMultiStepRoute}"
+                               HorizontalOptions="Center" />
+
+                        <!-- Icon + instruction text -->
+                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Label Grid.Column="0"
+                                   Text="{Binding CurrentStepIcon}"
+                                   FontSize="26" VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding CurrentStepText}"
+                                   FontSize="15" TextColor="#0F172A"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="WordWrap"
+                                   VerticalOptions="Center" />
+                        </Grid>
+
+                        <!-- Кнопки навигации -->
+                        <Grid Grid.Row="2">
+                            <Button Text="Далее →"
+                                    Command="{Binding NextStepCommand}"
+                                    IsVisible="{Binding HasNextStep}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="14" HeightRequest="44" CornerRadius="8" />
+                            <Button Text="✓ Завершить"
+                                    Command="{Binding ClearRouteCommand}"
+                                    IsVisible="{Binding IsLastStep}"
+                                    BackgroundColor="#16A34A" TextColor="White"
+                                    FontSize="14" HeightRequest="44" CornerRadius="8" />
+                        </Grid>
+
+                    </Grid>
                 </Border>
 
             </VerticalStackLayout>

@@ -32,6 +32,10 @@ public class MainViewModel : INotifyPropertyChanged
     private ObservableCollection<NavEdge> _edgesOnCurrentFloor = new();
     private ObservableCollection<NavNode> _allNodesForBuilding = new();
 
+    // --- Пошаговые инструкции ---
+    private readonly List<RouteStep> _routeStepsList = new();
+    private int _currentStepIndex;
+
     // Конфигурация зданий: Id → отображаемое название.
     // Чтобы добавить новое здание — просто допишите строку сюда.
     private static readonly (string Id, string Name)[] BuildingConfig =
@@ -203,10 +207,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>True when a route has been successfully calculated.</summary>
-    public bool HasRoute => _currentFullRoute != null && _currentFullRoute.Count > 0;
-
-    /// <summary>Step-by-step floor instructions shown below the map.</summary>
-    public ObservableCollection<string> RouteInstructions { get; } = new();
+    public bool HasRoute => _routeStepsList.Count > 0;
 
     /// <summary>Ordered list of floors that are part of the current route (for floor-jump buttons).</summary>
     public ObservableCollection<Floor> RouteFloors { get; } = new();
@@ -214,12 +215,30 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>True when the current route spans more than one floor.</summary>
     public bool IsMultiFloorRoute => RouteFloors.Count > 1;
 
+    public RouteStep? CurrentStep =>
+        _routeStepsList.Count > 0 ? _routeStepsList[_currentStepIndex] : null;
+
+    /// <summary>Текст текущего шага (плоское свойство для XAML-биндинга).</summary>
+    public string CurrentStepText => CurrentStep?.Text ?? string.Empty;
+    public string CurrentStepIcon => CurrentStep?.Icon ?? "🚶";
+
+    /// <summary>"Шаг N из M" — пусто для одношагового маршрута.</summary>
+    public string StepCounterText =>
+        _routeStepsList.Count > 1
+            ? $"Шаг {_currentStepIndex + 1} из {_routeStepsList.Count}"
+            : string.Empty;
+
+    public bool HasNextStep => _routeStepsList.Count > 0 && _currentStepIndex < _routeStepsList.Count - 1;
+    public bool IsLastStep  => _routeStepsList.Count > 0 && _currentStepIndex == _routeStepsList.Count - 1;
+    public bool IsMultiStepRoute => _routeStepsList.Count > 1;
+
     // ── Commands ──────────────────────────────────────────────────────────────────
 
     public ICommand BuildRouteCommand       { get; }
     public ICommand ClearRouteCommand       { get; }
     public ICommand GoToAdminCommand        { get; }
     public ICommand GoToFloorCommand        { get; }
+    public ICommand NextStepCommand         { get; }
     public ICommand OpenStartPickerCommand  { get; }
     public ICommand OpenEndPickerCommand    { get; }
     public ICommand SelectPickerNodeCommand { get; }
@@ -237,6 +256,7 @@ public class MainViewModel : INotifyPropertyChanged
         GoToAdminCommand  = new Command(async () =>
             await Shell.Current.GoToAsync("admin"));
         GoToFloorCommand  = new Command<Floor>(f => { if (f != null) SelectedFloor = f; });
+        NextStepCommand   = new Command(ExecuteNextStep, () => HasNextStep);
 
         OpenStartPickerCommand  = new Command(() =>
         {
@@ -428,17 +448,19 @@ public class MainViewModel : INotifyPropertyChanged
         if (StartNode == null || EndNode == null) return;
 
         var path = _graphService.Graph.FindPath(StartNode.Id, EndNode.Id);
-        RouteInstructions.Clear();
+        _routeStepsList.Clear();
+        _currentStepIndex = 0;
 
         if (path is null || path.Count == 0)
         {
-            _currentFullRoute = null;            // сначала null, потом уведомляем
-            RouteStatus = "Маршрут не найден.";  // триггерит HasRoute=false
+            _currentFullRoute = null;
+            RouteStatus = "Маршрут не найден.";
+            OnPropertyChanged(nameof(HasRoute));
         }
         else
         {
             _currentFullRoute = path;
-            BuildRouteInstructions(path);
+            BuildRouteSteps(path);
         }
 
         RefreshRoute();
@@ -458,48 +480,151 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private void BuildRouteInstructions(List<NavNode> path)
+    private void BuildRouteSteps(List<NavNode> path)
     {
-        int distinctFloors = path.Select(n => n.FloorNumber).Distinct().Count();
+        // Группируем последовательные узлы одного этажа в сегменты
+        var segments = new List<(int FloorNum, List<NavNode> Nodes)>();
+        int cur = path[0].FloorNumber;
+        var seg = new List<NavNode> { path[0] };
+        for (int i = 1; i < path.Count; i++)
+        {
+            if (path[i].FloorNumber == cur) { seg.Add(path[i]); }
+            else { segments.Add((cur, seg)); cur = path[i].FloorNumber; seg = new List<NavNode> { path[i] }; }
+        }
+        segments.Add((cur, seg));
+
+        int distinctFloors = segments.Count;
         RouteStatus = distinctFloors > 1
             ? $"Маршрут найден ({distinctFloors} этажа)"
             : $"Маршрут найден ({path.Count(n => !n.IsWaypoint)} точки)";
 
-        int curFloor = path[0].FloorNumber;
-        RouteInstructions.Add($"📍 Этаж {curFloor}:");
+        Floor? GetFloor(int num) =>
+            _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == num);
 
-        for (int i = 0; i < path.Count; i++)
+        var destination = EndNode?.Name ?? "назначение";
+
+        if (segments.Count == 1)
         {
-            var n = path[i];
-
-            if (n.FloorNumber != curFloor)
+            _routeStepsList.Add(new RouteStep
             {
-                // Нашли переход на другой этаж
-                var prev = path[i - 1];
-                string via   = prev.IsTransition ? prev.Name : "переход";
-                string dir   = n.FloorNumber > curFloor ? "поднимитесь" : "спуститесь";
-                RouteInstructions.Add($"🔼 Пройдите к [{via}] и {dir} на {n.FloorNumber}-й этаж");
-                curFloor = n.FloorNumber;
-                RouteInstructions.Add($"📍 Этаж {curFloor}:");
+                Text = $"Идите по {FloorNameInstrumental(segments[0].FloorNum)} до {destination}",
+                Icon = "🚶",
+                TargetFloor = GetFloor(segments[0].FloorNum)
+            });
+        }
+        else
+        {
+            for (int i = 0; i < segments.Count - 1; i++)
+            {
+                var (floorNum, nodes) = segments[i];
+                var (nextFloorNum, _) = segments[i + 1];
+
+                // Находим узел перехода (лестница/лифт) в конце сегмента
+                var transition = nodes.LastOrDefault(n => n.IsTransition) ?? nodes.Last();
+                bool isElevator = transition.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase);
+
+                // Шаг: идти до лестницы / лифта
+                _routeStepsList.Add(new RouteStep
+                {
+                    Text = $"Идите по {FloorNameInstrumental(floorNum)} до {transition.Name}",
+                    Icon = "🚶",
+                    TargetFloor = GetFloor(floorNum)
+                });
+
+                // Шаг: подняться / спуститься
+                string dir     = nextFloorNum > floorNum ? "Поднимайтесь" : "Спускайтесь";
+                string via     = isElevator ? "на лифте" : "по лестнице";
+                string toFloor = FloorNameInstrumental(nextFloorNum);
+                _routeStepsList.Add(new RouteStep
+                {
+                    Text = $"{dir} {via} ({transition.Name}) до {FloorNameAccusative(nextFloorNum)}",
+                    Icon = isElevator ? "🛗" : "🪜",
+                    TargetFloor = GetFloor(nextFloorNum)
+                });
             }
 
-            // Показываем только значимые узлы (не скрытые waypoint)
-            if (!n.IsWaypoint)
-                RouteInstructions.Add($"  → {n.Name}");
+            // Последний шаг: идти до пункта назначения
+            var lastFloorNum = segments[^1].FloorNum;
+            _routeStepsList.Add(new RouteStep
+            {
+                Text = $"Идите по {FloorNameInstrumental(lastFloorNum)} до {destination}",
+                Icon = "🚶",
+                TargetFloor = GetFloor(lastFloorNum)
+            });
         }
+
+        // Уведомляем об изменении всех свойств шагов
+        OnPropertyChanged(nameof(HasRoute));
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(CurrentStepText));
+        OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(StepCounterText));
+        OnPropertyChanged(nameof(IsLastStep));
+        OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(IsMultiStepRoute));
+        ((Command)NextStepCommand).ChangeCanExecute();
+
+        // Переключаем на этаж первого шага
+        var firstFloor = CurrentStep?.TargetFloor;
+        if (firstFloor != null && firstFloor != _selectedFloor)
+            SelectedFloor = firstFloor;
     }
+
+    private static string FloorNameInstrumental(int n) => n switch
+    {
+        -1 => "подвальном этаже",
+         0 => "цокольном этаже",
+         1 => "1-м этаже",
+         2 => "2-м этаже",
+         3 => "3-м этаже",
+         4 => "4-м этаже",
+         5 => "5-м этаже",
+         _ => $"{n}-м этаже"
+    };
+
+    private static string FloorNameAccusative(int n) => n switch
+    {
+        -1 => "подвальный этаж",
+         0 => "цокольный этаж",
+         _ => $"{n}-й этаж"
+    };
 
     private void ExecuteClearRoute()
     {
         _currentFullRoute = null;
         RouteNodesOnFloor.Clear();
-        RouteInstructions.Clear();
+        _routeStepsList.Clear();
+        _currentStepIndex = 0;
         RouteFloors.Clear();
         RouteStatus = string.Empty;
         StartNode = null;
         EndNode = null;
         OnPropertyChanged(nameof(HasRoute));
         OnPropertyChanged(nameof(IsMultiFloorRoute));
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(CurrentStepText));
+        OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(StepCounterText));
+        OnPropertyChanged(nameof(IsLastStep));
+        OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(IsMultiStepRoute));
+        ((Command)NextStepCommand).ChangeCanExecute();
+    }
+
+    private void ExecuteNextStep()
+    {
+        if (!HasNextStep) return;
+        _currentStepIndex++;
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(CurrentStepText));
+        OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(StepCounterText));
+        OnPropertyChanged(nameof(IsLastStep));
+        OnPropertyChanged(nameof(HasNextStep));
+        ((Command)NextStepCommand).ChangeCanExecute();
+        // Автопереключение на этаж текущего шага
+        var floor = CurrentStep?.TargetFloor;
+        if (floor != null) SelectedFloor = floor;
     }
 
     private void PopulateRouteFloors(List<NavNode>? path)
