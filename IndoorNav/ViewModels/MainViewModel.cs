@@ -536,31 +536,42 @@ public class MainViewModel : INotifyPropertyChanged
     {
         var building = new Building(id, name);
 
-        // Пробуем подвал (floor-1.svg) — проверяем существование.
-        try
+        // Проверяем существование этажа по WebP-файлу в FloorImages/
+        // (SVG-источники необязательны — могут отсутствовать после клонирования репозитория)
+        static async Task<bool> FloorExistsAsync(string id, string svgRelativePath)
         {
-            var basementPath = $"SvgFloors/{id}/floor-1.svg";
-            using var bs = await FileSystem.OpenAppPackageFileAsync(basementPath).ConfigureAwait(false);
-            // Файл существует — добавляем этаж (контент загрузится лениво).
-            building.Floors.Add(new Floor(-1, $"{id}/floor-1.svg"));
-        }
-        catch { /* нет подвала — пропускаем */ }
-
-        // Перебираем floor1.svg, floor2.svg, … пока файл существует.
-        for (int i = 1; i <= 50; i++)
-        {
-            var relativePath = $"{id}/floor{i}.svg";
-            var packagePath = $"SvgFloors/{relativePath}";
+            // Сначала ищем предгенерированный WebP (всегда есть в репозитории)
+            var cacheKey    = $"{id}_{svgRelativePath}".Replace('/', '_');
+            var webpBundle  = $"FloorImages/{cacheKey}.webp";
             try
             {
-                using var stream = await FileSystem.OpenAppPackageFileAsync(packagePath).ConfigureAwait(false);
-                // Файл существует — добавляем без чтения контента.
-                building.Floors.Add(new Floor(i, relativePath));
+                using var s = await FileSystem.OpenAppPackageFileAsync(webpBundle).ConfigureAwait(false);
+                return true;
             }
-            catch (Exception ex)
+            catch { /* нет WebP — пробуем SVG */ }
+
+            // Запасной вариант: SVG (для разработчика с полными исходниками)
+            try
+            {
+                using var s = await FileSystem.OpenAppPackageFileAsync($"SvgFloors/{id}/{svgRelativePath}").ConfigureAwait(false);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        // Подвал
+        if (await FloorExistsAsync(id, "floor-1.svg").ConfigureAwait(false))
+            building.Floors.Add(new Floor(-1, $"{id}/floor-1.svg"));
+
+        // floor1, floor2, …
+        for (int i = 1; i <= 50; i++)
+        {
+            if (await FloorExistsAsync(id, $"floor{i}.svg").ConfigureAwait(false))
+                building.Floors.Add(new Floor(i, $"{id}/floor{i}.svg"));
+            else
             {
                 if (i == 1)
-                    building.LoadDiagnostic = $"[{id}] floor1: {ex.GetType().Name}: {ex.Message}";
+                    building.LoadDiagnostic = $"[{id}] floor1 не найден (ни WebP, ни SVG)";
                 break;
             }
         }
