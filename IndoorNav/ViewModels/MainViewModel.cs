@@ -537,7 +537,9 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 Text = $"Идите по {FloorNameInstrumental(firstFloorNum)} до {transitKindAcc}",
                 Icon = "🚶",
-                TargetFloor = GetFloor(firstFloorNum)
+                TargetFloor = GetFloor(firstFloorNum),
+                FocusNode   = path.First(),      // от старта
+                FocusNode2  = firstTransition    // до перехода
             });
 
             // Один шаг перехода: зумировать на узел перехода (остаёмся на том же этаже)
@@ -556,7 +558,9 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 Text = $"Идите по {FloorNameInstrumental(lastFloorNum)} до {destination}",
                 Icon = "🚶",
-                TargetFloor = GetFloor(lastFloorNum)
+                TargetFloor = GetFloor(lastFloorNum),
+                FocusNode   = segments[^1].Nodes.First(),  // вход с перехода
+                FocusNode2  = path.Last()                   // до назначения
             });
         }
 

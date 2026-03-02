@@ -971,12 +971,35 @@ public class SvgView : SKCanvasView
         float svgW = _svgBounds.Width  > 0 ? _svgBounds.Width  : 800f;
         float svgH = _svgBounds.Height > 0 ? _svgBounds.Height : 600f;
 
-        // Показываем окно ~25% от меньшей из сторон SVG вокруг узла
-        float window = Math.Min(svgW, svgH) * 0.25f;
+        // Показываем окно ~38% от меньшей из сторон SVG вокруг узла
+        float window = Math.Min(svgW, svgH) * 0.38f;
         float scale  = Math.Min(_canvasW, _canvasH) / window;
 
         float tx = _canvasW / 2f - svgX * scale;
         float ty = _canvasH / 2f - svgY * scale;
+        _matrix = SKMatrix.CreateScaleTranslation(scale, scale, tx, ty);
+        InvalidateSurface();
+    }
+
+    /// <summary>Зумирует карту так, чтобы в viewport уместились обе SVG-точки с отступом.</summary>
+    public void ZoomToFitNodes(float x1, float y1, float x2, float y2)
+    {
+        if (_canvasW <= 0 || _canvasH <= 0) return;
+
+        float padding = Math.Max(Math.Abs(x2 - x1), Math.Abs(y2 - y1)) * 0.35f + 50f;
+        float minX = Math.Min(x1, x2) - padding;
+        float minY = Math.Min(y1, y2) - padding;
+        float maxX = Math.Max(x1, x2) + padding;
+        float maxY = Math.Max(y1, y2) + padding;
+        float rectW = maxX - minX;
+        float rectH = maxY - minY;
+        if (rectW < 1f || rectH < 1f) return;
+
+        float scale = Math.Min(_canvasW / rectW, _canvasH / rectH);
+        float cx = (minX + maxX) / 2f;
+        float cy = (minY + maxY) / 2f;
+        float tx = _canvasW / 2f - cx * scale;
+        float ty = _canvasH / 2f - cy * scale;
         _matrix = SKMatrix.CreateScaleTranslation(scale, scale, tx, ty);
         InvalidateSurface();
     }

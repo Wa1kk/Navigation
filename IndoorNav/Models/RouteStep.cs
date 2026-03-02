@@ -11,4 +11,7 @@ public class RouteStep
 
     /// <summary>Узел, на который нужно приблизиться (зум) при отображении шага. null = обычный вид.</summary>
     public NavNode? FocusNode { get; init; }
+
+    /// <summary>Второй узел для зума: если задан вместе с FocusNode — зум на область между двумя точками.</summary>
+    public NavNode? FocusNode2 { get; init; }
 }

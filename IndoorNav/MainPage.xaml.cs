@@ -64,9 +64,13 @@ public partial class MainPage : ContentPage
 
     private void ApplyStepZoom()
     {
-        var focus = _vm.CurrentStep?.FocusNode;
-        if (focus != null)
-            MainCanvas.ZoomToSvgPoint(focus.X, focus.Y);
+        var step = _vm.CurrentStep;
+        var f1 = step?.FocusNode;
+        var f2 = step?.FocusNode2;
+        if (f1 != null && f2 != null)
+            MainCanvas.ZoomToFitNodes(f1.X, f1.Y, f2.X, f2.Y);
+        else if (f1 != null)
+            MainCanvas.ZoomToSvgPoint(f1.X, f1.Y);
         else
             MainCanvas.ResetZoom();
     }
