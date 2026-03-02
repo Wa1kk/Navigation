@@ -158,6 +158,7 @@
                     <!-- Map -->
                     <controls:SvgView x:Name="MainCanvas"
                                       FloorSvgPath="{Binding SelectedFloor.SvgPath}"
+                                      CurrentFloorNumber="{Binding SelectedFloor.Number}"
                                       Nodes="{Binding NodesOnCurrentFloor}"
                                       Edges="{Binding EdgesOnCurrentFloor}"
                                       RouteNodes="{Binding RouteNodesOnFloor}"

@@ -137,6 +137,17 @@ public class SvgView : SKCanvasView
         set => SetValue(HighlightStartNodeProperty, value);
     }
 
+    /// <summary>Номер текущего отображаемого этажа — используется для фильтрации подсветки границ.</summary>
+    public static readonly BindableProperty CurrentFloorNumberProperty =
+        BindableProperty.Create(nameof(CurrentFloorNumber), typeof(int), typeof(SvgView),
+            int.MinValue, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
+    public int CurrentFloorNumber
+    {
+        get => (int)GetValue(CurrentFloorNumberProperty);
+        set => SetValue(CurrentFloorNumberProperty, value);
+    }
+
     /// <summary>Индекс выбранной вершины границы в режиме редактирования (-1 = не выбрана).</summary>
     public static readonly BindableProperty SelectedBoundaryVertexIndexProperty =
         BindableProperty.Create(nameof(SelectedBoundaryVertexIndex), typeof(int), typeof(SvgView),
@@ -590,17 +601,19 @@ public class SvgView : SKCanvasView
         if (sc < 0.001f) sc = 1f;
 
         // ── Границы аудиторий ──────────────────────────────────────────────────────────
-        // Пользовательский режим: подсветить границу узла-назначения
+        // Пользовательский режим: подсветить границу узла-назначения (только если он на текущем этаже)
+        int curFloor = CurrentFloorNumber;
         var hlNode = HighlightBoundaryNode;
-        if (!IsAdminMode && hlNode?.Boundary != null && hlNode.Boundary.Count >= 3)
+        if (!IsAdminMode && hlNode?.Boundary != null && hlNode.Boundary.Count >= 3
+            && hlNode.FloorNumber == curFloor)
         {
             DrawBoundaryHighlight(canvas, hlNode.Boundary, new SKColor(37, 99, 235), sc);
         }
 
-        // Подсветить границу узла-отправления (зелёный)
+        // Подсветить границу узла-отправления (зелёный, только если он на текущем этаже)
         var hlStartNode = HighlightStartNode;
         if (!IsAdminMode && hlStartNode?.Boundary != null && hlStartNode.Boundary.Count >= 3
-            && hlStartNode != hlNode)
+            && hlStartNode != hlNode && hlStartNode.FloorNumber == curFloor)
         {
             DrawBoundaryHighlight(canvas, hlStartNode.Boundary, new SKColor(34, 197, 94), sc);
         }
