@@ -447,17 +447,17 @@
                                            BindableLayout.ItemsSource="{Binding SelectedNodeEdges}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:SelectedEdgeItem">
-                                <Button Text="{Binding OtherNodeName}"
-                                        Clicked="OnEdgeButtonClicked"
-                                        BackgroundColor="#DBEAFE"
-                                        TextColor="#1D4ED8"
-                                        BorderColor="#BFDBFE"
-                                        BorderWidth="1"
-                                        FontSize="12"
-                                        MinimumWidthRequest="80"
-                                        HeightRequest="32"
-                                        CornerRadius="6"
-                                        Padding="14,0" />
+                                <Border BackgroundColor="#DBEAFE"
+                                        StrokeShape="RoundRectangle 6"
+                                        Stroke="#BFDBFE" StrokeThickness="1"
+                                        Padding="10,4" Margin="0">
+                                    <Label Text="{Binding OtherNodeName}"
+                                           FontSize="12" TextColor="#1D4ED8"
+                                           VerticalOptions="Center" HorizontalOptions="Center" />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnEdgeButtonClicked" />
+                                    </Border.GestureRecognizers>
+                                </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </HorizontalStackLayout>

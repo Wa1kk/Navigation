@@ -39,8 +39,8 @@ public partial class AdminPage : ContentPage
     // Кнопка связи выбранной точки — предложить удалить с подтверждением
     private async void OnEdgeButtonClicked(object sender, EventArgs e)
     {
-        if (sender is not Button btn) return;
-        if (btn.BindingContext is not SelectedEdgeItem item) return;
+        if (sender is not VisualElement el) return;
+        if (el.BindingContext is not SelectedEdgeItem item) return;
 
         bool ok = await DisplayAlert(
             "Удалить связь",
