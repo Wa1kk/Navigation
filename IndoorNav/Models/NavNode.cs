@@ -49,7 +49,7 @@ public class NavNode
     /// <summary>Отображаемое имя в пикере поиска: если SearchTags заданы — выводится "Имя · Теги", иначе просто Имя.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(SearchTags)
         ? Name
-        : $"{Name} · {SearchTags}";
+        : $"{Name} {SearchTags}";
 
     /// <summary>
     /// Полигон области аудитории в SVG-координатах.

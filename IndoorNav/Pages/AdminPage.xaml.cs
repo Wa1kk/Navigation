@@ -7,11 +7,13 @@ namespace IndoorNav.Pages;
 public partial class AdminPage : ContentPage
 {
     private AdminViewModel Vm => (AdminViewModel)BindingContext;
+    private readonly MainViewModel _mainVm;
 
-    public AdminPage(AdminViewModel viewModel)
+    public AdminPage(AdminViewModel viewModel, MainViewModel mainViewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        _mainVm = mainViewModel;
 
         // Подключаем события SvgView → команды ViewModel
         AdminCanvas.CanvasTapped += (_, svgPos) => Vm.CanvasTappedCommand.Execute(svgPos);
@@ -33,6 +35,48 @@ public partial class AdminPage : ContentPage
     // ← Выход из режима администратора (кнопка на телефоне)
     private async void OnExitAdminClicked(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("..");
+
+    // При открытии: синхронизируем здание и этаж из пользовательского режима
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        var srcBuilding = _mainVm.SelectedBuilding;
+        var srcFloor    = _mainVm.SelectedFloor;
+        if (srcBuilding == null) return;
+
+        var adminBuilding = Vm.Buildings.FirstOrDefault(b => b.Id == srcBuilding.Id);
+        if (adminBuilding == null) return;
+
+        Vm.SelectedBuilding = adminBuilding;   // auto-sets floor to 1
+
+        if (srcFloor != null)
+        {
+            var adminFloor = adminBuilding.Floors.FirstOrDefault(f => f.Number == srcFloor.Number);
+            if (adminFloor != null)
+                Vm.SelectedFloor = adminFloor;
+        }
+    }
+
+    // При закрытии: синхронизируем здание и этаж обратно в пользовательский режим
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        var adminBuilding = Vm.SelectedBuilding;
+        var adminFloor    = Vm.SelectedFloor;
+        if (adminBuilding == null) return;
+
+        var userBuilding = _mainVm.SelectedBuilding?.Id == adminBuilding.Id
+            ? _mainVm.SelectedBuilding
+            : null;
+        // Здание может быть тем же объектом (shared NavGraphService), просто обновляем этаж
+        if (adminFloor != null)
+        {
+            var userFloor = _mainVm.SelectedBuilding?.Floors
+                .FirstOrDefault(f => f.Number == adminFloor.Number);
+            if (userFloor != null)
+                _mainVm.SelectedFloor = userFloor;
+        }
+    }
 
     // Глобальный обработчик Delete — дополняет KeyboardAccelerator на кнопке
     protected override void OnHandlerChanged()
