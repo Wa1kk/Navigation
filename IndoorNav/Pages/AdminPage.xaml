@@ -291,6 +291,13 @@
                                     BackgroundColor="#1E3A5F" TextColor="#93C5FD"
                                     FontSize="12" HeightRequest="32" CornerRadius="6" />
 
+                            <!-- Ключевые слова поиска -->
+                            <Button Text="{Binding SelectedSearchTags, StringFormat='🔍 Поиск: {0}'}"
+                                    Command="{Binding EditSearchTagsCommand}"
+                                    BackgroundColor="#1A2A40" TextColor="#64748B"
+                                    LineBreakMode="TailTruncation"
+                                    FontSize="12" HeightRequest="32" CornerRadius="6" />
+
                             <!-- Удаление вершины границы -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"
                                   IsVisible="{Binding HasBoundaryVertexSelected}">

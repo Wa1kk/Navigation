@@ -43,6 +43,9 @@ public class NavNode
     /// <summary>Подпись внутри кружка точки (пустая = не отображается).</summary>
     public string InnerLabel { get; set; } = string.Empty;
 
+    /// <summary>Доп. ключевые слова для поиска. Не отображаются на карте, учитываются при фильтрации.</summary>
+    public string SearchTags { get; set; } = string.Empty;
+
     /// <summary>
     /// Полигон области аудитории в SVG-координатах.
     /// Каждый элемент — массив [x, y]. Сериализуется как JSON.

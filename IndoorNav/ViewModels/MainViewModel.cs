@@ -385,31 +385,37 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (string.IsNullOrWhiteSpace(query)) return true;
 
-        var name = node.Name.ToLowerInvariant();
         var q    = query.Trim().ToLowerInvariant();
 
-        // 1) Direct substring
-        if (name.Contains(q)) return true;
-
-        // 2) All query words appear somewhere in the name
-        var qWords = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (qWords.Length > 1 && qWords.All(w => name.Contains(w))) return true;
-
-        // 3) Abbreviation: each query char matches first char of a word in the name
-        //    e.g. "кф" → "Кафедра Физики"
-        var nameWords = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (nameWords.Length >= q.Length)
+        // Проверяем и основное имя, и доп теги
+        bool MatchText(string text)
         {
-            var initials = string.Concat(nameWords.Select(w => w[0]));
-            if (initials.Contains(q)) return true;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            var t = text.ToLowerInvariant();
+
+            // 1) Direct substring
+            if (t.Contains(q)) return true;
+
+            // 2) All query words appear somewhere
+            var qWords = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (qWords.Length > 1 && qWords.All(w => t.Contains(w))) return true;
+
+            // 3) Abbreviation: each query char matches first char of a word
+            var tWords = t.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (tWords.Length >= q.Length)
+            {
+                var initials = string.Concat(tWords.Select(w => w[0]));
+                if (initials.Contains(q)) return true;
+            }
+
+            // 4) Translit / partial without spaces
+            if (t.Replace(" ", "").Contains(q.Replace(" ", ""))) return true;
+
+            return false;
         }
 
-        // 4) Translit / partial: query without spaces inside the name without spaces
-        //    e.g. "ауд101" matches "Аудитория 101"
-        var nameNoSpaces = name.Replace(" ", "");
-        var qNoSpaces    = q.Replace(" ", "");
-        if (nameNoSpaces.Contains(qNoSpaces)) return true;
-
+        if (MatchText(node.Name))       return true;
+        if (MatchText(node.SearchTags)) return true;
         return false;
     }
 

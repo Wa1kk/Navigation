@@ -89,6 +89,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedLabelScale));
             OnPropertyChanged(nameof(SelectedNodeColor));
             OnPropertyChanged(nameof(SelectedInnerLabel));
+            OnPropertyChanged(nameof(SelectedSearchTags));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
         }
@@ -145,6 +146,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command DeleteSelectedCommand         { get; }
     public Command DeleteBoundaryVertexCommand   { get; }
     public Command EditInnerLabelCommand         { get; }
+    public Command EditSearchTagsCommand         { get; }
     public Command SaveCommand                   { get; }
     public Command CancelActionCommand           { get; }
     public Command SetAddModeCommand             { get; }
@@ -198,6 +200,11 @@ public class AdminViewModel : INotifyPropertyChanged
     {
         get => SelectedNode?.InnerLabel ?? string.Empty;
         set { if (SelectedNode != null) { SelectedNode.InnerLabel = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+    public string SelectedSearchTags
+    {
+        get => SelectedNode?.SearchTags ?? string.Empty;
+        set { if (SelectedNode != null) { SelectedNode.SearchTags = value; OnPropertyChanged(); } }
     }
 
     private int _selectedBoundaryVertexIndex = -1;
@@ -281,6 +288,18 @@ public class AdminViewModel : INotifyPropertyChanged
                 maxLength: 10);
             if (val == null) return; // cancel
             SelectedInnerLabel = val.Trim();
+        });
+        EditSearchTagsCommand = new Command(async () =>
+        {
+            if (SelectedNode == null) return;
+            var val = await Shell.Current.DisplayPromptAsync(
+                "Доп. ключевые слова для поиска",
+                "Слова, по которым можно найти эту точку. Не отображаются на карте.",
+                initialValue: SelectedNode.SearchTags,
+                placeholder: "Например: кафедра ритм, ДеканатСтрой",
+                maxLength: 200);
+            if (val == null) return; // cancel
+            SelectedSearchTags = val.Trim();
         });
         SaveCommand           = new Command(async () => await _graphService.SaveAsync());
         CancelActionCommand   = new Command(() =>
