@@ -7,7 +7,11 @@ using SkiaSharp;
 
 namespace IndoorNav.ViewModels;
 
+public enum AdminMainTab  { Map, Management }
+public enum ManagementTab { Users, Departments }
+
 public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddOther, AddFireExtinguisher, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+
 
 public class AdminViewModel : INotifyPropertyChanged
 {
@@ -16,6 +20,31 @@ public class AdminViewModel : INotifyPropertyChanged
     private readonly NavGraphService _graphService;
     private readonly EmergencyService _emergencyService;
     private readonly AuthService _authService;
+    private readonly DepartmentService _departmentService;
+
+    // ── Main tabs ──────────────────────────────────────────────────────────────
+    private AdminMainTab _activeTab = AdminMainTab.Map;
+    public AdminMainTab ActiveTab
+    {
+        get => _activeTab;
+        set { _activeTab = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsMapMode)); OnPropertyChanged(nameof(IsManagementMode)); }
+    }
+    public bool IsMapMode        => _activeTab == AdminMainTab.Map;
+    public bool IsManagementMode => _activeTab == AdminMainTab.Management;
+
+    private ManagementTab _managementTab = ManagementTab.Users;
+    public ManagementTab ActiveManagementTab
+    {
+        get => _managementTab;
+        set { _managementTab = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsUsersTab)); OnPropertyChanged(nameof(IsDepartmentsTab)); }
+    }
+    public bool IsUsersTab       => _managementTab == ManagementTab.Users;
+    public bool IsDepartmentsTab => _managementTab == ManagementTab.Departments;
+
+    public Command SwitchToMapCommand        { get; }
+    public Command SwitchToManagementCommand { get; }
+    public Command SwitchToUsersTabCommand        { get; }
+    public Command SwitchToDepartmentsTabCommand  { get; }
 
     // ---- Навигация по зданиям/этажам ----
     private Building?      _selectedBuilding;
@@ -184,7 +213,6 @@ public class AdminViewModel : INotifyPropertyChanged
     private string _newStudentName     = string.Empty;
     private string _newStudentLogin    = string.Empty;
     private string _newStudentPassword = string.Empty;
-    private string _newStudentGroup    = string.Empty;
     public string NewStudentName
     {
         get => _newStudentName;
@@ -200,11 +228,68 @@ public class AdminViewModel : INotifyPropertyChanged
         get => _newStudentPassword;
         set { _newStudentPassword = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
     }
-    public string NewStudentGroup
+
+    // Department picker for new student
+    private Department? _newStudentDept;
+    public Department? NewStudentDept
+    {
+        get => _newStudentDept;
+        set
+        {
+            _newStudentDept = value;
+            NewStudentGroup = null;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(NewStudentDeptGroups));
+        }
+    }
+    private StudyGroup? _newStudentGroup;
+    public StudyGroup? NewStudentGroup
     {
         get => _newStudentGroup;
-        set { _newStudentGroup = value; OnPropertyChanged(); }
+        set { _newStudentGroup = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
     }
+    public ObservableCollection<StudyGroup> NewStudentDeptGroups =>
+        new(_newStudentDept?.Groups ?? []);
+
+    // ── Departments ──
+    public ObservableCollection<Department> Departments { get; } = new();
+
+    private Department? _selectedDept;
+    public Department? SelectedDept
+    {
+        get => _selectedDept;
+        set
+        {
+            _selectedDept = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SelectedDeptGroups));
+            OnPropertyChanged(nameof(HasSelectedDept));
+            AddGroupCommand?.ChangeCanExecute();
+        }
+    }
+    public bool HasSelectedDept => _selectedDept != null;
+    public ObservableCollection<StudyGroup> SelectedDeptGroups =>
+        new(_selectedDept?.Groups ?? []);
+
+    private string _newDeptName = string.Empty;
+    public string NewDeptName
+    {
+        get => _newDeptName;
+        set { _newDeptName = value; OnPropertyChanged(); AddDepartmentCommand?.ChangeCanExecute(); }
+    }
+    private string _newGroupName = string.Empty;
+    public string NewGroupName
+    {
+        get => _newGroupName;
+        set { _newGroupName = value; OnPropertyChanged(); AddGroupCommand?.ChangeCanExecute(); }
+    }
+
+    public Command AddDepartmentCommand            { get; }
+    public Command<Department> RemoveDepartmentCommand { get; }
+    public Command<Department> RenameDepartmentCommand { get; }
+    public Command AddGroupCommand                 { get; }
+    public Command<StudyGroup> RemoveGroupCommand  { get; }
+    public Command<StudyGroup> RenameGroupCommand  { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -280,11 +365,12 @@ public class AdminViewModel : INotifyPropertyChanged
     private NavNode? _corridorLastNode;
     private int      _corridorStepCount;
 
-    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, MainViewModel mainViewModel)
+    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, DepartmentService departmentService, MainViewModel mainViewModel)
     {
-        _graphService     = graphService;
-        _emergencyService = emergencyService;
-        _authService      = authService;
+        _graphService      = graphService;
+        _emergencyService  = emergencyService;
+        _authService       = authService;
+        _departmentService = departmentService;
 
         foreach (var b in mainViewModel.Buildings)
             Buildings.Add(b);
@@ -420,6 +506,15 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsEmergencyInactive));
         });
 
+        // Tab switching
+        SwitchToMapCommand        = new Command(() => ActiveTab = AdminMainTab.Map);
+        SwitchToManagementCommand = new Command(() => ActiveTab = AdminMainTab.Management);
+        SwitchToUsersTabCommand        = new Command(() => ActiveManagementTab = ManagementTab.Users);
+        SwitchToDepartmentsTabCommand  = new Command(() => ActiveManagementTab = ManagementTab.Departments);
+
+        // Load departments
+        _ = LoadDepartmentsAsync();
+
         // Students
         foreach (var s in _authService.GetStudents())
             Students.Add(s);
@@ -428,24 +523,97 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             var user = new AuthUser
             {
-                Username    = NewStudentLogin.Trim(),
-                PasswordHash = NewStudentPassword.Trim(), // hashed inside AddUserAsync
-                Role        = UserRole.Student,
-                DisplayName = NewStudentName.Trim(),
-                GroupId     = NewStudentGroup.Trim(),
+                Username     = NewStudentLogin.Trim(),
+                PasswordHash = NewStudentPassword.Trim(),
+                Role         = UserRole.Student,
+                DisplayName  = NewStudentName.Trim(),
+                GroupId      = NewStudentGroup?.Id ?? string.Empty,
             };
             await _authService.AddUserAsync(user);
             Students.Add(user);
-            NewStudentName = NewStudentLogin = NewStudentPassword = NewStudentGroup = string.Empty;
+            NewStudentName = NewStudentLogin = NewStudentPassword = string.Empty;
+            NewStudentGroup = null;
+            NewStudentDept  = null;
         }, () => !string.IsNullOrWhiteSpace(NewStudentLogin) &&
                  !string.IsNullOrWhiteSpace(NewStudentPassword) &&
-                 !string.IsNullOrWhiteSpace(NewStudentName));
+                 !string.IsNullOrWhiteSpace(NewStudentName) &&
+                 NewStudentGroup != null);
 
         RemoveStudentCommand = new Command<AuthUser>(async user =>
         {
             if (user == null) return;
             await _authService.RemoveUserAsync(user.Id);
             Students.Remove(user);
+        });
+
+        // Departments
+        AddDepartmentCommand = new Command(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(NewDeptName)) return;
+            var dept = await _departmentService.AddDepartmentAsync(NewDeptName);
+            Departments.Add(dept);
+            NewDeptName = string.Empty;
+        }, () => !string.IsNullOrWhiteSpace(NewDeptName));
+
+        RemoveDepartmentCommand = new Command<Department>(async dept =>
+        {
+            if (dept == null) return;
+            bool ok = await Shell.Current.DisplayAlert(
+                "Удалить кафедру",
+                $"Удалить \u00ab{dept.Name}\u00bb и все её группы?",
+                "Удалить", "Отмена");
+            if (!ok) return;
+            await _departmentService.RemoveDepartmentAsync(dept.Id);
+            Departments.Remove(dept);
+            if (SelectedDept?.Id == dept.Id) SelectedDept = null;
+        });
+
+        RenameDepartmentCommand = new Command<Department>(async dept =>
+        {
+            if (dept == null) return;
+            var newName = await Shell.Current.DisplayPromptAsync(
+                "Переименовать кафедру", "Новое название:",
+                initialValue: dept.Name, maxLength: 80);
+            if (string.IsNullOrWhiteSpace(newName)) return;
+            await _departmentService.RenameDepartmentAsync(dept.Id, newName);
+            dept.Name = newName.Trim();
+            OnPropertyChanged(nameof(Departments));
+        });
+
+        AddGroupCommand = new Command(async () =>
+        {
+            if (SelectedDept == null || string.IsNullOrWhiteSpace(NewGroupName)) return;
+            var group = await _departmentService.AddGroupAsync(SelectedDept.Id, NewGroupName);
+            SelectedDept.Groups.Add(group);
+            OnPropertyChanged(nameof(SelectedDeptGroups));
+            // also refresh new-student picker
+            if (NewStudentDept?.Id == SelectedDept.Id)
+                OnPropertyChanged(nameof(NewStudentDeptGroups));
+            NewGroupName = string.Empty;
+        }, () => SelectedDept != null && !string.IsNullOrWhiteSpace(NewGroupName));
+
+        RemoveGroupCommand = new Command<StudyGroup>(async group =>
+        {
+            if (group == null || SelectedDept == null) return;
+            await _departmentService.RemoveGroupAsync(SelectedDept.Id, group.Id);
+            SelectedDept.Groups.Remove(group);
+            OnPropertyChanged(nameof(SelectedDeptGroups));
+            if (NewStudentDept?.Id == SelectedDept.Id)
+                OnPropertyChanged(nameof(NewStudentDeptGroups));
+        });
+
+        RenameGroupCommand = new Command<StudyGroup>(async group =>
+        {
+            if (group == null || SelectedDept == null) return;
+            var newName = await Shell.Current.DisplayPromptAsync(
+                "Переименовать группу", "Новое название:",
+                initialValue: group.Name, maxLength: 40);
+            if (string.IsNullOrWhiteSpace(newName)) return;
+            await _departmentService.RenameGroupAsync(SelectedDept.Id, group.Id, newName);
+            group.Name = newName.Trim();
+            OnPropertyChanged(nameof(SelectedDeptGroups));
+            if (NewStudentDept?.Id == SelectedDept.Id)
+                OnPropertyChanged(nameof(NewStudentDeptGroups));
         });
         SetNodeColorCommand = new Command<string>(hex =>
         {
@@ -865,6 +1033,14 @@ public class AdminViewModel : INotifyPropertyChanged
             AdminAction.DrawBoundary         => $"Режим границ: нажимайте углы области [{SelectedNode?.Name}] на плане ({_boundaryPoints.Count} точ.ек)",
             _ => SelectedNode != null ? $"Выбран: {SelectedNode.Name}" : "Выберите узел или действие"
         };
+    }
+
+    private async Task LoadDepartmentsAsync()
+    {
+        await _departmentService.LoadAsync();
+        Departments.Clear();
+        foreach (var d in _departmentService.Departments)
+            Departments.Add(d);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>

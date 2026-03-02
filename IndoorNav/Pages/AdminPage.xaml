@@ -15,7 +15,28 @@
         <conv:NullToBoolConverter  x:Key="NullToBoolConverter" />
     </ContentPage.Resources>
 
-    <Grid>
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ═══════════════════════════════════════
+             TOP TAB BAR
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*" BackgroundColor="#0F172A" HeightRequest="48">
+            <Button Grid.Column="0" Text="🗺  Карта"
+                    Command="{Binding SwitchToMapCommand}"
+                    BackgroundColor="{Binding IsMapMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
+                    TextColor="{Binding IsMapMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
+                    FontSize="14" CornerRadius="0" BorderWidth="0" />
+            <Button Grid.Column="1" Text="⚙  Управление"
+                    Command="{Binding SwitchToManagementCommand}"
+                    BackgroundColor="{Binding IsManagementMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
+                    TextColor="{Binding IsManagementMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
+                    FontSize="14" CornerRadius="0" BorderWidth="0" />
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             MAP MODE  (Row 1)
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Row="1" IsVisible="{Binding IsMapMode}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{OnIdiom Phone=0, Default=238}" />
             <ColumnDefinition Width="*" />
@@ -335,68 +356,6 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- ПОЛЬЗОВАТЕЛИ section -->
-                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
-                    <Label Text="ПОЛЬЗОВАТЕЛИ" FontSize="10" CharacterSpacing="1.5"
-                           TextColor="#334155" Margin="8,0,0,6" />
-
-                    <!-- Student list -->
-                    <CollectionView ItemsSource="{Binding Students}" HeightRequest="120">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:AuthUser">
-                                <Grid ColumnDefinitions="*,Auto" Padding="4,3" ColumnSpacing="4">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="1">
-                                        <Label Text="{Binding DisplayName}" FontSize="12" TextColor="#CBD5E1" />
-                                        <Label FontSize="10" TextColor="#475569">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="{Binding Username}" />
-                                                    <Span Text=" · " />
-                                                    <Span Text="{Binding GroupId}" />
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
-                                    </VerticalStackLayout>
-                                    <Button Grid.Column="1" Text="✕"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveStudentCommand}"
-                                            CommandParameter="{Binding .}"
-                                            BackgroundColor="#1E293B" TextColor="#F87171"
-                                            WidthRequest="32" HeightRequest="32"
-                                            CornerRadius="6" Padding="0" FontSize="11" />
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                    <!-- Add student form -->
-                    <Border Padding="10,8" StrokeShape="RoundRectangle 8"
-                            BackgroundColor="#0F1E2E" Stroke="#1E3A5F" StrokeThickness="1">
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="+ Новый студент" FontSize="10" CharacterSpacing="1"
-                                   TextColor="#475569" />
-                            <Entry Placeholder="Имя (отображаемое)"
-                                   Text="{Binding NewStudentName, Mode=TwoWay}"
-                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
-                                   BackgroundColor="#1E293B" FontSize="12" />
-                            <Entry Placeholder="Логин"
-                                   Text="{Binding NewStudentLogin, Mode=TwoWay}"
-                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
-                                   BackgroundColor="#1E293B" FontSize="12" />
-                            <Entry Placeholder="Пароль" IsPassword="True"
-                                   Text="{Binding NewStudentPassword, Mode=TwoWay}"
-                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
-                                   BackgroundColor="#1E293B" FontSize="12" />
-                            <Entry Placeholder="Группа (напр. ИС-21)"
-                                   Text="{Binding NewStudentGroup, Mode=TwoWay}"
-                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
-                                   BackgroundColor="#1E293B" FontSize="12" />
-                            <Button Text="Добавить студента"
-                                    Command="{Binding AddStudentCommand}"
-                                    BackgroundColor="#2563EB" TextColor="White"
-                                    FontSize="12" HeightRequest="34" CornerRadius="6" />
-                        </VerticalStackLayout>
-                    </Border>
-
                     <!-- MANAGE section -->
                     <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
                     <Label Text="УПРАВЛЕНИЕ" FontSize="10" CharacterSpacing="1.5"
@@ -637,5 +596,283 @@
             </Border>
 
         </Grid>
+        </Grid>
+        <!-- end map mode grid -->
+
+        <!-- ═══════════════════════════════════════
+             MANAGEMENT MODE  (Row 1)
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Row="1" IsVisible="{Binding IsManagementMode}"
+              RowDefinitions="Auto,*" BackgroundColor="#F1F5F9">
+
+            <!-- ─── Sub-tab bar ─── -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,*" BackgroundColor="#0F172A" HeightRequest="44">
+                <Button Grid.Column="0" Text="👥  Пользователи"
+                        Command="{Binding SwitchToUsersTabCommand}"
+                        BackgroundColor="{Binding IsUsersTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
+                        TextColor="{Binding IsUsersTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
+                        FontSize="13" CornerRadius="0" BorderWidth="0" />
+                <Button Grid.Column="1" Text="🏛  Кафедры и группы"
+                        Command="{Binding SwitchToDepartmentsTabCommand}"
+                        BackgroundColor="{Binding IsDepartmentsTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
+                        TextColor="{Binding IsDepartmentsTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
+                        FontSize="13" CornerRadius="0" BorderWidth="0" />
+            </Grid>
+
+            <!-- ─── USERS SUB-TAB ─── -->
+            <ScrollView Grid.Row="1" IsVisible="{Binding IsUsersTab}" Padding="16">
+                <VerticalStackLayout Spacing="10">
+
+                    <!-- Students list -->
+                    <Label Text="СТУДЕНТЫ" FontSize="11" CharacterSpacing="1.5"
+                           TextColor="#64748B" Margin="0,0,0,4" />
+                    <CollectionView ItemsSource="{Binding Students}" SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <Label Text="Нет добавленных студентов" TextColor="#94A3B8"
+                                   HorizontalOptions="Center" Margin="0,20" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:AuthUser">
+                                <Border Padding="12,10" Margin="0,3"
+                                        BackgroundColor="White" StrokeShape="RoundRectangle 8"
+                                        Stroke="#E2E8F0" StrokeThickness="1">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding DisplayName}" FontSize="14"
+                                                   TextColor="#1E293B" FontAttributes="Bold" />
+                                            <Label Text="{Binding Username}" FontSize="12"
+                                                   TextColor="#64748B" />
+                                            <Label Text="{Binding GroupId}" FontSize="11"
+                                                   TextColor="#94A3B8" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1" Text="🗑"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveStudentCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                WidthRequest="40" HeightRequest="40"
+                                                CornerRadius="8" Padding="0" FontSize="14"
+                                                VerticalOptions="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Add student form -->
+                    <BoxView HeightRequest="1" BackgroundColor="#E2E8F0" Margin="0,6" />
+                    <Label Text="ДОБАВИТЬ СТУДЕНТА" FontSize="11" CharacterSpacing="1.5"
+                           TextColor="#64748B" />
+                    <Border Padding="16" StrokeShape="RoundRectangle 12"
+                            BackgroundColor="White" Stroke="#E2E8F0" StrokeThickness="1">
+                        <VerticalStackLayout Spacing="8">
+                            <Entry Placeholder="Имя (отображаемое)"
+                                   Text="{Binding NewStudentName, Mode=TwoWay}"
+                                   BackgroundColor="#F8FAFC" FontSize="14" />
+                            <Entry Placeholder="Логин"
+                                   Text="{Binding NewStudentLogin, Mode=TwoWay}"
+                                   BackgroundColor="#F8FAFC" FontSize="14" />
+                            <Entry Placeholder="Пароль" IsPassword="True"
+                                   Text="{Binding NewStudentPassword, Mode=TwoWay}"
+                                   BackgroundColor="#F8FAFC" FontSize="14" />
+
+                            <!-- Department picker -->
+                            <Label Text="Кафедра:" FontSize="13" TextColor="#475569" Margin="0,4,0,0" />
+                            <CollectionView ItemsSource="{Binding Departments}"
+                                            SelectedItem="{Binding NewStudentDept, Mode=TwoWay}"
+                                            SelectionMode="Single" HeightRequest="120">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Department">
+                                        <Border Padding="10,8" Margin="0,2"
+                                                StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                                Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                            <Label Text="{Binding Name}" FontSize="13" TextColor="#1E293B" />
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroupList>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Selected">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="#DBEAFE" />
+                                                                <Setter Property="Stroke" Value="#3B82F6" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateGroupList>
+                                            </VisualStateManager.VisualStateGroups>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <!-- Group picker (visible when dept selected) -->
+                            <Label Text="Группа:" FontSize="13" TextColor="#475569"
+                                   IsVisible="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}" Margin="0,4,0,0" />
+                            <CollectionView ItemsSource="{Binding NewStudentDeptGroups}"
+                                            SelectedItem="{Binding NewStudentGroup, Mode=TwoWay}"
+                                            SelectionMode="Single" HeightRequest="100"
+                                            IsVisible="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}">
+                                <CollectionView.EmptyView>
+                                    <Label Text="В этой кафедре нет групп" TextColor="#94A3B8"
+                                           HorizontalOptions="Center" Margin="0,10" />
+                                </CollectionView.EmptyView>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:StudyGroup">
+                                        <Border Padding="10,8" Margin="0,2"
+                                                StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                                Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                            <Label Text="{Binding Name}" FontSize="13" TextColor="#1E293B" />
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroupList>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Selected">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="BackgroundColor" Value="#DCFCE7" />
+                                                                <Setter Property="Stroke" Value="#22C55E" />
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateGroupList>
+                                            </VisualStateManager.VisualStateGroups>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <Button Text="✚  Добавить студента"
+                                    Command="{Binding AddStudentCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="14" HeightRequest="46" CornerRadius="10"
+                                    FontAttributes="Bold" Margin="0,4,0,0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- ─── DEPARTMENTS SUB-TAB ─── -->
+            <Grid Grid.Row="1" IsVisible="{Binding IsDepartmentsTab}" RowDefinitions="*,Auto" Padding="16">
+
+                <!-- Departments list -->
+                <ScrollView Grid.Row="0">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="КАФЕДРЫ" FontSize="11" CharacterSpacing="1.5"
+                               TextColor="#64748B" Margin="0,0,0,4" />
+                        <CollectionView ItemsSource="{Binding Departments}"
+                                        SelectedItem="{Binding SelectedDept, Mode=TwoWay}"
+                                        SelectionMode="Single">
+                            <CollectionView.EmptyView>
+                                <Label Text="Нет кафедр. Добавьте первую." TextColor="#94A3B8"
+                                       HorizontalOptions="Center" Margin="0,20" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Department">
+                                    <Border Padding="14,12" Margin="0,4"
+                                            BackgroundColor="White" StrokeShape="RoundRectangle 12"
+                                            Stroke="#E2E8F0" StrokeThickness="1">
+                                        <VerticalStackLayout Spacing="8">
+                                            <!-- Department header -->
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                                <Label Grid.Column="0" Text="{Binding Name}"
+                                                       FontSize="16" FontAttributes="Bold"
+                                                       TextColor="#0F172A" VerticalOptions="Center" />
+                                                <Button Grid.Column="1" Text="✏"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RenameDepartmentCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="#EFF6FF" TextColor="#2563EB"
+                                                        WidthRequest="36" HeightRequest="36"
+                                                        CornerRadius="8" Padding="0" FontSize="14" />
+                                                <Button Grid.Column="2" Text="🗑"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveDepartmentCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                        WidthRequest="36" HeightRequest="36"
+                                                        CornerRadius="8" Padding="0" FontSize="14" />
+                                            </Grid>
+                                            <!-- Groups inside this dept -->
+                                            <CollectionView ItemsSource="{Binding Groups}" Margin="8,0,0,0">
+                                                <CollectionView.EmptyView>
+                                                    <Label Text="Нет групп" FontSize="12"
+                                                           TextColor="#CBD5E1" Margin="4,4" />
+                                                </CollectionView.EmptyView>
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:StudyGroup">
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" Padding="4,3"
+                                                              ColumnSpacing="4">
+                                                            <Label Grid.Column="0" Text="{Binding Name}"
+                                                                   FontSize="13" TextColor="#334155"
+                                                                   VerticalOptions="Center" />
+                                                            <Button Grid.Column="1" Text="✏"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RenameGroupCommand}"
+                                                                    CommandParameter="{Binding .}"
+                                                                    BackgroundColor="#EFF6FF" TextColor="#2563EB"
+                                                                    WidthRequest="30" HeightRequest="30"
+                                                                    CornerRadius="6" Padding="0" FontSize="12" />
+                                                            <Button Grid.Column="2" Text="✕"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveGroupCommand}"
+                                                                    CommandParameter="{Binding .}"
+                                                                    BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                                    WidthRequest="30" HeightRequest="30"
+                                                                    CornerRadius="6" Padding="0" FontSize="12" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </VerticalStackLayout>
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroupList>
+                                                <VisualStateGroup x:Name="CommonStates">
+                                                    <VisualState x:Name="Selected">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="Stroke" Value="#3B82F6" />
+                                                            <Setter Property="BackgroundColor" Value="#F0F9FF" />
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateGroupList>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- Bottom action bar -->
+                <Border Grid.Row="1" Padding="12" Margin="0,8,0,0"
+                        BackgroundColor="White" StrokeShape="RoundRectangle 12"
+                        Stroke="#E2E8F0" StrokeThickness="1">
+                    <VerticalStackLayout Spacing="8">
+                        <!-- Add group (only when dept selected) -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"
+                              IsVisible="{Binding HasSelectedDept}">
+                            <Entry Grid.Column="0" Placeholder="Название группы (напр. ИС-21)"
+                                   Text="{Binding NewGroupName, Mode=TwoWay}"
+                                   BackgroundColor="#F8FAFC" FontSize="13" />
+                            <Button Grid.Column="1" Text="+ Группа"
+                                    Command="{Binding AddGroupCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="13" HeightRequest="44" CornerRadius="8" Padding="10,0" />
+                        </Grid>
+                        <Label Text="Выберите кафедру выше, чтобы добавить группу"
+                               FontSize="12" TextColor="#94A3B8" HorizontalOptions="Center" />
+                        <BoxView HeightRequest="1" BackgroundColor="#E2E8F0" />
+                        <!-- Add department -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry Grid.Column="0" Placeholder="Название кафедры"
+                                   Text="{Binding NewDeptName, Mode=TwoWay}"
+                                   BackgroundColor="#F8FAFC" FontSize="13" />
+                            <Button Grid.Column="1" Text="+ Кафедра"
+                                    Command="{Binding AddDepartmentCommand}"
+                                    BackgroundColor="#059669" TextColor="White"
+                                    FontSize="13" HeightRequest="44" CornerRadius="8" Padding="10,0" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+            </Grid>
+            <!-- end departments sub-tab -->
+
+        </Grid>
+        <!-- end management mode -->
+
     </Grid>
 </ContentPage>

@@ -25,6 +25,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<AuthService>();
         builder.Services.AddSingleton<EmergencyService>();
         builder.Services.AddSingleton<ScheduleService>();
+        builder.Services.AddSingleton<DepartmentService>();
 
         // ViewModels
         builder.Services.AddSingleton<MainViewModel>();
