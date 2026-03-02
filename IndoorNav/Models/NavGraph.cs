@@ -78,6 +78,12 @@ public class NavGraph
     /// или пустой список если маршрут не найден.
     /// </summary>
     public List<NavNode> FindPath(string startId, string endId)
+        => FindPath(startId, endId, null);
+
+    /// <summary>
+    /// Дейкстра с возможностью исключить узлы из рассмотрения.
+    /// </summary>
+    public List<NavNode> FindPath(string startId, string endId, ISet<string>? excludeIds)
     {
         if (startId == endId)
             return GetNode(startId) is { } n ? [n] : [];
@@ -91,7 +97,8 @@ public class NavGraph
 
         foreach (var node in Nodes)
         {
-            dist[node.Id] = float.MaxValue;
+            // Исключённые узлы получают бесконечное расстояние — непроходимы
+            dist[node.Id] = (excludeIds != null && excludeIds.Contains(node.Id)) ? float.MaxValue : float.MaxValue;
             prev[node.Id] = null;
         }
         dist[startId] = 0;
@@ -115,6 +122,8 @@ public class NavGraph
 
             foreach (var (v, w) in adj[u])
             {
+                // Пропускаем исключённые узлы (кроме конца маршрута)
+                if (excludeIds != null && excludeIds.Contains(v) && v != endId) continue;
                 float alt = dist[u] + w;
                 if (alt < dist[v])
                 {

@@ -314,39 +314,14 @@
                     </Grid>
                 </Border>
 
-                <!-- Floor switcher (multi-floor route) -->
-                <Border Padding="14,10"
-                        StrokeShape="RoundRectangle 10"
-                        BackgroundColor="#EFF6FF"
-                        Stroke="#BFDBFE" StrokeThickness="1"
-                        IsVisible="{Binding IsMultiFloorRoute}">
-                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                        <Label Text="Маршрут через несколько этажей · Перейти:"
-                               FontSize="12" TextColor="#3B82F6" VerticalOptions="Center" />
-                        <CollectionView ItemsSource="{Binding RouteFloors}" SelectionMode="None">
-                            <CollectionView.ItemsLayout>
-                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
-                            </CollectionView.ItemsLayout>
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="{x:Null}">
-                                    <Button Text="{Binding Name}" FontSize="12"
-                                            Padding="14,6" CornerRadius="20"
-                                            BackgroundColor="#2563EB" TextColor="White"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.GoToFloorCommand}"
-                                            CommandParameter="{Binding .}" />
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </HorizontalStackLayout>
-                </Border>
-
                 <!-- Route step card -->
-                <Border Padding="16,14"
+                <Border Padding="0"
                         StrokeShape="RoundRectangle 10"
                         BackgroundColor="White"
                         Stroke="#E2E8F0" StrokeThickness="1"
                         IsVisible="{Binding HasRoute}">
-                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                    <Grid IsClippedToBounds="True" Padding="16,14">
+                    <Grid x:Name="StepContent" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
 
                         <!-- Step counter: "Шаг 1 из 3" -->
                         <Label Grid.Row="0"
@@ -368,20 +343,34 @@
                                    VerticalOptions="Center" />
                         </Grid>
 
-                        <!-- Кнопки навигации -->
-                        <Grid Grid.Row="2">
+                        <!-- Кнопки навигации: Назад | Далее / Завершить -->
+                        <Grid Grid.Row="2" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Text="← Назад"
+                                    Grid.Column="0"
+                                    Clicked="OnPrevStepClicked"
+                                    IsVisible="{Binding HasPreviousStep}"
+                                    BackgroundColor="#475569" TextColor="White"
+                                    FontSize="14" HeightRequest="44" CornerRadius="8"
+                                    MinimumWidthRequest="90" />
                             <Button Text="Далее →"
-                                    Command="{Binding NextStepCommand}"
+                                    Grid.Column="1"
+                                    Clicked="OnNextStepClicked"
                                     IsVisible="{Binding HasNextStep}"
                                     BackgroundColor="#2563EB" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8" />
                             <Button Text="✓ Завершить"
+                                    Grid.Column="1"
                                     Command="{Binding ClearRouteCommand}"
                                     IsVisible="{Binding IsLastStep}"
                                     BackgroundColor="#16A34A" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8" />
                         </Grid>
 
+                    </Grid>
                     </Grid>
                 </Border>
 

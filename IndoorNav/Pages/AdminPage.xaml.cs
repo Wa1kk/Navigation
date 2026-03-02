@@ -37,8 +37,24 @@ public partial class AdminPage : ContentPage
         {
             elem.KeyDown += (_, e) =>
             {
+                bool ctrl = (Microsoft.UI.Input.InputKeyboardSource
+                    .GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control) &
+                    Windows.UI.Core.CoreVirtualKeyStates.Down) != 0;
+
                 if (e.Key == Windows.System.VirtualKey.Delete)
+                {
                     Vm.DeleteSelectedCommand.Execute(null);
+                }
+                else if (ctrl && e.Key == Windows.System.VirtualKey.C)
+                {
+                    Vm.CopyNodeCommand.Execute(null);
+                    e.Handled = true;
+                }
+                else if (ctrl && e.Key == Windows.System.VirtualKey.V)
+                {
+                    Vm.PasteNodeCommand.Execute(null);
+                    e.Handled = true;
+                }
             };
         }
 #endif

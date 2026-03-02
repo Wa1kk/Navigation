@@ -16,6 +16,27 @@ public class NavNode
     /// <summary>Узел лестницы/лифта — соединяет этажи.</summary>
     public bool IsTransition { get; set; }
 
+    /// <summary>true — лифт, false — лестница. Актуально только когда IsTransition=true.</summary>
+    public bool IsElevator { get; set; }
+
+    /// <summary>Узел выхода (выход из здания).</summary>
+    public bool IsExit { get; set; }
+
+    /// <summary>Скрыть точку в пользовательском режиме (admin видит всегда).</summary>
+    public bool IsHidden { get; set; }
+
+    /// <summary>Скрыть подпись в пользовательском режиме.</summary>
+    public bool IsLabelHidden { get; set; }
+
+    /// <summary>Множитель радиуса точки (дефолт 1.0).</summary>
+    public float NodeRadiusScale { get; set; } = 1f;
+
+    /// <summary>Множитель размера текста (дефолт 1.0).</summary>
+    public float LabelScale { get; set; } = 1f;
+
+    /// <summary>Цвет точки в hex-формате "RRGGBB" без #. null/пусто = автоматически.</summary>
+    public string? NodeColorHex { get; set; }
+
     /// <summary>Промежуточная точка коридора — скрывается в пользовательском режиме.</summary>
     public bool IsWaypoint { get; set; }
 

@@ -19,4 +19,40 @@ public partial class MainPage : ContentPage
     {
         _vm.OnCanvasNodeTapped(node);
     }
+
+    private async void OnNextStepClicked(object sender, EventArgs e)
+    {
+        if (!_vm.HasNextStep) return;
+        double w = this.Width > 0 ? this.Width : 400;
+
+        // 1. Slide current content out to the left
+        await StepContent.TranslateTo(-w, 0, 160, Easing.CubicIn);
+
+        // 2. Update VM — labels now show the new step text
+        _vm.NextStepCommand.Execute(null);
+
+        // 3. Reposition off-screen to the right (so it slides in from the right)
+        StepContent.TranslationX = w;
+
+        // 4. Slide in from the right
+        await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+    }
+
+    private async void OnPrevStepClicked(object sender, EventArgs e)
+    {
+        if (!_vm.HasPreviousStep) return;
+        double w = this.Width > 0 ? this.Width : 400;
+
+        // 1. Slide current content out to the right
+        await StepContent.TranslateTo(w, 0, 160, Easing.CubicIn);
+
+        // 2. Update VM
+        _vm.PreviousStepCommand.Execute(null);
+
+        // 3. Reposition off-screen to the left
+        StepContent.TranslationX = -w;
+
+        // 4. Slide in from the left
+        await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+    }
 }

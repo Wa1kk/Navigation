@@ -7,7 +7,7 @@ using SkiaSharp;
 
 namespace IndoorNav.ViewModels;
 
-public enum AdminAction { None, AddNode, AddTransition, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
 
 public class AdminViewModel : INotifyPropertyChanged
 {
@@ -79,10 +79,17 @@ public class AdminViewModel : INotifyPropertyChanged
     public NavNode? SelectedNode
     {
         get => _selectedNode;
-        // RefreshOverlay НЕ вызываем здесь: SvgView сам перерисовывается
-        // через биндинг SelectedNode → InvalidateSurface. Вызов RefreshOverlay
-        // при каждом тапе пересоздавал все коллекции и вызывал заметную задержку.
-        set { _selectedNode = value; OnPropertyChanged(); }
+        set
+        {
+            _selectedNode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SelectedHidden));
+            OnPropertyChanged(nameof(SelectedLabelHidden));
+            OnPropertyChanged(nameof(SelectedNodeScale));
+            OnPropertyChanged(nameof(SelectedLabelScale));
+            OnPropertyChanged(nameof(SelectedNodeColor));
+            CopyNodeCommand?.ChangeCanExecute();
+        }
     }
 
     public AdminAction CurrentAction
@@ -98,6 +105,9 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsCorridorMode));
             OnPropertyChanged(nameof(IsMoveMode));
             OnPropertyChanged(nameof(IsTransitionMode));
+            OnPropertyChanged(nameof(IsElevatorMode));
+            OnPropertyChanged(nameof(IsStaircaseMode));
+            OnPropertyChanged(nameof(IsExitMode));
             OnPropertyChanged(nameof(IsBoundaryMode));
             UpdateStatus();
         }
@@ -105,6 +115,9 @@ public class AdminViewModel : INotifyPropertyChanged
 
     public bool IsAddMode        => CurrentAction == AdminAction.AddNode;
     public bool IsTransitionMode => CurrentAction == AdminAction.AddTransition;
+    public bool IsElevatorMode   => CurrentAction == AdminAction.AddElevator;
+    public bool IsStaircaseMode  => CurrentAction == AdminAction.AddStaircase;
+    public bool IsExitMode       => CurrentAction == AdminAction.AddExit;
     public bool IsConnectMode    => CurrentAction == AdminAction.ConnectNode;
     public bool IsDisconnectMode => CurrentAction == AdminAction.DisconnectNode;
     public bool IsCorridorMode   => CurrentAction == AdminAction.DrawCorridor;
@@ -134,10 +147,47 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetMoveModeCommand            { get; }
     public Command ConfirmMoveCommand            { get; }
     public Command SetTransitionModeCommand      { get; }
+    public Command SetElevatorModeCommand         { get; }
+    public Command SetStaircaseModeCommand        { get; }
+    public Command SetExitModeCommand             { get; }
+    public Command<string> SetNodeColorCommand    { get; }
+    public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
+    public Command CopyNodeCommand               { get; }
+    public Command PasteNodeCommand              { get; }
     public Command SetBoundaryModeCommand        { get; }
     public Command FinishBoundaryCommand         { get; }
     public Command ClearBoundaryCommand          { get; }
+
+    // ──── Wrapper-свойства для кастомизации выбранного узла ────
+    public bool SelectedHidden
+    {
+        get => SelectedNode?.IsHidden ?? false;
+        set { if (SelectedNode != null) { SelectedNode.IsHidden = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+    public bool SelectedLabelHidden
+    {
+        get => SelectedNode?.IsLabelHidden ?? false;
+        set { if (SelectedNode != null) { SelectedNode.IsLabelHidden = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+    public float SelectedNodeScale
+    {
+        get => SelectedNode?.NodeRadiusScale ?? 1f;
+        set { if (SelectedNode != null) { SelectedNode.NodeRadiusScale = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+    public float SelectedLabelScale
+    {
+        get => SelectedNode?.LabelScale ?? 1f;
+        set { if (SelectedNode != null) { SelectedNode.LabelScale = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+    public string SelectedNodeColor
+    {
+        get => SelectedNode?.NodeColorHex ?? string.Empty;
+        set { if (SelectedNode != null) { SelectedNode.NodeColorHex = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+
+    // Буфер копирования
+    private NavNode? _copiedNode;
 
     // Граница аудитории (черновик)
     private readonly List<SkiaSharp.SKPoint> _boundaryPoints = new();
@@ -214,6 +264,46 @@ public class AdminViewModel : INotifyPropertyChanged
             CurrentAction = AdminAction.AddTransition;
             StatusText    = "Режим перехода: нажмите на план — будет добавлена точка лестницы/лифта.";
         });
+        SetElevatorModeCommand = new Command(() =>
+        {
+            CurrentAction = AdminAction.AddElevator;
+            StatusText    = "Режим лифта: нажмите на план — будет добавлена точка лифта.";
+        });
+        SetStaircaseModeCommand = new Command(() =>
+        {
+            CurrentAction = AdminAction.AddStaircase;
+            StatusText    = "Режим лестницы: нажмите на план — будет добавлена точка лестницы.";
+        });
+        SetExitModeCommand = new Command(() =>
+        {
+            CurrentAction = AdminAction.AddExit;
+            StatusText    = "Режим выхода: нажмите на план — будет добавлена точка выхода.";
+        });
+        SetNodeColorCommand = new Command<string>(hex =>
+        {
+            if (SelectedNode != null)
+            {
+                SelectedNode.NodeColorHex = string.IsNullOrEmpty(hex) ? null : hex;
+                OnPropertyChanged(nameof(SelectedNodeColor));
+                RefreshOverlay();
+            }
+        });
+        ResetNodeStyleCommand = new Command(() =>
+        {
+            if (SelectedNode == null) return;
+            SelectedNode.NodeRadiusScale = 1f;
+            SelectedNode.LabelScale      = 1f;
+            SelectedNode.NodeColorHex    = null;
+            SelectedNode.IsHidden        = false;
+            SelectedNode.IsLabelHidden   = false;
+            OnPropertyChanged(nameof(SelectedHidden));
+            OnPropertyChanged(nameof(SelectedLabelHidden));
+            OnPropertyChanged(nameof(SelectedNodeScale));
+            OnPropertyChanged(nameof(SelectedLabelScale));
+            OnPropertyChanged(nameof(SelectedNodeColor));
+            RefreshOverlay();
+            StatusText = $"Стиль [{SelectedNode.Name}] сброшен.";
+        });
         ResetGraphCommand = new Command(async () =>
         {
             bool ok = await Shell.Current.DisplayAlert(
@@ -225,6 +315,38 @@ public class AdminViewModel : INotifyPropertyChanged
             RefreshOverlay();
             StatusText = "Граф очищен. Начните заново.";
         });
+
+        CopyNodeCommand = new Command(() =>
+        {
+            if (SelectedNode == null) return;
+            _copiedNode = SelectedNode;
+            StatusText  = $"Скопирован: {SelectedNode.Name}. Нажмите Ctrl+V для вставки.";
+        }, () => SelectedNode != null);
+
+        PasteNodeCommand = new Command(() =>
+        {
+            if (_copiedNode == null || SelectedFloor == null || SelectedBuilding == null) return;
+            var copy = new NavNode
+            {
+                Name            = _copiedNode.Name + " (копия)",
+                BuildingId      = SelectedBuilding.Id,
+                FloorNumber     = SelectedFloor.Number,
+                X               = _copiedNode.X + 25f,
+                Y               = _copiedNode.Y + 25f,
+                IsTransition    = _copiedNode.IsTransition,
+                IsElevator      = _copiedNode.IsElevator,
+                IsExit          = _copiedNode.IsExit,
+                IsHidden        = _copiedNode.IsHidden,
+                IsLabelHidden   = _copiedNode.IsLabelHidden,
+                NodeRadiusScale = _copiedNode.NodeRadiusScale,
+                LabelScale      = _copiedNode.LabelScale,
+                NodeColorHex    = _copiedNode.NodeColorHex,
+            };
+            _graphService.AddNode(copy);
+            SelectedNode = copy;
+            RefreshOverlay();
+            StatusText = $"Вставлен: {copy.Name}";
+        }, () => _copiedNode != null);
 
         SetBoundaryModeCommand = new Command(() =>
         {
@@ -287,14 +409,38 @@ public class AdminViewModel : INotifyPropertyChanged
             return;
         }
 
-        if (CurrentAction == AdminAction.AddNode || CurrentAction == AdminAction.AddTransition)
+        if (CurrentAction == AdminAction.AddNode
+         || CurrentAction == AdminAction.AddTransition
+         || CurrentAction == AdminAction.AddElevator
+         || CurrentAction == AdminAction.AddStaircase
+         || CurrentAction == AdminAction.AddExit)
         {
-            bool forceTransit = CurrentAction == AdminAction.AddTransition;
-            string title   = forceTransit ? "Точка перехода" : "Новый узел";
-            string promptMsg = forceTransit
-                ? "Название лестницы / лифта:"
-                : "Введите название аудитории / точки:";
-            string placeholder = forceTransit ? "Например: Лестница А, Лифт 1" : "Например: 101, Лифт, Лестница А";
+            bool isElevatorAction   = CurrentAction == AdminAction.AddElevator;
+            bool isStaircaseAction  = CurrentAction == AdminAction.AddStaircase;
+            bool isExitAction       = CurrentAction == AdminAction.AddExit;
+            bool forceTransit       = CurrentAction == AdminAction.AddTransition || isElevatorAction || isStaircaseAction;
+
+            string title, promptMsg, placeholder;
+            if (isExitAction)
+            {
+                title = "Выход"; promptMsg = "Название выхода:"; placeholder = "Например: Главный выход, Выход 1";
+            }
+            else if (isElevatorAction)
+            {
+                title = "Лифт"; promptMsg = "Название лифта:"; placeholder = "Например: Лифт 1, Лифт А";
+            }
+            else if (isStaircaseAction)
+            {
+                title = "Лестница"; promptMsg = "Название лестницы:"; placeholder = "Например: Лестница А, Лестница главная";
+            }
+            else if (forceTransit)
+            {
+                title = "Точка перехода"; promptMsg = "Название лестницы / лифта:"; placeholder = "Например: Лестница А, Лифт 1";
+            }
+            else
+            {
+                title = "Новый узел"; promptMsg = "Введите название аудитории / точки:"; placeholder = "Например: 101, Лифт, Лестница А";
+            }
 
             var name = await Shell.Current.DisplayPromptAsync(title, promptMsg,
                 placeholder: placeholder, maxLength: 40);
@@ -305,6 +451,9 @@ public class AdminViewModel : INotifyPropertyChanged
                           || name.Contains("лифт",     StringComparison.OrdinalIgnoreCase)
                           || name.Contains("лестниц", StringComparison.OrdinalIgnoreCase);
 
+            bool isElevator = isElevatorAction
+                           || (!isStaircaseAction && name.Contains("лифт", StringComparison.OrdinalIgnoreCase));
+
             var node = new NavNode
             {
                 Name         = name.Trim(),
@@ -312,13 +461,16 @@ public class AdminViewModel : INotifyPropertyChanged
                 FloorNumber  = SelectedFloor.Number,
                 X            = svgPos.X,
                 Y            = svgPos.Y,
-                IsTransition = isTransit
+                IsTransition = isTransit,
+                IsElevator   = isElevator,
+                IsExit       = isExitAction
             };
 
             _graphService.AddNode(node);
             RefreshOverlay();
             CurrentAction = AdminAction.None;
-            StatusText    = $"Добавлен: {node.Name}{(isTransit ? " (переход)" : string.Empty)}";
+            string typeLabel = isExitAction ? " (выход)" : isElevator ? " (лифт)" : isTransit ? " (лестница)" : string.Empty;
+            StatusText    = $"Добавлен: {node.Name}{typeLabel}";
         }
         else if (CurrentAction == AdminAction.DrawCorridor)
         {

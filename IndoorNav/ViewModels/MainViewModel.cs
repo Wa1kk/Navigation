@@ -40,8 +40,8 @@ public class MainViewModel : INotifyPropertyChanged
     // Чтобы добавить новое здание — просто допишите строку сюда.
     private static readonly (string Id, string Name)[] BuildingConfig =
     [
-        ("BuildingA", "Здание А"),
-        ("BuildingB", "Здание Б"),
+        ("BuildingA", "Верхний корпус"),
+        ("BuildingB", "Нижний корпус"),
     ];
 
     public ObservableCollection<Building> Buildings { get; } = new();
@@ -228,8 +228,9 @@ public class MainViewModel : INotifyPropertyChanged
             ? $"Шаг {_currentStepIndex + 1} из {_routeStepsList.Count}"
             : string.Empty;
 
-    public bool HasNextStep => _routeStepsList.Count > 0 && _currentStepIndex < _routeStepsList.Count - 1;
-    public bool IsLastStep  => _routeStepsList.Count > 0 && _currentStepIndex == _routeStepsList.Count - 1;
+    public bool HasNextStep     => _routeStepsList.Count > 0 && _currentStepIndex < _routeStepsList.Count - 1;
+    public bool HasPreviousStep  => _routeStepsList.Count > 0 && _currentStepIndex > 0;
+    public bool IsLastStep       => _routeStepsList.Count > 0 && _currentStepIndex == _routeStepsList.Count - 1;
     public bool IsMultiStepRoute => _routeStepsList.Count > 1;
 
     // ── Commands ──────────────────────────────────────────────────────────────────
@@ -239,6 +240,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand GoToAdminCommand        { get; }
     public ICommand GoToFloorCommand        { get; }
     public ICommand NextStepCommand         { get; }
+    public ICommand PreviousStepCommand     { get; }
     public ICommand OpenStartPickerCommand  { get; }
     public ICommand OpenEndPickerCommand    { get; }
     public ICommand SelectPickerNodeCommand { get; }
@@ -256,7 +258,8 @@ public class MainViewModel : INotifyPropertyChanged
         GoToAdminCommand  = new Command(async () =>
             await Shell.Current.GoToAsync("admin"));
         GoToFloorCommand  = new Command<Floor>(f => { if (f != null) SelectedFloor = f; });
-        NextStepCommand   = new Command(ExecuteNextStep, () => HasNextStep);
+        NextStepCommand     = new Command(ExecuteNextStep, () => HasNextStep);
+        PreviousStepCommand = new Command(ExecutePreviousStep, () => HasPreviousStep);
 
         OpenStartPickerCommand  = new Command(() =>
         {
@@ -447,7 +450,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (StartNode == null || EndNode == null) return;
 
-        var path = _graphService.Graph.FindPath(StartNode.Id, EndNode.Id);
+        var path = _graphService.Graph.FindPath(StartNode.Id, EndNode.Id,
+            BuildExcludeSet(StartNode, EndNode));
         _routeStepsList.Clear();
         _currentStepIndex = 0;
 
@@ -514,37 +518,33 @@ public class MainViewModel : INotifyPropertyChanged
         }
         else
         {
-            for (int i = 0; i < segments.Count - 1; i++)
+            // Первый сегмент: идти до первого перехода
+            var (firstFloorNum, firstNodes) = segments[0];
+            var firstTransition = firstNodes.LastOrDefault(n => n.IsTransition) ?? firstNodes.Last();
+            bool isElevator = firstTransition.IsElevator
+                           || (!firstTransition.IsTransition && firstTransition.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase));
+
+            string transitKindAcc = isElevator ? "лифта" : "лестницы"; // до лифта / до лестницы
+            string transitKindVia = isElevator ? "на лифте" : "по лестнице";
+
+            _routeStepsList.Add(new RouteStep
             {
-                var (floorNum, nodes) = segments[i];
-                var (nextFloorNum, _) = segments[i + 1];
+                Text = $"Идите по {FloorNameInstrumental(firstFloorNum)} до {transitKindAcc}",
+                Icon = "🚶",
+                TargetFloor = GetFloor(firstFloorNum)
+            });
 
-                // Находим узел перехода (лестница/лифт) в конце сегмента
-                var transition = nodes.LastOrDefault(n => n.IsTransition) ?? nodes.Last();
-                bool isElevator = transition.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase);
-
-                // Шаг: идти до лестницы / лифта
-                _routeStepsList.Add(new RouteStep
-                {
-                    Text = $"Идите по {FloorNameInstrumental(floorNum)} до {transition.Name}",
-                    Icon = "🚶",
-                    TargetFloor = GetFloor(floorNum)
-                });
-
-                // Шаг: подняться / спуститься
-                string dir     = nextFloorNum > floorNum ? "Поднимайтесь" : "Спускайтесь";
-                string via     = isElevator ? "на лифте" : "по лестнице";
-                string toFloor = FloorNameInstrumental(nextFloorNum);
-                _routeStepsList.Add(new RouteStep
-                {
-                    Text = $"{dir} {via} ({transition.Name}) до {FloorNameAccusative(nextFloorNum)}",
-                    Icon = isElevator ? "🛗" : "🪜",
-                    TargetFloor = GetFloor(nextFloorNum)
-                });
-            }
+            // Один шаг перехода: сразу до конечного этажа (промежуточные этажи пропускаются)
+            var lastFloorNum = segments[^1].FloorNum;
+            string dir = lastFloorNum > firstFloorNum ? "Поднимайтесь" : "Спускайтесь";
+            _routeStepsList.Add(new RouteStep
+            {
+                Text = $"{dir} {transitKindVia} до {FloorNameAccusative(lastFloorNum)}",
+                Icon = isElevator ? "🛗" : "🪜",
+                TargetFloor = GetFloor(lastFloorNum)
+            });
 
             // Последний шаг: идти до пункта назначения
-            var lastFloorNum = segments[^1].FloorNum;
             _routeStepsList.Add(new RouteStep
             {
                 Text = $"Идите по {FloorNameInstrumental(lastFloorNum)} до {destination}",
@@ -561,8 +561,10 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(StepCounterText));
         OnPropertyChanged(nameof(IsLastStep));
         OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(HasPreviousStep));
         OnPropertyChanged(nameof(IsMultiStepRoute));
         ((Command)NextStepCommand).ChangeCanExecute();
+        ((Command)PreviousStepCommand).ChangeCanExecute();
 
         // Переключаем на этаж первого шага
         var firstFloor = CurrentStep?.TargetFloor;
@@ -570,23 +572,33 @@ public class MainViewModel : INotifyPropertyChanged
             SelectedFloor = firstFloor;
     }
 
+    // Исключаем узлы-выходы, если они не являются стартом или финишем.
+    private ISet<string> BuildExcludeSet(NavNode start, NavNode end)
+    {
+        var exclude = new HashSet<string>(
+            _graphService.Graph.Nodes
+                .Where(n => n.IsExit && n.Id != start.Id && n.Id != end.Id)
+                .Select(n => n.Id));
+        return exclude;
+    }
+
     private static string FloorNameInstrumental(int n) => n switch
     {
         -1 => "подвальном этаже",
          0 => "цокольном этаже",
-         1 => "1-м этаже",
-         2 => "2-м этаже",
-         3 => "3-м этаже",
-         4 => "4-м этаже",
-         5 => "5-м этаже",
-         _ => $"{n}-м этаже"
+         1 => "1 этажу",
+         2 => "2 этажу",
+         3 => "3 этажу",
+         4 => "4 этажу",
+         5 => "5 этажу",
+         _ => $"{n} этажу"
     };
 
     private static string FloorNameAccusative(int n) => n switch
     {
         -1 => "подвальный этаж",
          0 => "цокольный этаж",
-         _ => $"{n}-й этаж"
+         _ => $"{n} этажа"
     };
 
     private void ExecuteClearRoute()
@@ -607,8 +619,10 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(StepCounterText));
         OnPropertyChanged(nameof(IsLastStep));
         OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(HasPreviousStep));
         OnPropertyChanged(nameof(IsMultiStepRoute));
         ((Command)NextStepCommand).ChangeCanExecute();
+        ((Command)PreviousStepCommand).ChangeCanExecute();
     }
 
     private void ExecuteNextStep()
@@ -621,7 +635,27 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(StepCounterText));
         OnPropertyChanged(nameof(IsLastStep));
         OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(HasPreviousStep));
         ((Command)NextStepCommand).ChangeCanExecute();
+        ((Command)PreviousStepCommand).ChangeCanExecute();
+        // Автопереключение на этаж текущего шага
+        var floor = CurrentStep?.TargetFloor;
+        if (floor != null) SelectedFloor = floor;
+    }
+
+    private void ExecutePreviousStep()
+    {
+        if (!HasPreviousStep) return;
+        _currentStepIndex--;
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(CurrentStepText));
+        OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(StepCounterText));
+        OnPropertyChanged(nameof(IsLastStep));
+        OnPropertyChanged(nameof(HasNextStep));
+        OnPropertyChanged(nameof(HasPreviousStep));
+        ((Command)NextStepCommand).ChangeCanExecute();
+        ((Command)PreviousStepCommand).ChangeCanExecute();
         // Автопереключение на этаж текущего шага
         var floor = CurrentStep?.TargetFloor;
         if (floor != null) SelectedFloor = floor;

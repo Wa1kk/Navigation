@@ -636,6 +636,7 @@ public class SvgView : SKCanvasView
         using var fillNorm  = new SKPaint { Color = new SKColor(33, 150, 243),  IsAntialias = true };
         using var fillSel   = new SKPaint { Color = new SKColor(255, 152, 0),   IsAntialias = true };
         using var fillTrans = new SKPaint { Color = new SKColor(156, 39, 176),  IsAntialias = true };
+        using var fillExit  = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
         using var stroke    = new SKPaint { Color = SKColors.White, StrokeWidth = 2.5f / sc, IsStroke = true, IsAntialias = true };
         using var shadowP   = new SKPaint { Color = new SKColor(0, 0, 0, 60), IsAntialias = true,
                                             MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4f / sc) };
@@ -643,28 +644,61 @@ public class SvgView : SKCanvasView
 
         foreach (var node in visibleNodes)
         {
-            var s    = new SKPoint(node.X, node.Y);   // SVG-координаты
-            var fill = node == SelectedNode ? fillSel
-                     : node.IsTransition    ? fillTrans
-                     : fillNorm;
+            // В польз. режиме скрытые узлы не рисуем
+            if (!IsAdminMode && node.IsHidden) continue;
 
-            canvas.DrawCircle(s.X + 2f / sc, s.Y + 3f / sc, r, shadowP);
-            canvas.DrawCircle(s, r, fill);
-            canvas.DrawCircle(s, r, stroke);
+            var s    = new SKPoint(node.X, node.Y);
+            float nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
 
+            // Цвет: персональный → выбранный → типовой
+            SKPaint fill;
+            if (node == SelectedNode)
+            {
+                fill = fillSel;
+            }
+            else if (!string.IsNullOrEmpty(node.NodeColorHex))
+            {
+                if (SKColor.TryParse("#" + node.NodeColorHex, out var custom))
+                    fill = new SKPaint { Color = custom, IsAntialias = true };
+                else
+                    fill = fillNorm;
+            }
+            else if (node.IsExit)       fill = fillExit;
+            else if (node.IsTransition) fill = fillTrans;
+            else                        fill = fillNorm;
+
+            // В админ-режиме скрытые узлы рисуем полупрозрачными
+            float alpha = (IsAdminMode && node.IsHidden) ? 0.35f : 1f;
+            if (alpha < 1f)
+            {
+                var c = fill.Color;
+                fill = new SKPaint { Color = c.WithAlpha((byte)(c.Alpha * alpha)), IsAntialias = true };
+            }
+
+            canvas.DrawCircle(s.X + 2f / sc, s.Y + 3f / sc, nodeR, shadowP);
+            canvas.DrawCircle(s, nodeR, fill);
+            canvas.DrawCircle(s, nodeR, stroke);
+
+            // Внутренняя метка (первые 3 символа имени)
             var lbl = node.Name.Length > 0 ? node.Name[..Math.Min(3, node.Name.Length)] : "?";
             using var textP = new SKPaint { Color = SKColors.White, IsAntialias = true };
             canvas.DrawText(lbl, s.X, s.Y + fontSize * 0.38f, SKTextAlign.Center, font, textP);
 
-            using var namePaint = new SKPaint { Color = new SKColor(20, 20, 20), IsAntialias = true };
-            using var nameFont  = new SKFont(SKTypeface.Default, (IsAdminMode ? 12f : 11f) / sc);
-            var nameStr  = node.Name;
-            var nameW    = nameFont.MeasureText(nameStr, namePaint);
-            var pillRect = new SKRect(s.X - nameW / 2f - 4f / sc, s.Y + r + 2f / sc,
-                                      s.X + nameW / 2f + 4f / sc, s.Y + r + 16f / sc);
-            using var pillPaint = new SKPaint { Color = new SKColor(255, 255, 255, 210), IsAntialias = true };
-            canvas.DrawRoundRect(pillRect, 4f / sc, 4f / sc, pillPaint);
-            canvas.DrawText(nameStr, s.X, s.Y + r + 14f / sc, SKTextAlign.Center, nameFont, namePaint);
+            // Подпись под точкой
+            if (!(!IsAdminMode && node.IsLabelHidden))
+            {
+                float lblOpacity = (IsAdminMode && node.IsLabelHidden) ? 0.35f : 1f;
+                float lblSize = (IsAdminMode ? 12f : 11f) / sc * (node.LabelScale > 0.01f ? node.LabelScale : 1f);
+                using var namePaint = new SKPaint { Color = new SKColor(20, 20, 20, (byte)(255 * lblOpacity)), IsAntialias = true };
+                using var nameFont  = new SKFont(SKTypeface.Default, lblSize);
+                var nameStr = node.Name;
+                var nameW   = nameFont.MeasureText(nameStr, namePaint);
+                var pillRect = new SKRect(s.X - nameW / 2f - 4f / sc, s.Y + nodeR + 2f / sc,
+                                          s.X + nameW / 2f + 4f / sc, s.Y + nodeR + lblSize + 6f / sc);
+                using var pillPaint = new SKPaint { Color = new SKColor(255, 255, 255, (byte)(210 * lblOpacity)), IsAntialias = true };
+                canvas.DrawRoundRect(pillRect, 4f / sc, 4f / sc, pillPaint);
+                canvas.DrawText(nameStr, s.X, s.Y + nodeR + lblSize + 2f / sc, SKTextAlign.Center, nameFont, namePaint);
+            }
         }
     }
 
