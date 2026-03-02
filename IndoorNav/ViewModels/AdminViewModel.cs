@@ -15,6 +15,7 @@ public class AdminViewModel : INotifyPropertyChanged
 
     private readonly NavGraphService _graphService;
     private readonly EmergencyService _emergencyService;
+    private readonly AuthService _authService;
 
     // ---- Навигация по зданиям/этажам ----
     private Building?      _selectedBuilding;
@@ -174,7 +175,36 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetExitModeCommand             { get; }
     public Command SetFireExtinguisherModeCommand { get; }
     public Command ToggleEmergencyCommand         { get; }
+    public Command AddStudentCommand              { get; }
+    public Command<AuthUser> RemoveStudentCommand { get; }
     public Command<string> SetNodeColorCommand    { get; }
+
+    // ── Students ──
+    public ObservableCollection<AuthUser> Students { get; } = new();
+    private string _newStudentName     = string.Empty;
+    private string _newStudentLogin    = string.Empty;
+    private string _newStudentPassword = string.Empty;
+    private string _newStudentGroup    = string.Empty;
+    public string NewStudentName
+    {
+        get => _newStudentName;
+        set { _newStudentName = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
+    }
+    public string NewStudentLogin
+    {
+        get => _newStudentLogin;
+        set { _newStudentLogin = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
+    }
+    public string NewStudentPassword
+    {
+        get => _newStudentPassword;
+        set { _newStudentPassword = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
+    }
+    public string NewStudentGroup
+    {
+        get => _newStudentGroup;
+        set { _newStudentGroup = value; OnPropertyChanged(); }
+    }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -250,10 +280,11 @@ public class AdminViewModel : INotifyPropertyChanged
     private NavNode? _corridorLastNode;
     private int      _corridorStepCount;
 
-    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, MainViewModel mainViewModel)
+    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, MainViewModel mainViewModel)
     {
-        _graphService    = graphService;
+        _graphService     = graphService;
         _emergencyService = emergencyService;
+        _authService      = authService;
 
         foreach (var b in mainViewModel.Buildings)
             Buildings.Add(b);
@@ -387,6 +418,34 @@ public class AdminViewModel : INotifyPropertyChanged
                 _emergencyService.Activate();
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
+        });
+
+        // Students
+        foreach (var s in _authService.GetStudents())
+            Students.Add(s);
+
+        AddStudentCommand = new Command(async () =>
+        {
+            var user = new AuthUser
+            {
+                Username    = NewStudentLogin.Trim(),
+                PasswordHash = NewStudentPassword.Trim(), // hashed inside AddUserAsync
+                Role        = UserRole.Student,
+                DisplayName = NewStudentName.Trim(),
+                GroupId     = NewStudentGroup.Trim(),
+            };
+            await _authService.AddUserAsync(user);
+            Students.Add(user);
+            NewStudentName = NewStudentLogin = NewStudentPassword = NewStudentGroup = string.Empty;
+        }, () => !string.IsNullOrWhiteSpace(NewStudentLogin) &&
+                 !string.IsNullOrWhiteSpace(NewStudentPassword) &&
+                 !string.IsNullOrWhiteSpace(NewStudentName));
+
+        RemoveStudentCommand = new Command<AuthUser>(async user =>
+        {
+            if (user == null) return;
+            await _authService.RemoveUserAsync(user.Id);
+            Students.Remove(user);
         });
         SetNodeColorCommand = new Command<string>(hex =>
         {

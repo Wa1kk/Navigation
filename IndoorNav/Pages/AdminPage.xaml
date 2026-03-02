@@ -335,6 +335,68 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- ПОЛЬЗОВАТЕЛИ section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+                    <Label Text="ПОЛЬЗОВАТЕЛИ" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+
+                    <!-- Student list -->
+                    <CollectionView ItemsSource="{Binding Students}" HeightRequest="120">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:AuthUser">
+                                <Grid ColumnDefinitions="*,Auto" Padding="4,3" ColumnSpacing="4">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="1">
+                                        <Label Text="{Binding DisplayName}" FontSize="12" TextColor="#CBD5E1" />
+                                        <Label FontSize="10" TextColor="#475569">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding Username}" />
+                                                    <Span Text=" · " />
+                                                    <Span Text="{Binding GroupId}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="✕"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveStudentCommand}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#1E293B" TextColor="#F87171"
+                                            WidthRequest="32" HeightRequest="32"
+                                            CornerRadius="6" Padding="0" FontSize="11" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Add student form -->
+                    <Border Padding="10,8" StrokeShape="RoundRectangle 8"
+                            BackgroundColor="#0F1E2E" Stroke="#1E3A5F" StrokeThickness="1">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="+ Новый студент" FontSize="10" CharacterSpacing="1"
+                                   TextColor="#475569" />
+                            <Entry Placeholder="Имя (отображаемое)"
+                                   Text="{Binding NewStudentName, Mode=TwoWay}"
+                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
+                                   BackgroundColor="#1E293B" FontSize="12" />
+                            <Entry Placeholder="Логин"
+                                   Text="{Binding NewStudentLogin, Mode=TwoWay}"
+                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
+                                   BackgroundColor="#1E293B" FontSize="12" />
+                            <Entry Placeholder="Пароль" IsPassword="True"
+                                   Text="{Binding NewStudentPassword, Mode=TwoWay}"
+                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
+                                   BackgroundColor="#1E293B" FontSize="12" />
+                            <Entry Placeholder="Группа (напр. ИС-21)"
+                                   Text="{Binding NewStudentGroup, Mode=TwoWay}"
+                                   PlaceholderColor="#334155" TextColor="#CBD5E1"
+                                   BackgroundColor="#1E293B" FontSize="12" />
+                            <Button Text="Добавить студента"
+                                    Command="{Binding AddStudentCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="12" HeightRequest="34" CornerRadius="6" />
+                        </VerticalStackLayout>
+                    </Border>
+
                     <!-- MANAGE section -->
                     <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
                     <Label Text="УПРАВЛЕНИЕ" FontSize="10" CharacterSpacing="1.5"

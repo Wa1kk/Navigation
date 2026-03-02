@@ -59,4 +59,11 @@ public class ScheduleService
     /// <summary>All rooms currently occupied (used for emergency routing).</summary>
     public IEnumerable<ScheduleEntry> GetCurrentlyActiveEntries() =>
         _entries.Where(e => e.TimeSlots.Any(t => t.IsActiveNow()));
+
+    /// <summary>Returns the active entry for a group right now (for emergency auto-routing).</summary>
+    public ScheduleEntry? GetCurrentEntryForGroup(string groupName) =>
+        string.IsNullOrWhiteSpace(groupName) ? null :
+        _entries.FirstOrDefault(e =>
+            string.Equals(e.GroupName, groupName, StringComparison.OrdinalIgnoreCase) &&
+            e.TimeSlots.Any(t => t.IsActiveNow()));
 }

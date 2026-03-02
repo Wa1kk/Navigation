@@ -17,6 +17,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly NavGraphService _graphService;
     private readonly AuthService _authService;
     private readonly EmergencyService _emergencyService;
+    private readonly ScheduleService _scheduleService;
 
     private Building? _selectedBuilding;
     private Floor? _selectedFloor;
@@ -293,11 +294,12 @@ public class MainViewModel : INotifyPropertyChanged
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
-    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService)
+    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService)
     {
-        _graphService    = graphService;
-        _authService     = authService;
+        _graphService     = graphService;
+        _authService      = authService;
         _emergencyService = emergencyService;
+        _scheduleService  = scheduleService;
 
         // Subscribe to emergency state changes
         _emergencyService.EmergencyChanged += OnEmergencyChanged;
@@ -373,6 +375,7 @@ public class MainViewModel : INotifyPropertyChanged
         try
         {
             await _graphService.LoadAsync();
+            await _scheduleService.LoadAsync();
 
             var tasks = BuildingConfig.Select(cfg => Task.Run(() => DiscoverBuildingAsync(cfg.Id, cfg.Name)));
             var buildings = await Task.WhenAll(tasks);
@@ -794,9 +797,29 @@ public class MainViewModel : INotifyPropertyChanged
             // Show notification on the UI thread
             MainThread.BeginInvokeOnMainThread(async () =>
             {
+                // For students: try to auto-determine current room via schedule
+                if (StartNode == null && _authService.CurrentRole == UserRole.Student)
+                {
+                    var groupId = _authService.CurrentUser?.GroupId;
+                    if (!string.IsNullOrEmpty(groupId))
+                    {
+                        var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
+                        if (entry != null)
+                        {
+                            var roomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
+                            if (roomNode != null)
+                                StartNode = roomNode;
+                        }
+                    }
+                }
+
+                string locationHint = StartNode != null
+                    ? $"Ваше местоположение: {StartNode.DisplayName}. Строю маршрут до выхода."
+                    : "Выберите своё местоположение на карте для построения маршрута.";
+
                 await Shell.Current.DisplayAlert(
                     "⚠ РЕЖИМ ЧРЕЗВЫЧАЙНОЙ СИТУАЦИИ",
-                    "Активирован режим ЧС! Следуйте к ближайшему выходу.",
+                    $"Активирован режим ЧС! Следуйте к ближайшему выходу.\n\n{locationHint}",
                     "OK");
 
                 // Auto-route to nearest exit from current start node
