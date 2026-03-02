@@ -139,6 +139,9 @@ public class AuthService
         await SaveUsersAsync();
     }
 
+    /// <summary>Persist in-place edits made to a user object that is already in the list.</summary>
+    public async Task UpdateUserAsync() => await SaveUsersAsync();
+
     public async Task ChangePasswordAsync(string userId, string newPassword)
     {
         var user = _users.FirstOrDefault(u => u.Id == userId);

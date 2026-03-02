@@ -6,6 +6,7 @@
              xmlns:conv="clr-namespace:IndoorNav.Converters"
              xmlns:vm="clr-namespace:IndoorNav.ViewModels"
              x:Class="IndoorNav.Pages.AdminPage"
+             x:Name="AdminRoot"
              x:DataType="vm:AdminViewModel"
              Title="Редактор графа"
              BackgroundColor="#F1F5F9">
@@ -632,27 +633,63 @@
                                    HorizontalOptions="Center" Margin="0,20" />
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:AuthUser">
+                            <!-- x:DataType="{x:Null}" — отключаем compiled bindings чтобы команды VM увидели x:Reference -->
+                            <DataTemplate x:DataType="{x:Null}">
                                 <Border Padding="12,10" Margin="0,3"
                                         BackgroundColor="White" StrokeShape="RoundRectangle 8"
                                         Stroke="#E2E8F0" StrokeThickness="1">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="{Binding DisplayName}" FontSize="14"
-                                                   TextColor="#1E293B" FontAttributes="Bold" />
-                                            <Label Text="{Binding Username}" FontSize="12"
-                                                   TextColor="#64748B" />
-                                            <Label Text="{Binding GroupId}" FontSize="11"
-                                                   TextColor="#94A3B8" />
-                                        </VerticalStackLayout>
-                                        <Button Grid.Column="1" Text="🗑"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveStudentCommand}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="#FEF2F2" TextColor="#DC2626"
-                                                WidthRequest="40" HeightRequest="40"
-                                                CornerRadius="8" Padding="0" FontSize="14"
-                                                VerticalOptions="Center" />
-                                    </Grid>
+                                    <VerticalStackLayout Spacing="6">
+                                        <!-- Main row -->
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Label Text="{Binding DisplayName}" FontSize="14"
+                                                       TextColor="#1E293B" FontAttributes="Bold" />
+                                                <Label FontSize="12" TextColor="#64748B">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding FacultyName}" TextColor="#2563EB" />
+                                                            <Span Text=" • " TextColor="#94A3B8" />
+                                                            <Span Text="{Binding GroupName}" TextColor="#059669" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="1" Text="✏"
+                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.EditStudentCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#EFF6FF" TextColor="#2563EB"
+                                                    WidthRequest="38" HeightRequest="38"
+                                                    CornerRadius="8" Padding="0" FontSize="14"
+                                                    VerticalOptions="Center" />
+                                            <Button Grid.Column="2" Text="🗑"
+                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveStudentCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                    WidthRequest="38" HeightRequest="38"
+                                                    CornerRadius="8" Padding="0" FontSize="14"
+                                                    VerticalOptions="Center" />
+                                        </Grid>
+                                        <!-- Details row (toggle) -->
+                                        <Button Text="ℹ Подробнее"
+                                                Command="{Binding ToggleDetailsCommand}"
+                                                BackgroundColor="#F8FAFC" TextColor="#64748B"
+                                                FontSize="11" HeightRequest="28" CornerRadius="6"
+                                                HorizontalOptions="Start" Padding="8,0" />
+                                        <Border Padding="10,8" BackgroundColor="#F0F9FF"
+                                                StrokeShape="RoundRectangle 6" StrokeThickness="0"
+                                                IsVisible="{Binding ShowDetails}">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label FontSize="12" TextColor="#334155">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="Логин: " FontAttributes="Bold" />
+                                                            <Span Text="{Binding Login}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -667,13 +704,13 @@
                         <VerticalStackLayout Spacing="8">
                             <Entry Placeholder="Имя (отображаемое)"
                                    Text="{Binding NewStudentName, Mode=TwoWay}"
-                                   BackgroundColor="#F8FAFC" FontSize="14" />
+                                   TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="14" />
                             <Entry Placeholder="Логин"
                                    Text="{Binding NewStudentLogin, Mode=TwoWay}"
-                                   BackgroundColor="#F8FAFC" FontSize="14" />
+                                   TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="14" />
                             <Entry Placeholder="Пароль" IsPassword="True"
                                    Text="{Binding NewStudentPassword, Mode=TwoWay}"
-                                   BackgroundColor="#F8FAFC" FontSize="14" />
+                                   TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="14" />
 
                             <!-- Department picker -->
                             <Label Text="Факультет:" FontSize="13" TextColor="#475569" Margin="0,4,0,0" />
@@ -764,7 +801,7 @@
                                        HorizontalOptions="Center" Margin="0,20" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
-                                <DataTemplate x:DataType="models:Department">
+                                <DataTemplate x:DataType="{x:Null}">
                                     <Border Padding="14,12" Margin="0,4"
                                             BackgroundColor="White" StrokeShape="RoundRectangle 12"
                                             Stroke="#E2E8F0" StrokeThickness="1">
@@ -775,13 +812,13 @@
                                                        FontSize="16" FontAttributes="Bold"
                                                        TextColor="#0F172A" VerticalOptions="Center" />
                                                 <Button Grid.Column="1" Text="✏"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RenameDepartmentCommand}"
+                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RenameDepartmentCommand}"
                                                         CommandParameter="{Binding .}"
                                                         BackgroundColor="#EFF6FF" TextColor="#2563EB"
                                                         WidthRequest="36" HeightRequest="36"
                                                         CornerRadius="8" Padding="0" FontSize="14" />
                                                 <Button Grid.Column="2" Text="🗑"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveDepartmentCommand}"
+                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveDepartmentCommand}"
                                                         CommandParameter="{Binding .}"
                                                         BackgroundColor="#FEF2F2" TextColor="#DC2626"
                                                         WidthRequest="36" HeightRequest="36"
@@ -794,20 +831,20 @@
                                                            TextColor="#CBD5E1" Margin="4,4" />
                                                 </CollectionView.EmptyView>
                                                 <CollectionView.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:StudyGroup">
+                                                    <DataTemplate x:DataType="{x:Null}">
                                                         <Grid ColumnDefinitions="*,Auto,Auto" Padding="4,3"
                                                               ColumnSpacing="4">
                                                             <Label Grid.Column="0" Text="{Binding Name}"
                                                                    FontSize="13" TextColor="#334155"
                                                                    VerticalOptions="Center" />
                                                             <Button Grid.Column="1" Text="✏"
-                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RenameGroupCommand}"
+                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RenameGroupCommand}"
                                                                     CommandParameter="{Binding .}"
                                                                     BackgroundColor="#EFF6FF" TextColor="#2563EB"
                                                                     WidthRequest="30" HeightRequest="30"
                                                                     CornerRadius="6" Padding="0" FontSize="12" />
                                                             <Button Grid.Column="2" Text="✕"
-                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:AdminViewModel}}, Path=RemoveGroupCommand}"
+                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveGroupCommand}"
                                                                     CommandParameter="{Binding .}"
                                                                     BackgroundColor="#FEF2F2" TextColor="#DC2626"
                                                                     WidthRequest="30" HeightRequest="30"
@@ -846,7 +883,7 @@
                               IsVisible="{Binding HasSelectedDept}">
                             <Entry Grid.Column="0" Placeholder="Название группы (напр. ИС-21)"
                                    Text="{Binding NewGroupName, Mode=TwoWay}"
-                                   BackgroundColor="#F8FAFC" FontSize="13" />
+                                   TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="13" />
                             <Button Grid.Column="1" Text="+ Группа"
                                     Command="{Binding AddGroupCommand}"
                                     BackgroundColor="#2563EB" TextColor="White"
@@ -859,7 +896,7 @@
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Entry Grid.Column="0" Placeholder="Название факультета"
                                    Text="{Binding NewDeptName, Mode=TwoWay}"
-                                   BackgroundColor="#F8FAFC" FontSize="13" />
+                                   TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="13" />
                             <Button Grid.Column="1" Text="+ Факультет"
                                     Command="{Binding AddDepartmentCommand}"
                                     BackgroundColor="#059669" TextColor="White"

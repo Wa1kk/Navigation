@@ -205,11 +205,12 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetFireExtinguisherModeCommand { get; }
     public Command ToggleEmergencyCommand         { get; }
     public Command AddStudentCommand              { get; }
-    public Command<AuthUser> RemoveStudentCommand { get; }
+    public Command<StudentRowVm> RemoveStudentCommand { get; }
+    public Command<StudentRowVm> EditStudentCommand   { get; }
     public Command<string> SetNodeColorCommand    { get; }
 
     // ── Students ──
-    public ObservableCollection<AuthUser> Students { get; } = new();
+    public ObservableCollection<StudentRowVm> Students { get; } = new();
     private string _newStudentName     = string.Empty;
     private string _newStudentLogin    = string.Empty;
     private string _newStudentPassword = string.Empty;
@@ -248,8 +249,8 @@ public class AdminViewModel : INotifyPropertyChanged
         get => _newStudentGroup;
         set { _newStudentGroup = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
     }
-    public ObservableCollection<StudyGroup> NewStudentDeptGroups =>
-        new(_newStudentDept?.Groups ?? []);
+    // Returns the actual ObservableCollection so the picker reflects live group changes
+    public ObservableCollection<StudyGroup>? NewStudentDeptGroups => _newStudentDept?.Groups;
 
     // ── Departments ──
     public ObservableCollection<Department> Departments { get; } = new();
@@ -512,12 +513,8 @@ public class AdminViewModel : INotifyPropertyChanged
         SwitchToUsersTabCommand        = new Command(() => ActiveManagementTab = ManagementTab.Users);
         SwitchToDepartmentsTabCommand  = new Command(() => ActiveManagementTab = ManagementTab.Departments);
 
-        // Load departments
+        // Students are loaded after departments in LoadDepartmentsAsync (for name resolution)
         _ = LoadDepartmentsAsync();
-
-        // Students
-        foreach (var s in _authService.GetStudents())
-            Students.Add(s);
 
         AddStudentCommand = new Command(async () =>
         {
@@ -530,7 +527,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 GroupId      = NewStudentGroup?.Id ?? string.Empty,
             };
             await _authService.AddUserAsync(user);
-            Students.Add(user);
+            Students.Add(MakeStudentRow(user));
             NewStudentName = NewStudentLogin = NewStudentPassword = string.Empty;
             NewStudentGroup = null;
             NewStudentDept  = null;
@@ -539,11 +536,65 @@ public class AdminViewModel : INotifyPropertyChanged
                  !string.IsNullOrWhiteSpace(NewStudentName) &&
                  NewStudentGroup != null);
 
-        RemoveStudentCommand = new Command<AuthUser>(async user =>
+        RemoveStudentCommand = new Command<StudentRowVm>(async row =>
         {
-            if (user == null) return;
-            await _authService.RemoveUserAsync(user.Id);
-            Students.Remove(user);
+            if (row == null) return;
+            await _authService.RemoveUserAsync(row.User.Id);
+            Students.Remove(row);
+        });
+
+        EditStudentCommand = new Command<StudentRowVm>(async row =>
+        {
+            if (row == null) return;
+            var action = await Shell.Current.DisplayActionSheet(
+                $"Редактировать: {row.DisplayName}", "Отмена", null,
+                "✒ Изменить имя",
+                "🔑 Изменить пароль",
+                "🏛 Изменить факультет/группу");
+
+            if (action == "✒ Изменить имя")
+            {
+                var name = await Shell.Current.DisplayPromptAsync(
+                    "Имя", "Новое отображаемое имя:", initialValue: row.User.DisplayName);
+                if (string.IsNullOrWhiteSpace(name)) return;
+                row.User.DisplayName = name.Trim();
+                row.RefreshNames();
+                await _authService.UpdateUserAsync();
+            }
+            else if (action == "🔑 Изменить пароль")
+            {
+                var pwd = await Shell.Current.DisplayPromptAsync(
+                    "Пароль", "Новый пароль:", maxLength: 100);
+                if (string.IsNullOrWhiteSpace(pwd)) return;
+                await _authService.ChangePasswordAsync(row.User.Id, pwd);
+            }
+            else if (action == "🏛 Изменить факультет/группу")
+            {
+                if (!Departments.Any())
+                {
+                    await Shell.Current.DisplayAlert("Факультеты", "Нет ни одного факультета.", "ОК"); return;
+                }
+                var deptChoice = await Shell.Current.DisplayActionSheet(
+                    "Факультет", "Отмена", null,
+                    Departments.Select(d => d.Name).ToArray());
+                var dept = Departments.FirstOrDefault(d => d.Name == deptChoice);
+                if (dept == null) return;
+
+                if (!dept.Groups.Any())
+                {
+                    await Shell.Current.DisplayAlert("Группы", $"В «{dept.Name}» нет групп.", "ОК"); return;
+                }
+                var groupChoice = await Shell.Current.DisplayActionSheet(
+                    "Группа", "Отмена", null,
+                    dept.Groups.Select(g => g.Name).ToArray());
+                var group = dept.Groups.FirstOrDefault(g => g.Name == groupChoice);
+                if (group == null) return;
+
+                row.User.GroupId = group.Id;
+                row.FacultyName  = dept.Name;
+                row.GroupName    = group.Name;
+                await _authService.UpdateUserAsync();
+            }
         });
 
         // Departments
@@ -582,8 +633,8 @@ public class AdminViewModel : INotifyPropertyChanged
         AddGroupCommand = new Command(async () =>
         {
             if (SelectedDept == null || string.IsNullOrWhiteSpace(NewGroupName)) return;
-            var group = await _departmentService.AddGroupAsync(SelectedDept.Id, NewGroupName);
-            SelectedDept.Groups.Add(group); // ObservableCollection notifies the inner CollectionView
+            // AddGroupAsync already adds the group to SelectedDept.Groups (ObservableCollection) — don't add again
+            await _departmentService.AddGroupAsync(SelectedDept.Id, NewGroupName);
             if (NewStudentDept?.Id == SelectedDept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
             NewGroupName = string.Empty;
@@ -1041,6 +1092,17 @@ public class AdminViewModel : INotifyPropertyChanged
         Departments.Clear();
         foreach (var d in _departmentService.Departments)
             Departments.Add(d);
+        // Load students after departments so faculty/group names resolve correctly
+        Students.Clear();
+        foreach (var s in _authService.GetStudents())
+            Students.Add(MakeStudentRow(s));
+    }
+
+    private StudentRowVm MakeStudentRow(AuthUser user)
+    {
+        var group = _departmentService.FindGroup(user.GroupId);
+        var dept  = group != null ? _departmentService.FindDepartmentByGroup(user.GroupId) : null;
+        return new StudentRowVm(user, dept?.Name ?? "—", group?.Name ?? "—");
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
@@ -1081,7 +1143,42 @@ public class AdminViewModel : INotifyPropertyChanged
     }
 }
 
-/// <summary>Элемент списка рёбер выбранного узла для панели снизу.</summary>
+public sealed class StudentRowVm : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void Notify([CallerMemberName] string? n = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    public AuthUser User { get; }
+
+    private string _displayName;
+    public string DisplayName { get => _displayName; private set { _displayName = value; Notify(); } }
+
+    private string _facultyName;
+    public string FacultyName { get => _facultyName; set { _facultyName = value; Notify(); } }
+
+    private string _groupName;
+    public string GroupName   { get => _groupName;   set { _groupName   = value; Notify(); } }
+
+    private bool _showDetails;
+    public bool ShowDetails   { get => _showDetails; set { _showDetails = value; Notify(); } }
+
+    public string Login => User.Username;
+
+    public Command ToggleDetailsCommand { get; }
+
+    public StudentRowVm(AuthUser user, string facultyName, string groupName)
+    {
+        User          = user;
+        _displayName  = user.DisplayName;
+        _facultyName  = facultyName;
+        _groupName    = groupName;
+        ToggleDetailsCommand = new Command(() => ShowDetails = !ShowDetails);
+    }
+
+    public void RefreshNames() => DisplayName = User.DisplayName;
+}
+
 public sealed class SelectedEdgeItem
 {
     public NavEdge Edge          { get; init; } = null!;
