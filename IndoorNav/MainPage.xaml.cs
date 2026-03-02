@@ -19,7 +19,12 @@ public partial class MainPage : ContentPage
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainViewModel.HasRoute) && _vm.HasRoute)
-            ApplyStepZoom();
+        {
+            // Откладываем на следующую итерацию главного потока — к этому моменту
+            // BuildRouteSteps уже вызовет SelectedFloor (StartFloorLoad), и ApplyOrQueueZoom
+            // правильно поставит зум в очередь вместо немедленного применения на старом этаже.
+            Dispatcher.Dispatch(ApplyStepZoom);
+        }
     }
 
     private void OnNodeTapped(object sender, NavNode node)
@@ -38,14 +43,15 @@ public partial class MainPage : ContentPage
         // 2. Update VM — labels now show the new step text
         _vm.NextStepCommand.Execute(null);
 
+        // 2б. Сразу ставим зум в очередь (пока _floorLoading = true).
+        //     Если этаж загрузится раньше конца анимации — зум применится правильно.
+        ApplyStepZoom();
+
         // 3. Reposition off-screen to the right (so it slides in from the right)
         StepContent.TranslationX = w;
 
         // 4. Slide in from the right
         await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
-
-        // 5. Ясли у шага есть узел фокуса — приближаемся, иначе сбрасываем зум
-        ApplyStepZoom();
     }
 
     private async void OnPrevStepClicked(object sender, EventArgs e)
@@ -59,14 +65,14 @@ public partial class MainPage : ContentPage
         // 2. Update VM
         _vm.PreviousStepCommand.Execute(null);
 
+        // 2б. Сразу ставим зум в очередь (пока _floorLoading = true).
+        ApplyStepZoom();
+
         // 3. Reposition off-screen to the left
         StepContent.TranslationX = -w;
 
         // 4. Slide in from the left
         await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
-
-        // 5. Зум / сброс
-        ApplyStepZoom();
     }
 
     private void ApplyStepZoom()
