@@ -139,10 +139,10 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Text shown in the Откуда field (node name or placeholder).</summary>
-    public string StartNodeDisplay => _startNode?.Name ?? "Откуда...";
+    public string StartNodeDisplay => _startNode?.DisplayName ?? "Откуда...";
 
     /// <summary>Text shown in the Куда field (node name or placeholder).</summary>
-    public string EndNodeDisplay => _endNode?.Name ?? "Куда...";
+    public string EndNodeDisplay => _endNode?.DisplayName ?? "Куда...";
 
     /// <summary>True when at least one of start/end nodes is selected — drives Clear button color.</summary>
     public bool HasAnySelection => _startNode != null || _endNode != null;
