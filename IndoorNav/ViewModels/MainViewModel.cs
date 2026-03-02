@@ -24,6 +24,8 @@ public class MainViewModel : INotifyPropertyChanged
     private NavNode? _endNode;
     private string _routeStatus = string.Empty;
     private bool _isPickerOpen;
+    private NavNode? _tappedNode;
+    private bool _isNodePopupOpen;
     private string _pickerTarget = "start"; // "start" or "end"
     private string _pickerSearchText = string.Empty;
     private List<FloorNodeGroup> _nodesByFloor = new();
@@ -154,6 +156,23 @@ public class MainViewModel : INotifyPropertyChanged
         set { _isPickerOpen = value; OnPropertyChanged(); }
     }
 
+    /// <summary>Node the user has tapped on the canvas.</summary>
+    public NavNode? TappedNode
+    {
+        get => _tappedNode;
+        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); }
+    }
+
+    /// <summary>Display name of the tapped node for the popup header.</summary>
+    public string TappedNodeName => _tappedNode?.DisplayName ?? string.Empty;
+
+    /// <summary>Whether the node-tap popup is visible.</summary>
+    public bool IsNodePopupOpen
+    {
+        get => _isNodePopupOpen;
+        set { _isNodePopupOpen = value; OnPropertyChanged(); }
+    }
+
     /// <summary>Title shown in the picker popup header.</summary>
     public string PickerTitle => _pickerTarget == "start"
         ? "📍 Выберите начальную точку"
@@ -245,6 +264,9 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand OpenEndPickerCommand    { get; }
     public ICommand SelectPickerNodeCommand { get; }
     public ICommand ClosePickerCommand      { get; }
+    public ICommand SetTappedAsStartCommand { get; }
+    public ICommand SetTappedAsEndCommand   { get; }
+    public ICommand CloseNodePopupCommand   { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
@@ -287,6 +309,20 @@ public class MainViewModel : INotifyPropertyChanged
             IsPickerOpen = false;
         });
         ClosePickerCommand = new Command(() => IsPickerOpen = false);
+
+        SetTappedAsStartCommand = new Command(() =>
+        {
+            if (_tappedNode == null) return;
+            StartNode = _tappedNode;
+            IsNodePopupOpen = false;
+        });
+        SetTappedAsEndCommand = new Command(() =>
+        {
+            if (_tappedNode == null) return;
+            EndNode = _tappedNode;
+            IsNodePopupOpen = false;
+        });
+        CloseNodePopupCommand = new Command(() => IsNodePopupOpen = false);
 
         _ = InitializeAsync();
     }
@@ -706,17 +742,8 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Call when a node on the canvas is tapped in user mode.</summary>
     public void OnCanvasNodeTapped(NavNode node)
     {
-        if (StartNode == null)
-        {
-            StartNode = node;
-            RouteStatus = $"Старт: {node.Name}. Выберите пункт назначения.";
-        }
-        else if (EndNode == null && node != StartNode)
-        {
-            EndNode = node;
-            RouteStatus = $"Назначение: {node.Name}. Нажмите «Построить».";
-            ((Command)BuildRouteCommand).ChangeCanExecute();
-        }
+        TappedNode = node;
+        IsNodePopupOpen = true;
     }
 
 

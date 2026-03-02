@@ -208,6 +208,43 @@
                         </HorizontalStackLayout>
                     </Border>
 
+                    <!-- Node tap popup: dim backdrop -->
+                    <BoxView Color="#66000000"
+                             IsVisible="{Binding IsNodePopupOpen}">
+                        <BoxView.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
+                        </BoxView.GestureRecognizers>
+                    </BoxView>
+
+                    <!-- Node tap popup: modal card -->
+                    <Border HorizontalOptions="Center" VerticalOptions="Center"
+                            Padding="20,18" Margin="32"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="White"
+                            Stroke="#E2E8F0" StrokeThickness="1"
+                            IsVisible="{Binding IsNodePopupOpen}">
+                        <VerticalStackLayout Spacing="14" MinimumWidthRequest="220">
+                            <Label Text="{Binding TappedNodeName}"
+                                   FontSize="15" FontAttributes="Bold" TextColor="#0F172A"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Установить точку как:"
+                                   FontSize="12" TextColor="#64748B"
+                                   HorizontalOptions="Center" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Grid.Column="0" Text="📍 Откуда"
+                                        Command="{Binding SetTappedAsStartCommand}"
+                                        BackgroundColor="#EFF6FF" TextColor="#1D4ED8"
+                                        BorderColor="#BFDBFE" BorderWidth="1"
+                                        FontSize="13" CornerRadius="8" HeightRequest="44" />
+                                <Button Grid.Column="1" Text="🏁 Куда"
+                                        Command="{Binding SetTappedAsEndCommand}"
+                                        BackgroundColor="#F0FDF4" TextColor="#15803D"
+                                        BorderColor="#BBF7D0" BorderWidth="1"
+                                        FontSize="13" CornerRadius="8" HeightRequest="44" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
                 </Grid>
             </Border>
 
@@ -353,20 +390,20 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Button Text="← Назад"
+                            <Button Text="Назад"
                                     Grid.Column="0"
                                     Clicked="OnPrevStepClicked"
                                     IsVisible="{Binding HasPreviousStep}"
                                     BackgroundColor="#475569" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8"
                                     MinimumWidthRequest="90" />
-                            <Button Text="Далее →"
+                            <Button Text="Далее"
                                     Grid.Column="1"
                                     Clicked="OnNextStepClicked"
                                     IsVisible="{Binding HasNextStep}"
                                     BackgroundColor="#2563EB" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8" />
-                            <Button Text="✓ Завершить"
+                            <Button Text="Завершить"
                                     Grid.Column="1"
                                     Command="{Binding ClearRouteCommand}"
                                     IsVisible="{Binding IsLastStep}"
