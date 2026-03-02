@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using IndoorNav.Models;
 
@@ -9,11 +7,6 @@ public class NavGraphService
 {
     private static readonly string FilePath =
         Path.Combine(FileSystem.AppDataDirectory, "navgraph.json");
-
-    // Хранит MD5 последнего известного бандла — если бандл изменился (новый git pull),
-    // локальный кэш автоматически заменяется новым бандлом без ручных правок.
-    private static readonly string BundleHashPath =
-        Path.Combine(FileSystem.AppDataDirectory, "bundle_hash.txt");
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -28,48 +21,24 @@ public class NavGraphService
     {
         try
         {
-            // Читаем бандл и считаем его MD5-хеш
-            string? bundledJson = null;
-            string bundleHash   = string.Empty;
+            // Всегда загружаем бандл — актуальные данные всегда из последней сборки
             try
             {
                 using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
                 using var reader = new StreamReader(stream);
-                bundledJson = await reader.ReadToEndAsync();
-                bundleHash  = ComputeMd5(bundledJson);
+                var json = await reader.ReadToEndAsync();
+                _graph = JsonSerializer.Deserialize<NavGraph>(json, JsonOpts) ?? new NavGraph();
+                MigrateWaypoints();
             }
-            catch { /* бандл недоступен — продолжаем с локальным */ }
-
-            // Хеш, который был при предыдущем запуске
-            string savedHash = File.Exists(BundleHashPath)
-                ? await File.ReadAllTextAsync(BundleHashPath)
-                : string.Empty;
-
-            bool bundleChanged = !string.IsNullOrEmpty(bundleHash) && bundleHash != savedHash;
-
-            if (bundleChanged || !File.Exists(FilePath))
+            catch
             {
-                // Бандл изменился (новый git pull) или локального файла нет — берём бандл
-                if (bundledJson != null)
+                // Бандл недоступен (не должно бывать) — падаем на локальный файл
+                if (File.Exists(FilePath))
                 {
-                    System.Diagnostics.Debug.WriteLine(
-                        bundleChanged ? "Bundle changed, replacing local cache." : "No local cache, loading bundle.");
-                    _graph = JsonSerializer.Deserialize<NavGraph>(bundledJson, JsonOpts) ?? new NavGraph();
+                    var localJson = await File.ReadAllTextAsync(FilePath);
+                    _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
                     MigrateWaypoints();
-                    await SaveAsync();
-                    await File.WriteAllTextAsync(BundleHashPath, bundleHash);
                 }
-                else
-                {
-                    _graph = new NavGraph();
-                }
-            }
-            else
-            {
-                // Бандл не изменился — используем локальный файл (с правками администратора)
-                var localJson = await File.ReadAllTextAsync(FilePath);
-                _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
-                if (MigrateWaypoints()) await SaveAsync();
             }
         }
         catch (Exception ex)
@@ -77,12 +46,6 @@ public class NavGraphService
             System.Diagnostics.Debug.WriteLine($"NavGraph load error: {ex.Message}");
             _graph = new NavGraph();
         }
-    }
-
-    private static string ComputeMd5(string text)
-    {
-        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(text));
-        return Convert.ToHexString(bytes);
     }
 
     /// <summary>
@@ -129,8 +92,6 @@ public class NavGraphService
         _graph = new NavGraph();
         if (File.Exists(FilePath))
             File.Delete(FilePath);
-        if (File.Exists(BundleHashPath))
-            File.Delete(BundleHashPath);
         await Task.CompletedTask;
     }
 
