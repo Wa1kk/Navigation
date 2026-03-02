@@ -730,6 +730,12 @@ public class SvgView : SKCanvasView
                                             MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4f / sc) };
         using var font      = new SKFont(SKTypeface.Default, fontSize);
 
+        // При наличии маршрута — строим набор id узлов маршрута, чтобы не рисовать их метки дважды
+        // (DrawRoute уже рисует метки для узлов маршрута)
+        var routeNodeIds = hideCirclesForRoute && RouteNodes != null
+            ? new HashSet<string>(RouteNodes.Select(n => n.Id))
+            : null;
+
         foreach (var node in visibleNodes)
         {
             // В польз. режиме: если скрыта и точка, и метка — пропускаем полностью
@@ -780,6 +786,8 @@ public class SvgView : SKCanvasView
             }
 
             // Подпись под точкой
+            // Если узел в маршруте — его метку уже нарисует DrawRoute, пропускаем
+            if (routeNodeIds != null && routeNodeIds.Contains(node.Id)) continue;
             if (!(!IsAdminMode && node.IsLabelHidden))
             {
                 float lblOpacity = (IsAdminMode && node.IsLabelHidden) ? 0.35f : 1f;
