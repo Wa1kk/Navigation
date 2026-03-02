@@ -223,28 +223,39 @@
                             BackgroundColor="White"
                             Stroke="#E2E8F0" StrokeThickness="1"
                             IsVisible="{Binding IsNodePopupOpen}">
-                        <VerticalStackLayout Spacing="14" MinimumWidthRequest="220">
-                            <Label Text="{Binding TappedNodeName}"
-                                   FontSize="15" FontAttributes="Bold" TextColor="#0F172A"
-                                   HorizontalOptions="Center" />
-                            <Label Text="{Binding TappedNodeInfo}"
-                                   FontSize="12" TextColor="#64748B"
-                                   HorizontalOptions="Center" />
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                                <Button Grid.Column="0" Text="Отсюда"
-                                        Command="{Binding SetTappedAsStartCommand}"
-                                        BackgroundColor="#2B4EDB" TextColor="White"
-                                        BorderWidth="0"
-                                        FontSize="13" FontAttributes="Bold"
-                                        CornerRadius="22" HeightRequest="44" />
-                                <Button Grid.Column="1" Text="Сюда"
-                                        Command="{Binding SetTappedAsEndCommand}"
-                                        BackgroundColor="#2B4EDB" TextColor="White"
-                                        BorderWidth="0"
-                                        FontSize="13" FontAttributes="Bold"
-                                        CornerRadius="22" HeightRequest="44" />
-                            </Grid>
-                        </VerticalStackLayout>
+                        <Grid>
+                            <VerticalStackLayout Spacing="14" MinimumWidthRequest="220">
+                                <Label Text="{Binding TappedNodeName}"
+                                       FontSize="15" FontAttributes="Bold" TextColor="#0F172A"
+                                       HorizontalOptions="Center" />
+                                <Label Text="{Binding TappedNodeInfo}"
+                                       FontSize="12" TextColor="#64748B"
+                                       HorizontalOptions="Center" />
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <Button Grid.Column="0" Text="Отсюда"
+                                            Command="{Binding SetTappedAsStartCommand}"
+                                            BackgroundColor="#2B4EDB" TextColor="White"
+                                            BorderWidth="0"
+                                            FontSize="13" FontAttributes="Bold"
+                                            CornerRadius="22" HeightRequest="44" />
+                                    <Button Grid.Column="1" Text="Сюда"
+                                            Command="{Binding SetTappedAsEndCommand}"
+                                            BackgroundColor="#2B4EDB" TextColor="White"
+                                            BorderWidth="0"
+                                            FontSize="13" FontAttributes="Bold"
+                                            CornerRadius="22" HeightRequest="44" />
+                                </Grid>
+                            </VerticalStackLayout>
+                            <!-- Close button top-right -->
+                            <Button Text="✕"
+                                    Command="{Binding CloseNodePopupCommand}"
+                                    HorizontalOptions="End" VerticalOptions="Start"
+                                    Margin="0,-10,-10,0"
+                                    BackgroundColor="#E5E7EB" TextColor="#6B7280"
+                                    FontSize="12" FontAttributes="Bold"
+                                    WidthRequest="28" HeightRequest="28"
+                                    CornerRadius="14" Padding="0" />
+                        </Grid>
                     </Border>
 
                 </Grid>
