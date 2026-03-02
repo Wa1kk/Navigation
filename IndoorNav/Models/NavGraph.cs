@@ -5,12 +5,7 @@ public class NavGraph
     public List<NavNode> Nodes { get; set; } = new();
     public List<NavEdge> Edges { get; set; } = new();
 
-    /// <summary>
-    /// Версия данных. Увеличивай вручную в bundled navgraph.json каждый раз,
-    /// когда пушишь обновлённые точки в git — тогда у других пользователей
-    /// локальный кэш перезапишется из бандла.
-    /// </summary>
-    public int DataVersion { get; set; } = 0;
+
 
     // ---------------------------------------------------------------
     // Вспомогательные методы

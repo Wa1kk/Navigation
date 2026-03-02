@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using IndoorNav.Models;
 
@@ -7,6 +9,11 @@ public class NavGraphService
 {
     private static readonly string FilePath =
         Path.Combine(FileSystem.AppDataDirectory, "navgraph.json");
+
+    // Хранит MD5 последнего известного бандла — если бандл изменился (новый git pull),
+    // локальный кэш автоматически заменяется новым бандлом без ручных правок.
+    private static readonly string BundleHashPath =
+        Path.Combine(FileSystem.AppDataDirectory, "bundle_hash.txt");
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -21,44 +28,48 @@ public class NavGraphService
     {
         try
         {
-            // Всегда читаем бандл, чтобы знать его DataVersion
-            NavGraph? bundled = null;
+            // Читаем бандл и считаем его MD5-хеш
+            string? bundledJson = null;
+            string bundleHash   = string.Empty;
             try
             {
                 using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
                 using var reader = new StreamReader(stream);
-                var bundledJson = await reader.ReadToEndAsync();
-                bundled = JsonSerializer.Deserialize<NavGraph>(bundledJson, JsonOpts);
+                bundledJson = await reader.ReadToEndAsync();
+                bundleHash  = ComputeMd5(bundledJson);
             }
             catch { /* бандл недоступен — продолжаем с локальным */ }
 
-            if (File.Exists(FilePath))
-            {
-                // Локальный файл существует — проверяем версию
-                var localJson = await File.ReadAllTextAsync(FilePath);
-                var local = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
+            // Хеш, который был при предыдущем запуске
+            string savedHash = File.Exists(BundleHashPath)
+                ? await File.ReadAllTextAsync(BundleHashPath)
+                : string.Empty;
 
-                if (bundled != null && bundled.DataVersion > local.DataVersion)
+            bool bundleChanged = !string.IsNullOrEmpty(bundleHash) && bundleHash != savedHash;
+
+            if (bundleChanged || !File.Exists(FilePath))
+            {
+                // Бандл изменился (новый git pull) или локального файла нет — берём бандл
+                if (bundledJson != null)
                 {
-                    // Бандл новее — используем бандл и перезаписываем локальный
                     System.Diagnostics.Debug.WriteLine(
-                        $"Bundle DataVersion ({bundled.DataVersion}) > local ({local.DataVersion}), switching to bundle.");
-                    _graph = bundled;
+                        bundleChanged ? "Bundle changed, replacing local cache." : "No local cache, loading bundle.");
+                    _graph = JsonSerializer.Deserialize<NavGraph>(bundledJson, JsonOpts) ?? new NavGraph();
                     MigrateWaypoints();
                     await SaveAsync();
+                    await File.WriteAllTextAsync(BundleHashPath, bundleHash);
                 }
                 else
                 {
-                    _graph = local;
-                    if (MigrateWaypoints()) await SaveAsync();
+                    _graph = new NavGraph();
                 }
             }
             else
             {
-                // Локального файла нет — берём бандл
-                _graph = bundled ?? new NavGraph();
-                MigrateWaypoints();
-                await SaveAsync();
+                // Бандл не изменился — используем локальный файл (с правками администратора)
+                var localJson = await File.ReadAllTextAsync(FilePath);
+                _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
+                if (MigrateWaypoints()) await SaveAsync();
             }
         }
         catch (Exception ex)
@@ -66,6 +77,12 @@ public class NavGraphService
             System.Diagnostics.Debug.WriteLine($"NavGraph load error: {ex.Message}");
             _graph = new NavGraph();
         }
+    }
+
+    private static string ComputeMd5(string text)
+    {
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(text));
+        return Convert.ToHexString(bytes);
     }
 
     /// <summary>
@@ -112,6 +129,8 @@ public class NavGraphService
         _graph = new NavGraph();
         if (File.Exists(FilePath))
             File.Delete(FilePath);
+        if (File.Exists(BundleHashPath))
+            File.Delete(BundleHashPath);
         await Task.CompletedTask;
     }
 
