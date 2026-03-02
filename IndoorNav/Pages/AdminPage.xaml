@@ -612,7 +612,7 @@
                         BackgroundColor="{Binding IsUsersTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
                         TextColor="{Binding IsUsersTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
                         FontSize="13" CornerRadius="0" BorderWidth="0" />
-                <Button Grid.Column="1" Text="🏛  Кафедры и группы"
+                <Button Grid.Column="1" Text="🏛  Факультеты и группы"
                         Command="{Binding SwitchToDepartmentsTabCommand}"
                         BackgroundColor="{Binding IsDepartmentsTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E3A5F|Transparent'}"
                         TextColor="{Binding IsDepartmentsTab, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#475569'}"
@@ -676,7 +676,7 @@
                                    BackgroundColor="#F8FAFC" FontSize="14" />
 
                             <!-- Department picker -->
-                            <Label Text="Кафедра:" FontSize="13" TextColor="#475569" Margin="0,4,0,0" />
+                            <Label Text="Факультет:" FontSize="13" TextColor="#475569" Margin="0,4,0,0" />
                             <CollectionView ItemsSource="{Binding Departments}"
                                             SelectedItem="{Binding NewStudentDept, Mode=TwoWay}"
                                             SelectionMode="Single" HeightRequest="120">
@@ -711,7 +711,7 @@
                                             SelectionMode="Single" HeightRequest="100"
                                             IsVisible="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}">
                                 <CollectionView.EmptyView>
-                                    <Label Text="В этой кафедре нет групп" TextColor="#94A3B8"
+                                    <Label Text="В этом факультете нет групп" TextColor="#94A3B8"
                                            HorizontalOptions="Center" Margin="0,10" />
                                 </CollectionView.EmptyView>
                                 <CollectionView.ItemTemplate>
@@ -754,13 +754,13 @@
                 <!-- Departments list -->
                 <ScrollView Grid.Row="0">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="КАФЕДРЫ" FontSize="11" CharacterSpacing="1.5"
+                        <Label Text="ФАКУЛЬТЕТЫ" FontSize="11" CharacterSpacing="1.5"
                                TextColor="#64748B" Margin="0,0,0,4" />
                         <CollectionView ItemsSource="{Binding Departments}"
                                         SelectedItem="{Binding SelectedDept, Mode=TwoWay}"
                                         SelectionMode="Single">
                             <CollectionView.EmptyView>
-                                <Label Text="Нет кафедр. Добавьте первую." TextColor="#94A3B8"
+                                <Label Text="Нет факультетов. Добавьте первый." TextColor="#94A3B8"
                                        HorizontalOptions="Center" Margin="0,20" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
@@ -852,15 +852,15 @@
                                     BackgroundColor="#2563EB" TextColor="White"
                                     FontSize="13" HeightRequest="44" CornerRadius="8" Padding="10,0" />
                         </Grid>
-                        <Label Text="Выберите кафедру выше, чтобы добавить группу"
+                        <Label Text="Выберите факультет выше, чтобы добавить группу"
                                FontSize="12" TextColor="#94A3B8" HorizontalOptions="Center" />
                         <BoxView HeightRequest="1" BackgroundColor="#E2E8F0" />
                         <!-- Add department -->
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                            <Entry Grid.Column="0" Placeholder="Название кафедры"
+                            <Entry Grid.Column="0" Placeholder="Название факультета"
                                    Text="{Binding NewDeptName, Mode=TwoWay}"
                                    BackgroundColor="#F8FAFC" FontSize="13" />
-                            <Button Grid.Column="1" Text="+ Кафедра"
+                            <Button Grid.Column="1" Text="+ Факультет"
                                     Command="{Binding AddDepartmentCommand}"
                                     BackgroundColor="#059669" TextColor="White"
                                     FontSize="13" HeightRequest="44" CornerRadius="8" Padding="10,0" />

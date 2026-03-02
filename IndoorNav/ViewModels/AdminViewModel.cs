@@ -428,7 +428,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 "Доп. ключевые слова для поиска",
                 "Слова, по которым можно найти эту точку. Не отображаются на карте.",
                 initialValue: SelectedNode.SearchTags,
-                placeholder: "Например: кафедра ритм, ДеканатСтрой",
+                placeholder: "Например: факультет ИТИТ, ФизМат",
                 maxLength: 200);
             if (val == null) return; // cancel
             SelectedSearchTags = val.Trim();
@@ -559,7 +559,7 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             if (dept == null) return;
             bool ok = await Shell.Current.DisplayAlert(
-                "Удалить кафедру",
+                "Удалить факультет",
                 $"Удалить \u00ab{dept.Name}\u00bb и все её группы?",
                 "Удалить", "Отмена");
             if (!ok) return;
@@ -572,7 +572,7 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             if (dept == null) return;
             var newName = await Shell.Current.DisplayPromptAsync(
-                "Переименовать кафедру", "Новое название:",
+                "Переименовать факультет", "Новое название:",
                 initialValue: dept.Name, maxLength: 80);
             if (string.IsNullOrWhiteSpace(newName)) return;
             await _departmentService.RenameDepartmentAsync(dept.Id, newName);
