@@ -349,10 +349,10 @@
         <!-- ═══════════════════════════════════════
              MAIN AREA
              ═══════════════════════════════════════ -->
-        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto">
 
             <!-- ═══ PHONE TOP BAR (hidden on desktop) ═══ -->
-            <Grid Grid.Row="0" BackgroundColor="#0F172A" Padding="10,8,10,8"
+            <Grid Grid.Row="1" BackgroundColor="#0F172A" Padding="10,8,10,8"
                   ColumnDefinitions="Auto,*,*" ColumnSpacing="6"
                   IsVisible="{OnIdiom Phone=True, Default=False}">
                 <Button Grid.Column="0"
@@ -377,7 +377,7 @@
             </Grid>
 
             <!-- Status bar -->
-            <Border Grid.Row="1"
+            <Border Grid.Row="2"
                     BackgroundColor="#FFF7ED"
                     StrokeShape="RoundRectangle 8"
                     Stroke="#FED7AA" StrokeThickness="1"
@@ -386,7 +386,7 @@
             </Border>
 
             <!-- Selected node info badge -->
-            <Border Grid.Row="2"
+            <Border Grid.Row="3"
                     BackgroundColor="#EFF6FF"
                     StrokeShape="RoundRectangle 8"
                     Stroke="#BFDBFE" StrokeThickness="1"
@@ -413,7 +413,7 @@
             </Border>
 
             <!-- Canvas -->
-            <Border Grid.Row="3"
+            <Border Grid.Row="4"
                     StrokeShape="RoundRectangle 14"
                     Stroke="#E2E8F0" StrokeThickness="1"
                     BackgroundColor="White" Padding="0">
@@ -433,7 +433,7 @@
             </Border>
 
             <!-- Рёбра выбранной точки -->
-            <Border Grid.Row="4"
+            <Border Grid.Row="0"
                     BackgroundColor="#262563EB"
                     StrokeShape="RoundRectangle 10"
                     Stroke="#2563EB" StrokeThickness="1"
