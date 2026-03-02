@@ -233,14 +233,16 @@
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                 <Button Grid.Column="0" Text="Отсюда"
                                         Command="{Binding SetTappedAsStartCommand}"
-                                        BackgroundColor="#EFF6FF" TextColor="#1D4ED8"
-                                        BorderColor="#BFDBFE" BorderWidth="1"
-                                        FontSize="13" CornerRadius="8" HeightRequest="44" />
+                                        BackgroundColor="#2B4EDB" TextColor="White"
+                                        BorderWidth="0"
+                                        FontSize="13" FontAttributes="Bold"
+                                        CornerRadius="22" HeightRequest="44" />
                                 <Button Grid.Column="1" Text="Сюда"
                                         Command="{Binding SetTappedAsEndCommand}"
-                                        BackgroundColor="#F0FDF4" TextColor="#15803D"
-                                        BorderColor="#BBF7D0" BorderWidth="1"
-                                        FontSize="13" CornerRadius="8" HeightRequest="44" />
+                                        BackgroundColor="#2B4EDB" TextColor="White"
+                                        BorderWidth="0"
+                                        FontSize="13" FontAttributes="Bold"
+                                        CornerRadius="22" HeightRequest="44" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
