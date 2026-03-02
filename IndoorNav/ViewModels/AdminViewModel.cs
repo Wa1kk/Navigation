@@ -786,12 +786,20 @@ public class AdminViewModel : INotifyPropertyChanged
         var allEdges = _graphService.Graph.Edges;
         var allNodes = _graphService.Graph.Nodes;
 
+        // Дедупликация: каноническая пара (min, max) — как в RefreshOverlay
+        var seenPairs = new HashSet<(string, string)>();
+
         foreach (var edge in allEdges)
         {
             string otherId;
             if      (edge.FromId == sel.Id) otherId = edge.ToId;
             else if (edge.ToId   == sel.Id) otherId = edge.FromId;
             else continue;
+
+            var canonical = string.CompareOrdinal(sel.Id, otherId) <= 0
+                ? (sel.Id, otherId)
+                : (otherId, sel.Id);
+            if (!seenPairs.Add(canonical)) continue;
 
             var other = allNodes.FirstOrDefault(n => n.Id == otherId);
             SelectedNodeEdges.Add(new SelectedEdgeItem
