@@ -115,6 +115,28 @@ public class SvgView : SKCanvasView
         set => SetValue(BoundaryPreviewProperty, value);
     }
 
+    /// <summary>Подсветка границы узла-назначения (пользовательский режим).</summary>
+    public static readonly BindableProperty HighlightBoundaryNodeProperty =
+        BindableProperty.Create(nameof(HighlightBoundaryNode), typeof(NavNode), typeof(SvgView),
+            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
+    public NavNode? HighlightBoundaryNode
+    {
+        get => (NavNode?)GetValue(HighlightBoundaryNodeProperty);
+        set => SetValue(HighlightBoundaryNodeProperty, value);
+    }
+
+    /// <summary>Индекс выбранной вершины границы в режиме редактирования (-1 = не выбрана).</summary>
+    public static readonly BindableProperty SelectedBoundaryVertexIndexProperty =
+        BindableProperty.Create(nameof(SelectedBoundaryVertexIndex), typeof(int), typeof(SvgView),
+            -1, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
+    public int SelectedBoundaryVertexIndex
+    {
+        get => (int)GetValue(SelectedBoundaryVertexIndexProperty);
+        set => SetValue(SelectedBoundaryVertexIndexProperty, value);
+    }
+
     /// <summary>Нажатие на пустое место холста. Аргумент — координаты в пространстве SVG.</summary>
     public event EventHandler<SKPoint>? CanvasTapped;
 
@@ -123,6 +145,12 @@ public class SvgView : SKCanvasView
 
     /// <summary>Перемещение узла. Аргументы: узел + новые SVG-координаты.</summary>
     public event EventHandler<(NavNode node, SKPoint svgPos)>? NodeMoved;
+
+    /// <summary>Перемещение вершины границы. Аргументы: индекс + новая SVG-позиция.</summary>
+    public event EventHandler<(int idx, SKPoint svgPos)>? BoundaryVertexMoved;
+
+    /// <summary>Тап по вершине границы. Аргумент: индекс вершины.</summary>
+    public event EventHandler<int>? BoundaryVertexTapped;
 
     // ===== Internal state =====
 
@@ -167,6 +195,7 @@ public class SvgView : SKCanvasView
 
     // Admin drag state
     private NavNode? _draggingNode;
+    private int      _draggingBoundaryVertexIdx = -1;
     private bool     _didDrag;
 
     // ===== Route animation =====
@@ -545,7 +574,26 @@ public class SvgView : SKCanvasView
         float sc = MatrixScale();
         if (sc < 0.001f) sc = 1f;
 
-        // ── Границы аудиторий (admins: все; users: кликабельные области) ───────────────
+        // ── Границы аудиторий ──────────────────────────────────────────────────────────
+        // Пользовательский режим: подсветить границу узла-назначения
+        var hlNode = HighlightBoundaryNode;
+        if (!IsAdminMode && hlNode?.Boundary != null && hlNode.Boundary.Count >= 3)
+        {
+            using var hlPath = new SKPath();
+            hlPath.MoveTo(hlNode.Boundary[0][0], hlNode.Boundary[0][1]);
+            for (int bi = 1; bi < hlNode.Boundary.Count; bi++)
+                hlPath.LineTo(hlNode.Boundary[bi][0], hlNode.Boundary[bi][1]);
+            hlPath.Close();
+            using var hlFill = new SKPaint { Color = new SKColor(37, 99, 235, 50), IsAntialias = true };
+            canvas.DrawPath(hlPath, hlFill);
+            using var hlStroke = new SKPaint
+            {
+                Color = new SKColor(37, 99, 235, 230), StrokeWidth = 2.5f / sc,
+                IsStroke = true, IsAntialias = true, StrokeCap = SKStrokeCap.Round,
+            };
+            canvas.DrawPath(hlPath, hlStroke);
+        }
+
         foreach (var node in visibleNodes)
         {
             if (node.Boundary == null || node.Boundary.Count < 3) continue;
@@ -578,6 +626,22 @@ public class SvgView : SKCanvasView
                     PathEffect = SKPathEffect.CreateDash(new[] { 6f / sc, 3f / sc }, 0f)
                 };
                 canvas.DrawPath(boundaryPath, strokeP);
+
+                // Вершины границы (редактируемые ручки)
+                if (isSelected)
+                {
+                    int selVtx = SelectedBoundaryVertexIndex;
+                    float vtxR = 6f / sc;
+                    using var vtxFill = new SKPaint { Color = new SKColor(255, 152, 0, 220), IsAntialias = true };
+                    using var vtxSelFill = new SKPaint { Color = new SKColor(255, 80, 0, 255), IsAntialias = true };
+                    using var vtxStroke = new SKPaint { Color = SKColors.White, StrokeWidth = 1.5f / sc, IsStroke = true, IsAntialias = true };
+                    for (int vi = 0; vi < node.Boundary.Count; vi++)
+                    {
+                        var vp = new SKPoint(node.Boundary[vi][0], node.Boundary[vi][1]);
+                        canvas.DrawCircle(vp, vtxR, vi == selVtx ? vtxSelFill : vtxFill);
+                        canvas.DrawCircle(vp, vtxR, vtxStroke);
+                    }
+                }
             }
         }
 
@@ -644,45 +708,52 @@ public class SvgView : SKCanvasView
 
         foreach (var node in visibleNodes)
         {
-            // В польз. режиме скрытые узлы не рисуем
-            if (!IsAdminMode && node.IsHidden) continue;
+            // В польз. режиме: если скрыта и точка, и метка — пропускаем полностью
+            if (!IsAdminMode && node.IsHidden && node.IsLabelHidden) continue;
+
+            bool drawCircle = IsAdminMode || !node.IsHidden;
 
             var s    = new SKPoint(node.X, node.Y);
             float nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
 
-            // Цвет: персональный → выбранный → типовой
-            SKPaint fill;
-            if (node == SelectedNode)
+            if (drawCircle)
             {
-                fill = fillSel;
-            }
-            else if (!string.IsNullOrEmpty(node.NodeColorHex))
-            {
-                if (SKColor.TryParse("#" + node.NodeColorHex, out var custom))
-                    fill = new SKPaint { Color = custom, IsAntialias = true };
-                else
-                    fill = fillNorm;
-            }
-            else if (node.IsExit)       fill = fillExit;
-            else if (node.IsTransition) fill = fillTrans;
-            else                        fill = fillNorm;
+                // Цвет: персональный → выбранный → типовой
+                SKPaint fill;
+                if (node == SelectedNode)
+                {
+                    fill = fillSel;
+                }
+                else if (!string.IsNullOrEmpty(node.NodeColorHex))
+                {
+                    if (SKColor.TryParse("#" + node.NodeColorHex, out var custom))
+                        fill = new SKPaint { Color = custom, IsAntialias = true };
+                    else
+                        fill = fillNorm;
+                }
+                else if (node.IsExit)       fill = fillExit;
+                else if (node.IsTransition) fill = fillTrans;
+                else                        fill = fillNorm;
 
-            // В админ-режиме скрытые узлы рисуем полупрозрачными
-            float alpha = (IsAdminMode && node.IsHidden) ? 0.35f : 1f;
-            if (alpha < 1f)
-            {
-                var c = fill.Color;
-                fill = new SKPaint { Color = c.WithAlpha((byte)(c.Alpha * alpha)), IsAntialias = true };
+                // В админ-режиме скрытые узлы рисуем полупрозрачными
+                float alpha = (IsAdminMode && node.IsHidden) ? 0.35f : 1f;
+                if (alpha < 1f)
+                {
+                    var c = fill.Color;
+                    fill = new SKPaint { Color = c.WithAlpha((byte)(c.Alpha * alpha)), IsAntialias = true };
+                }
+
+                canvas.DrawCircle(s.X + 2f / sc, s.Y + 3f / sc, nodeR, shadowP);
+                canvas.DrawCircle(s, nodeR, fill);
+                canvas.DrawCircle(s, nodeR, stroke);
+
+                // Внутренняя метка (InnerLabel, если задана)
+                if (!string.IsNullOrEmpty(node.InnerLabel))
+                {
+                    using var textP = new SKPaint { Color = SKColors.White, IsAntialias = true };
+                    canvas.DrawText(node.InnerLabel, s.X, s.Y + fontSize * 0.38f, SKTextAlign.Center, font, textP);
+                }
             }
-
-            canvas.DrawCircle(s.X + 2f / sc, s.Y + 3f / sc, nodeR, shadowP);
-            canvas.DrawCircle(s, nodeR, fill);
-            canvas.DrawCircle(s, nodeR, stroke);
-
-            // Внутренняя метка (первые 3 символа имени)
-            var lbl = node.Name.Length > 0 ? node.Name[..Math.Min(3, node.Name.Length)] : "?";
-            using var textP = new SKPaint { Color = SKColors.White, IsAntialias = true };
-            canvas.DrawText(lbl, s.X, s.Y + fontSize * 0.38f, SKTextAlign.Center, font, textP);
 
             // Подпись под точкой
             if (!(!IsAdminMode && node.IsLabelHidden))
@@ -860,6 +931,7 @@ public class SvgView : SKCanvasView
     // ===== Touch handling =====
 
     private const float NodeHitRadius = 24f;
+    private const float BoundaryVertexHitRadius = 20f;
     private readonly Dictionary<long, SKPoint> _activePointers = new();
 
     /// <summary>Переводит экранный тап (e.Location) в SVG-координаты.</summary>
@@ -901,6 +973,22 @@ public class SvgView : SKCanvasView
         return best;
     }
 
+    /// <summary>Ищет вершину границы выбранного узла, ближайшую к экранной точке. Возвращает индекс или -1.</summary>
+    private int HitBoundaryVertex(SKPoint screen)
+    {
+        var selNode = SelectedNode;
+        if (!IsAdminMode || selNode?.Boundary == null || selNode.Boundary.Count < 1) return -1;
+        int bestIdx = -1;
+        float bestDist = BoundaryVertexHitRadius;
+        for (int i = 0; i < selNode.Boundary.Count; i++)
+        {
+            var pt = _matrix.MapPoint(new SKPoint(selNode.Boundary[i][0], selNode.Boundary[i][1]));
+            float d = Distance(screen, pt);
+            if (d < bestDist) { bestDist = d; bestIdx = i; }
+        }
+        return bestIdx;
+    }
+
     /// <summary>Ray-casting point-in-polygon. Координаты SVG-пространства.</summary>
     private static bool PointInPolygon(SKPoint pt, List<float[]> poly)
     {
@@ -926,9 +1014,21 @@ public class SvgView : SKCanvasView
             case SKTouchAction.Pressed:
                 _activePointers[e.Id] = e.Location;
                 _didDrag = false;
-                // В режиме перемещения: всегда проверяем попадание в узел (даже промахнувшись — не даём карте двигаться)
-                if (IsAdminMode && IsDragMode && _activePointers.Count == 1)
-                    _draggingNode = HitNode(e.Location);
+                _draggingBoundaryVertexIdx = -1;
+                if (IsAdminMode && _activePointers.Count == 1)
+                {
+                    // Сначала проверяем вершины границы (приоритет над узлом)
+                    int vtxHit = HitBoundaryVertex(e.Location);
+                    if (vtxHit >= 0)
+                    {
+                        _draggingBoundaryVertexIdx = vtxHit;
+                        _draggingNode = null;
+                    }
+                    else if (IsDragMode)
+                    {
+                        _draggingNode = HitNode(e.Location);
+                    }
+                }
                 break;
 
             case SKTouchAction.Moved:
@@ -940,13 +1040,19 @@ public class SvgView : SKCanvasView
                 {
                     if (Distance(e.Location, prev) > 3f) _didDrag = true;
 
-                    if (IsAdminMode && IsDragMode && _draggingNode != null)
+                    if (IsAdminMode && _draggingBoundaryVertexIdx >= 0)
+                    {
+                        // Перемещение вершины границы
+                        BoundaryVertexMoved?.Invoke(this, (_draggingBoundaryVertexIdx, ToSvg(e.Location)));
+                        InvalidateSurface();
+                    }
+                    else if (IsAdminMode && IsDragMode && _draggingNode != null)
                     {
                         // Режим перемещения узла: двигаем только узел, карта стоит на месте
                         NodeMoved?.Invoke(this, (_draggingNode, ToSvg(e.Location)));
                         InvalidateSurface();
                     }
-                    else if (!IsDragMode || _draggingNode == null)
+                    else if (!IsDragMode || (_draggingNode == null && _draggingBoundaryVertexIdx < 0))
                     {
                         // Обычный режим или в режиме перемещения нажали на пустое место — двигаем карту
                         // В IsDragMode без захваченного узла тоже разрешаем панорамирование
@@ -974,17 +1080,30 @@ public class SvgView : SKCanvasView
             case SKTouchAction.Released:
                 if (_activePointers.ContainsKey(e.Id) && !_didDrag)
                 {
-                    var hit = HitNode(e.Location);
-                    if (hit != null) NodeTapped?.Invoke(this, hit);
-                    else if (IsAdminMode) CanvasTapped?.Invoke(this, ToSvg(e.Location));
+                    if (IsAdminMode && _draggingBoundaryVertexIdx >= 0)
+                    {
+                        // Тап по вершине границы (без перемещения)
+                        BoundaryVertexTapped?.Invoke(this, _draggingBoundaryVertexIdx);
+                    }
+                    else
+                    {
+                        var hit = HitNode(e.Location);
+                        if (hit != null) NodeTapped?.Invoke(this, hit);
+                        else if (IsAdminMode) CanvasTapped?.Invoke(this, ToSvg(e.Location));
+                    }
                 }
                 _activePointers.Remove(e.Id);
-                if (_activePointers.Count == 0) _draggingNode = null;
+                if (_activePointers.Count == 0)
+                {
+                    _draggingNode = null;
+                    _draggingBoundaryVertexIdx = -1;
+                }
                 break;
 
             case SKTouchAction.Cancelled:
                 _activePointers.Clear();
                 _draggingNode = null;
+                _draggingBoundaryVertexIdx = -1;
                 break;
         }
     }

@@ -7,7 +7,7 @@ using SkiaSharp;
 
 namespace IndoorNav.ViewModels;
 
-public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddOther, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
 
 public class AdminViewModel : INotifyPropertyChanged
 {
@@ -88,6 +88,8 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeScale));
             OnPropertyChanged(nameof(SelectedLabelScale));
             OnPropertyChanged(nameof(SelectedNodeColor));
+            OnPropertyChanged(nameof(SelectedInnerLabel));
+            SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
         }
     }
@@ -108,6 +110,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsElevatorMode));
             OnPropertyChanged(nameof(IsStaircaseMode));
             OnPropertyChanged(nameof(IsExitMode));
+            OnPropertyChanged(nameof(IsOtherMode));
             OnPropertyChanged(nameof(IsBoundaryMode));
             UpdateStatus();
         }
@@ -118,6 +121,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public bool IsElevatorMode   => CurrentAction == AdminAction.AddElevator;
     public bool IsStaircaseMode  => CurrentAction == AdminAction.AddStaircase;
     public bool IsExitMode       => CurrentAction == AdminAction.AddExit;
+    public bool IsOtherMode      => CurrentAction == AdminAction.AddOther;
     public bool IsConnectMode    => CurrentAction == AdminAction.ConnectNode;
     public bool IsDisconnectMode => CurrentAction == AdminAction.DisconnectNode;
     public bool IsCorridorMode   => CurrentAction == AdminAction.DrawCorridor;
@@ -135,11 +139,16 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<SKPoint> CanvasTappedCommand  { get; }
     public Command<NavNode> NodeTappedCommand    { get; }
     public Command<(NavNode, SKPoint)> NodeMovedCommand { get; }
+    public Command<(int idx, SKPoint svgPos)> BoundaryVertexMovedCommand { get; }
+    public Command<int> BoundaryVertexTappedCommand { get; }
     public Command RenameSelectedCommand         { get; }
     public Command DeleteSelectedCommand         { get; }
+    public Command DeleteBoundaryVertexCommand   { get; }
+    public Command EditInnerLabelCommand         { get; }
     public Command SaveCommand                   { get; }
     public Command CancelActionCommand           { get; }
     public Command SetAddModeCommand             { get; }
+    public Command SetOtherModeCommand           { get; }
     public Command SetConnectModeCommand         { get; }
     public Command SetDisconnectModeCommand      { get; }
     public Command SetCorridorModeCommand        { get; }
@@ -185,6 +194,25 @@ public class AdminViewModel : INotifyPropertyChanged
         get => SelectedNode?.NodeColorHex ?? string.Empty;
         set { if (SelectedNode != null) { SelectedNode.NodeColorHex = value; OnPropertyChanged(); RefreshOverlay(); } }
     }
+    public string SelectedInnerLabel
+    {
+        get => SelectedNode?.InnerLabel ?? string.Empty;
+        set { if (SelectedNode != null) { SelectedNode.InnerLabel = value; OnPropertyChanged(); RefreshOverlay(); } }
+    }
+
+    private int _selectedBoundaryVertexIndex = -1;
+    public int SelectedBoundaryVertexIndex
+    {
+        get => _selectedBoundaryVertexIndex;
+        set
+        {
+            _selectedBoundaryVertexIndex = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasBoundaryVertexSelected));
+            DeleteBoundaryVertexCommand?.ChangeCanExecute();
+        }
+    }
+    public bool HasBoundaryVertexSelected => _selectedBoundaryVertexIndex >= 0;
 
     // Буфер копирования
     private NavNode? _copiedNode;
@@ -220,8 +248,40 @@ public class AdminViewModel : INotifyPropertyChanged
         CanvasTappedCommand   = new Command<SKPoint>(OnCanvasTapped);
         NodeTappedCommand     = new Command<NavNode>(OnNodeTapped);
         NodeMovedCommand      = new Command<(NavNode, SKPoint)>(OnNodeMoved);
+        BoundaryVertexMovedCommand = new Command<(int idx, SKPoint svgPos)>(args =>
+        {
+            if (SelectedNode?.Boundary == null || args.idx < 0 || args.idx >= SelectedNode.Boundary.Count) return;
+            SelectedNode.Boundary[args.idx][0] = args.svgPos.X;
+            SelectedNode.Boundary[args.idx][1] = args.svgPos.Y;
+            RefreshOverlay();
+        });
+        BoundaryVertexTappedCommand = new Command<int>(idx =>
+        {
+            SelectedBoundaryVertexIndex = SelectedBoundaryVertexIndex == idx ? -1 : idx;
+        });
         RenameSelectedCommand = new Command(async () => await RenameSelectedAsync(), () => SelectedNode != null);
         DeleteSelectedCommand = new Command(DeleteSelected, () => SelectedNode != null);
+        DeleteBoundaryVertexCommand = new Command(() =>
+        {
+            if (SelectedNode?.Boundary == null || _selectedBoundaryVertexIndex < 0 ||
+                _selectedBoundaryVertexIndex >= SelectedNode.Boundary.Count) return;
+            SelectedNode.Boundary.RemoveAt(_selectedBoundaryVertexIndex);
+            SelectedBoundaryVertexIndex = -1;
+            RefreshOverlay();
+            StatusText = $"Вершина удалена [{SelectedNode.Name}]. Точек: {SelectedNode.Boundary?.Count ?? 0}";
+        }, () => _selectedBoundaryVertexIndex >= 0);
+        EditInnerLabelCommand = new Command(async () =>
+        {
+            if (SelectedNode == null) return;
+            var val = await Shell.Current.DisplayPromptAsync(
+                "Надпись на точке",
+                "Введите надпись, которая будет отображаться внутри кружка.",
+                initialValue: SelectedNode.InnerLabel,
+                placeholder: "Пусто = нет надписи",
+                maxLength: 10);
+            if (val == null) return; // cancel
+            SelectedInnerLabel = val.Trim();
+        });
         SaveCommand           = new Command(async () => await _graphService.SaveAsync());
         CancelActionCommand   = new Command(() =>
         {
@@ -233,6 +293,7 @@ public class AdminViewModel : INotifyPropertyChanged
             SelectedNode       = null;
         });
         SetAddModeCommand        = new Command(() => CurrentAction = AdminAction.AddNode);
+        SetOtherModeCommand      = new Command(() => CurrentAction = AdminAction.AddOther);
         SetConnectModeCommand    = new Command(() => CurrentAction = AdminAction.ConnectNode);
         SetDisconnectModeCommand = new Command(() => CurrentAction = AdminAction.DisconnectNode);
         SetCorridorModeCommand   = new Command(() =>
@@ -413,11 +474,13 @@ public class AdminViewModel : INotifyPropertyChanged
          || CurrentAction == AdminAction.AddTransition
          || CurrentAction == AdminAction.AddElevator
          || CurrentAction == AdminAction.AddStaircase
-         || CurrentAction == AdminAction.AddExit)
+         || CurrentAction == AdminAction.AddExit
+         || CurrentAction == AdminAction.AddOther)
         {
             bool isElevatorAction   = CurrentAction == AdminAction.AddElevator;
             bool isStaircaseAction  = CurrentAction == AdminAction.AddStaircase;
             bool isExitAction       = CurrentAction == AdminAction.AddExit;
+            bool isOtherAction      = CurrentAction == AdminAction.AddOther;
             bool forceTransit       = CurrentAction == AdminAction.AddTransition || isElevatorAction || isStaircaseAction;
 
             string title, promptMsg, placeholder;
@@ -433,13 +496,17 @@ public class AdminViewModel : INotifyPropertyChanged
             {
                 title = "Лестница"; promptMsg = "Название лестницы:"; placeholder = "Например: Лестница А, Лестница главная";
             }
+            else if (isOtherAction)
+            {
+                title = "Прочее"; promptMsg = "Введите название:"; placeholder = "Например: Кофемашина, Информационный стенд";
+            }
             else if (forceTransit)
             {
                 title = "Точка перехода"; promptMsg = "Название лестницы / лифта:"; placeholder = "Например: Лестница А, Лифт 1";
             }
             else
             {
-                title = "Новый узел"; promptMsg = "Введите название аудитории / точки:"; placeholder = "Например: 101, Лифт, Лестница А";
+                title = "Новый узел"; promptMsg = "Введите название аудитории:"; placeholder = "Например: 101, 202, Деканат";
             }
 
             var name = await Shell.Current.DisplayPromptAsync(title, promptMsg,
@@ -454,6 +521,9 @@ public class AdminViewModel : INotifyPropertyChanged
             bool isElevator = isElevatorAction
                            || (!isStaircaseAction && name.Contains("лифт", StringComparison.OrdinalIgnoreCase));
 
+            // Аудитории добавляются с IsHidden=true (видна только подпись под точкой)
+            bool isHidden = CurrentAction == AdminAction.AddNode;
+
             var node = new NavNode
             {
                 Name         = name.Trim(),
@@ -463,13 +533,14 @@ public class AdminViewModel : INotifyPropertyChanged
                 Y            = svgPos.Y,
                 IsTransition = isTransit,
                 IsElevator   = isElevator,
-                IsExit       = isExitAction
+                IsExit       = isExitAction,
+                IsHidden     = isHidden,
             };
 
             _graphService.AddNode(node);
             RefreshOverlay();
             CurrentAction = AdminAction.None;
-            string typeLabel = isExitAction ? " (выход)" : isElevator ? " (лифт)" : isTransit ? " (лестница)" : string.Empty;
+            string typeLabel = isExitAction ? " (выход)" : isElevator ? " (лифт)" : isTransit ? " (лестница)" : isOtherAction ? " (прочее)" : " (аудитория)";
             StatusText    = $"Добавлен: {node.Name}{typeLabel}";
         }
         else if (CurrentAction == AdminAction.DrawCorridor)
@@ -657,7 +728,8 @@ public class AdminViewModel : INotifyPropertyChanged
     {
         StatusText = CurrentAction switch
         {
-            AdminAction.AddNode        => "Нажмите на карту для добавления узла. Совет: добавляйте узлы вдоль коридоров для точного маршрута",
+            AdminAction.AddNode        => "Нажмите на карту — будет добавлена аудитория (только подпись, без точки)",
+            AdminAction.AddOther       => "Нажмите на карту — будет добавлена точка категории Прочее",
             AdminAction.ConnectNode    => "Нажмите первый, затем второй узел для соединения",
             AdminAction.DisconnectNode => "Нажмите первый, затем второй узел для разъединения",
             AdminAction.DrawCorridor   => _corridorLastNode == null

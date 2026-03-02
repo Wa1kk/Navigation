@@ -22,6 +22,12 @@ public partial class AdminPage : ContentPage
             // Перерисовываем вручную — PropertyChanged на координатах узла не триггерит SvgView
             AdminCanvas.InvalidateSurface();
         };
+        AdminCanvas.BoundaryVertexMoved  += (_, args) =>
+        {
+            Vm.BoundaryVertexMovedCommand.Execute(args);
+            AdminCanvas.InvalidateSurface();
+        };
+        AdminCanvas.BoundaryVertexTapped += (_, idx) => Vm.BoundaryVertexTappedCommand.Execute(idx);
     }
 
     // ← Выход из режима администратора (кнопка на телефоне)

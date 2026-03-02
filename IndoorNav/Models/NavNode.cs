@@ -40,6 +40,9 @@ public class NavNode
     /// <summary>Промежуточная точка коридора — скрывается в пользовательском режиме.</summary>
     public bool IsWaypoint { get; set; }
 
+    /// <summary>Подпись внутри кружка точки (пустая = не отображается).</summary>
+    public string InnerLabel { get; set; } = string.Empty;
+
     /// <summary>
     /// Полигон области аудитории в SVG-координатах.
     /// Каждый элемент — массив [x, y]. Сериализуется как JSON.
