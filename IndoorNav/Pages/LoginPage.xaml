@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:IndoorNav.Converters"
+             xmlns:vm="clr-namespace:IndoorNav.ViewModels"
+             x:Class="IndoorNav.Pages.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Title=""
+             BackgroundColor="#F1F5F9"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:BoolToColorConverter x:Key="BoolToColorConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="*,Auto" VerticalOptions="Fill">
+
+        <!-- Scrollable content -->
+        <ScrollView Grid.Row="0" VerticalOptions="Fill">
+            <VerticalStackLayout Padding="32,48,32,24" Spacing="0" VerticalOptions="Center">
+
+                <!-- Logo -->
+                <Label Text="IndoorNav"
+                       FontSize="30" FontAttributes="Bold" TextColor="#0F172A"
+                       HorizontalOptions="Center" Margin="0,0,0,4" />
+                <Label Text="Навигация по зданиям"
+                       FontSize="13" TextColor="#64748B"
+                       HorizontalOptions="Center" Margin="0,0,0,36" />
+
+                <!-- Role selector -->
+                <Border BackgroundColor="White"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="#E2E8F0" StrokeThickness="1"
+                        Padding="6" Margin="0,0,0,24">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                        <!-- Admin pill -->
+                        <Border Grid.Column="0"
+                                BackgroundColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
+                            <Label Text="Админ" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                   HorizontalOptions="Center" />
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectAdminRoleCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                        <!-- Student pill -->
+                        <Border Grid.Column="1"
+                                BackgroundColor="{Binding IsStudent, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
+                            <Label Text="Студент" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{Binding IsStudent, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                   HorizontalOptions="Center" />
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectStudentRoleCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                        <!-- Guest pill -->
+                        <Border Grid.Column="2"
+                                BackgroundColor="{Binding IsGuest, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
+                            <Label Text="Гость" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{Binding IsGuest, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                   HorizontalOptions="Center" />
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectGuestRoleCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Credentials (hidden for guest) -->
+                <VerticalStackLayout Spacing="12"
+                                     IsVisible="{Binding ShowCredentials}">
+
+                    <!-- Username (student only) -->
+                    <Border BackgroundColor="White"
+                            StrokeShape="RoundRectangle 10"
+                            Stroke="#E2E8F0" StrokeThickness="1"
+                            Padding="14,0"
+                            IsVisible="{Binding ShowUsernameField}">
+                        <Entry Placeholder="Имя пользователя"
+                               Text="{Binding Username, Mode=TwoWay}"
+                               PlaceholderColor="#94A3B8"
+                               TextColor="#0F172A" FontSize="14"
+                               BackgroundColor="Transparent"
+                               HeightRequest="50"
+                               ReturnType="Next" />
+                    </Border>
+
+                    <!-- Password -->
+                    <Border BackgroundColor="White"
+                            StrokeShape="RoundRectangle 10"
+                            Stroke="#E2E8F0" StrokeThickness="1"
+                            Padding="14,0">
+                        <Entry Placeholder="Пароль"
+                               Text="{Binding Password, Mode=TwoWay}"
+                               IsPassword="True"
+                               PlaceholderColor="#94A3B8"
+                               TextColor="#0F172A" FontSize="14"
+                               BackgroundColor="Transparent"
+                               HeightRequest="50"
+                               ReturnType="Done"
+                               ReturnCommand="{Binding LoginCommand}" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Guest hint -->
+                <Label Text="Полный доступ к навигации без учётной записи"
+                       FontSize="12" TextColor="#64748B"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                       Margin="0,8,0,0"
+                       IsVisible="{Binding IsGuest}" />
+
+                <!-- Error -->
+                <Border BackgroundColor="#FEF2F2"
+                        StrokeShape="RoundRectangle 8"
+                        Stroke="#FECACA" StrokeThickness="1"
+                        Padding="12,10" Margin="0,16,0,0"
+                        IsVisible="{Binding HasError}">
+                    <Label Text="{Binding ErrorMessage}"
+                           FontSize="13" TextColor="#DC2626"
+                           HorizontalOptions="Center" />
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Bottom login button (always visible) -->
+        <Border Grid.Row="1" Padding="32,0,32,32" BackgroundColor="Transparent" StrokeThickness="0">
+            <Button Text="Войти"
+                    Command="{Binding LoginCommand}"
+                    BackgroundColor="#2563EB" TextColor="White"
+                    FontSize="15" FontAttributes="Bold"
+                    CornerRadius="12" HeightRequest="52" />
+        </Border>
+
+    </Grid>
+
+</ContentPage>

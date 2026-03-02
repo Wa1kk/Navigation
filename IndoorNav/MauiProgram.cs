@@ -22,14 +22,20 @@ public static class MauiProgram
 
         // Services
         builder.Services.AddSingleton<NavGraphService>();
+        builder.Services.AddSingleton<AuthService>();
 
         // ViewModels
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddTransient<AdminViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
 
         // Pages
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddTransient<AdminPage>();
+        builder.Services.AddTransient<LoginPage>();
+
+        // Shell (singleton so it can be retrieved in LoginViewModel)
+        builder.Services.AddSingleton<AppShell>();
 
 #if DEBUG
         builder.Logging.AddDebug();
@@ -38,3 +44,4 @@ public static class MauiProgram
         return builder.Build();
     }
 }
+
