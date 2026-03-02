@@ -21,49 +21,44 @@ public class NavGraphService
     {
         try
         {
-            // Всегда читаем бандл чтобы сравнить версию
-            string? bundleJson = null;
-            NavGraph? bundleGraph = null;
+            // Всегда читаем бандл, чтобы знать его DataVersion
+            NavGraph? bundled = null;
             try
             {
                 using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
                 using var reader = new StreamReader(stream);
-                bundleJson = await reader.ReadToEndAsync();
-                bundleGraph = JsonSerializer.Deserialize<NavGraph>(bundleJson, JsonOpts);
+                var bundledJson = await reader.ReadToEndAsync();
+                bundled = JsonSerializer.Deserialize<NavGraph>(bundledJson, JsonOpts);
             }
-            catch { /* бандл недоступен */ }
+            catch { /* бандл недоступен — продолжаем с локальным */ }
 
             if (File.Exists(FilePath))
             {
-                // Локальный файл — используем его, если его версия не старее бандла
+                // Локальный файл существует — проверяем версию
                 var localJson = await File.ReadAllTextAsync(FilePath);
-                var localGraph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
+                var local = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
 
-                if (bundleGraph != null && bundleGraph.DataVersion > localGraph.DataVersion)
+                if (bundled != null && bundled.DataVersion > local.DataVersion)
                 {
-                    // Бандл новее — заменяем локальный файл обновлёнными точками
+                    // Бандл новее — используем бандл и перезаписываем локальный
                     System.Diagnostics.Debug.WriteLine(
-                        $"NavGraph: bundle v{bundleGraph.DataVersion} > local v{localGraph.DataVersion}, updating.");
-                    _graph = bundleGraph;
+                        $"Bundle DataVersion ({bundled.DataVersion}) > local ({local.DataVersion}), switching to bundle.");
+                    _graph = bundled;
                     MigrateWaypoints();
                     await SaveAsync();
                 }
                 else
                 {
-                    _graph = localGraph;
+                    _graph = local;
                     if (MigrateWaypoints()) await SaveAsync();
                 }
             }
-            else if (bundleGraph != null)
-            {
-                // Первый запуск — копируем из бандла
-                _graph = bundleGraph;
-                MigrateWaypoints();
-                await SaveAsync();
-            }
             else
             {
-                _graph = new NavGraph();
+                // Локального файла нет — берём бандл
+                _graph = bundled ?? new NavGraph();
+                MigrateWaypoints();
+                await SaveAsync();
             }
         }
         catch (Exception ex)
