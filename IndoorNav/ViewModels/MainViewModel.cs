@@ -533,13 +533,18 @@ public class MainViewModel : INotifyPropertyChanged
             string transitKindAcc = isElevator ? "лифта" : "лестницы"; // до лифта / до лестницы
             string transitKindVia = isElevator ? "на лифте" : "по лестнице";
 
+            // Bounding box всех узлов первого сегмента (включая WP) — для зума шага 1
+            float seg1MinX = firstNodes.Min(n => n.X);
+            float seg1MinY = firstNodes.Min(n => n.Y);
+            float seg1MaxX = firstNodes.Max(n => n.X);
+            float seg1MaxY = firstNodes.Max(n => n.Y);
+
             _routeStepsList.Add(new RouteStep
             {
                 Text = $"Идите по {FloorNameInstrumental(firstFloorNum)} до {transitKindAcc}",
                 Icon = "🚶",
                 TargetFloor = GetFloor(firstFloorNum),
-                FocusNode   = path.First(),      // от старта
-                FocusNode2  = firstTransition    // до перехода
+                FocusRect   = (seg1MinX, seg1MinY, seg1MaxX, seg1MaxY)
             });
 
             // Один шаг перехода: зумировать на узел перехода (остаёмся на том же этаже)
@@ -553,14 +558,20 @@ public class MainViewModel : INotifyPropertyChanged
                 FocusNode   = firstTransition           // Приближаемся к лестнице/лифту
             });
 
+            // Bounding box всех узлов последнего сегмента (включая WP) — для зума шага 3
+            var lastNodes = segments[^1].Nodes;
+            float segLMinX = lastNodes.Min(n => n.X);
+            float segLMinY = lastNodes.Min(n => n.Y);
+            float segLMaxX = lastNodes.Max(n => n.X);
+            float segLMaxY = lastNodes.Max(n => n.Y);
+
             // Последний шаг: идти до пункта назначения
             _routeStepsList.Add(new RouteStep
             {
                 Text = $"Идите по {FloorNameInstrumental(lastFloorNum)} до {destination}",
                 Icon = "🚶",
                 TargetFloor = GetFloor(lastFloorNum),
-                FocusNode   = segments[^1].Nodes.First(),  // вход с перехода
-                FocusNode2  = path.Last()                   // до назначения
+                FocusRect   = (segLMinX, segLMinY, segLMaxX, segLMaxY)
             });
         }
 

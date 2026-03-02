@@ -981,23 +981,27 @@ public class SvgView : SKCanvasView
         InvalidateSurface();
     }
 
-    /// <summary>Зумирует карту так, чтобы в viewport уместились обе SVG-точки с отступом.</summary>
-    public void ZoomToFitNodes(float x1, float y1, float x2, float y2)
+    /// <summary>Зумирует карту на указанную SVG-область с равномерным отступом (20%).</summary>
+    public void ZoomToFitRect(float minX, float minY, float maxX, float maxY)
     {
         if (_canvasW <= 0 || _canvasH <= 0) return;
 
-        float padding = Math.Max(Math.Abs(x2 - x1), Math.Abs(y2 - y1)) * 0.35f + 50f;
-        float minX = Math.Min(x1, x2) - padding;
-        float minY = Math.Min(y1, y2) - padding;
-        float maxX = Math.Max(x1, x2) + padding;
-        float maxY = Math.Max(y1, y2) + padding;
-        float rectW = maxX - minX;
-        float rectH = maxY - minY;
-        if (rectW < 1f || rectH < 1f) return;
+        float w = maxX - minX;
+        float h = maxY - minY;
+        if (w < 1f && h < 1f) return;
+
+        // Отступ 20% от большей из сторон, минимум 40 единиц SVG
+        float padding = Math.Max(w, h) * 0.20f + 40f;
+        float pMinX = minX - padding;
+        float pMinY = minY - padding;
+        float pMaxX = maxX + padding;
+        float pMaxY = maxY + padding;
+        float rectW = pMaxX - pMinX;
+        float rectH = pMaxY - pMinY;
 
         float scale = Math.Min(_canvasW / rectW, _canvasH / rectH);
-        float cx = (minX + maxX) / 2f;
-        float cy = (minY + maxY) / 2f;
+        float cx = (pMinX + pMaxX) / 2f;
+        float cy = (pMinY + pMaxY) / 2f;
         float tx = _canvasW / 2f - cx * scale;
         float ty = _canvasH / 2f - cy * scale;
         _matrix = SKMatrix.CreateScaleTranslation(scale, scale, tx, ty);
