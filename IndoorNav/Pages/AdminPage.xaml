@@ -140,6 +140,12 @@
                             TextColor="{Binding IsExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                             CornerRadius="8" HeightRequest="38" />
 
+                    <Button Text="🧯 Огнетушитель"
+                            Command="{Binding SetFireExtinguisherModeCommand}"
+                            BackgroundColor="{Binding IsFireExtinguisherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#166534|#1E293B'}"
+                            TextColor="{Binding IsFireExtinguisherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
                     <Button Text="••• Прочее"
                             Command="{Binding SetOtherModeCommand}"
                             BackgroundColor="{Binding IsOtherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#B45309|#1E293B'}"
@@ -157,6 +163,23 @@
                             IsVisible="{Binding IsCorridorMode}"
                             BackgroundColor="#064E3B" TextColor="#6EE7B7"
                             FontAttributes="Bold" CornerRadius="8" HeightRequest="34" />
+
+                    <!-- ЧС section -->
+                    <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
+                    <Label Text="РЕЖИМ ЧС" FontSize="10" CharacterSpacing="1.5"
+                           TextColor="#334155" Margin="8,0,0,6" />
+                    <!-- Activate button — visible when NOT active -->
+                    <Button Text="⚠ АКТИВИРОВАТЬ ЧС"
+                            Command="{Binding ToggleEmergencyCommand}"
+                            IsVisible="{Binding IsEmergencyInactive}"
+                            BackgroundColor="#7F1D1D" TextColor="#FCA5A5"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="42" />
+                    <!-- Cancel button — visible when active -->
+                    <Button Text="🔴 ДЕАКТИВИРОВАТЬ ЧС"
+                            Command="{Binding ToggleEmergencyCommand}"
+                            IsVisible="{Binding IsEmergencyActive}"
+                            BackgroundColor="#DC2626" TextColor="White"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="42" />
 
                     <!-- EDIT section -->
                     <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />

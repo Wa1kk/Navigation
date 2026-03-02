@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IndoorNav.Models;
 using IndoorNav.Services;
+using Microsoft.Maui;
 using Microsoft.Maui.Storage;
 
 namespace IndoorNav.ViewModels;
@@ -14,6 +15,8 @@ public class MainViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private readonly NavGraphService _graphService;
+    private readonly AuthService _authService;
+    private readonly EmergencyService _emergencyService;
 
     private Building? _selectedBuilding;
     private Floor? _selectedFloor;
@@ -102,6 +105,20 @@ public class MainViewModel : INotifyPropertyChanged
         private set { _loadError = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasLoadError)); }
     }
     public bool HasLoadError => !string.IsNullOrEmpty(_loadError);
+
+    // ── Auth / Emergency ──────────────────────────────────────────────────────
+    public bool IsAdminUser => _authService?.CurrentRole == UserRole.Admin;
+    public string CurrentUserName => _authService?.CurrentUser?.DisplayName ?? "Гость";
+
+    private bool _isEmergencyActive;
+    public bool IsEmergencyActive
+    {
+        get => _isEmergencyActive;
+        private set { _isEmergencyActive = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShowFireExtinguishers)); OnPropertyChanged(nameof(EmergencyMessage)); }
+    }
+    public string EmergencyMessage => _emergencyService?.EmergencyMessage ?? string.Empty;
+    /// <summary>Передаётся в SvgView.ShowFireExtinguishers — огнетушители видны только при ЧС.</summary>
+    public bool ShowFireExtinguishers => _isEmergencyActive;
 
     // ── Routing properties ──────────────────────────────────────────────────
 
@@ -272,18 +289,33 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SetTappedAsStartCommand { get; }
     public ICommand SetTappedAsEndCommand   { get; }
     public ICommand CloseNodePopupCommand   { get; }
+    public ICommand LogoutCommand           { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
-    public MainViewModel(NavGraphService graphService)
+    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService)
     {
-        _graphService = graphService;
+        _graphService    = graphService;
+        _authService     = authService;
+        _emergencyService = emergencyService;
+
+        // Subscribe to emergency state changes
+        _emergencyService.EmergencyChanged += OnEmergencyChanged;
 
         BuildRouteCommand = new Command(ExecuteBuildRoute,
             () => StartNode != null && EndNode != null);
         ClearRouteCommand = new Command(ExecuteClearRoute);
         GoToAdminCommand  = new Command(async () =>
-            await Shell.Current.GoToAsync("admin"));
+            await Shell.Current.GoToAsync("admin"),
+            () => IsAdminUser);
+        LogoutCommand = new Command(() =>
+        {
+            _authService.Logout();
+            // Navigate back to login page
+            var loginPage = IPlatformApplication.Current?.Services.GetService<IndoorNav.Pages.LoginPage>();
+            if (loginPage != null && Application.Current?.Windows.Count > 0)
+                Application.Current.Windows[0].Page = loginPage;
+        });
         GoToFloorCommand  = new Command<Floor>(f => { if (f != null) SelectedFloor = f; });
         NextStepCommand     = new Command(ExecuteNextStep, () => HasNextStep);
         PreviousStepCommand = new Command(ExecutePreviousStep, () => HasPreviousStep);
@@ -749,6 +781,36 @@ public class MainViewModel : INotifyPropertyChanged
     {
         TappedNode = node;
         IsNodePopupOpen = true;
+    }
+
+    private void OnEmergencyChanged(object? sender, bool isActive)
+    {
+        IsEmergencyActive = isActive;
+        OnPropertyChanged(nameof(IsAdminUser));
+        ((Command)GoToAdminCommand).ChangeCanExecute();
+
+        if (isActive)
+        {
+            // Show notification on the UI thread
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await Shell.Current.DisplayAlert(
+                    "⚠ РЕЖИМ ЧРЕЗВЫЧАЙНОЙ СИТУАЦИИ",
+                    "Активирован режим ЧС! Следуйте к ближайшему выходу.",
+                    "OK");
+
+                // Auto-route to nearest exit from current start node
+                if (StartNode != null)
+                {
+                    var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph);
+                    if (path.Count > 1)
+                    {
+                        EndNode = path.Last();
+                        ExecuteBuildRoute();
+                    }
+                }
+            });
+        }
     }
 
 

@@ -22,6 +22,9 @@ public class NavNode
     /// <summary>Узел выхода (выход из здания).</summary>
     public bool IsExit { get; set; }
 
+    /// <summary>Огнетушитель — отображается только в режиме ЧС.</summary>
+    public bool IsFireExtinguisher { get; set; }
+
     /// <summary>Скрыть точку в пользовательском режиме (admin видит всегда).</summary>
     public bool IsHidden { get; set; }
 

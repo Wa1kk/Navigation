@@ -23,6 +23,8 @@ public static class MauiProgram
         // Services
         builder.Services.AddSingleton<NavGraphService>();
         builder.Services.AddSingleton<AuthService>();
+        builder.Services.AddSingleton<EmergencyService>();
+        builder.Services.AddSingleton<ScheduleService>();
 
         // ViewModels
         builder.Services.AddSingleton<MainViewModel>();

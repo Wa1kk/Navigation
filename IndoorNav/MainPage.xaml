@@ -108,12 +108,26 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <!-- Admin button -->
+            <!-- Admin button + user info -->
             <Border Grid.Row="3" Padding="10,8,10,20" BackgroundColor="Transparent" StrokeThickness="0">
-                <Button Text="⚙ Администратор"
-                        Command="{Binding GoToAdminCommand}"
-                        BackgroundColor="#1E293B" TextColor="#64748B"
-                        FontSize="13" CornerRadius="8" HeightRequest="38" />
+                <VerticalStackLayout Spacing="6">
+                    <!-- User name label -->
+                    <Label Text="{Binding CurrentUserName}"
+                           FontSize="12" TextColor="#64748B"
+                           HorizontalTextAlignment="Center"
+                           Margin="0,0,0,2" />
+                    <!-- Admin button (only for admin users) -->
+                    <Button Text="⚙ Администратор"
+                            Command="{Binding GoToAdminCommand}"
+                            IsVisible="{Binding IsAdminUser}"
+                            BackgroundColor="#1E293B" TextColor="#64748B"
+                            FontSize="13" CornerRadius="8" HeightRequest="38" />
+                    <!-- Logout button -->
+                    <Button Text="Выйти"
+                            Command="{Binding LogoutCommand}"
+                            BackgroundColor="#1E293B" TextColor="#EF4444"
+                            FontSize="13" CornerRadius="8" HeightRequest="38" />
+                </VerticalStackLayout>
             </Border>
 
         </Grid>
@@ -164,6 +178,7 @@
                                       RouteNodes="{Binding RouteNodesOnFloor}"
                                       HighlightBoundaryNode="{Binding EndNode}"
                                       HighlightStartNode="{Binding StartNode}"
+                                      ShowFireExtinguishers="{Binding ShowFireExtinguishers}"
                                       ShowGraph="True"
                                       HorizontalOptions="Fill" VerticalOptions="Fill" />
 
@@ -189,6 +204,17 @@
                             <Label Text="{Binding LoadError}" FontSize="12" TextColor="#7F1D1D"
                                    HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
                         </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Emergency banner (top overlay) -->
+                    <Border HorizontalOptions="Fill" VerticalOptions="Start"
+                            BackgroundColor="#DC2626" Padding="14,10"
+                            StrokeThickness="0"
+                            IsVisible="{Binding IsEmergencyActive}"
+                            ZIndex="20">
+                        <Label Text="{Binding EmergencyMessage}"
+                               TextColor="White" FontAttributes="Bold"
+                               FontSize="13" HorizontalTextAlignment="Center" />
                     </Border>
 
                     <!-- Breadcrumb pill (top-left overlay) -->

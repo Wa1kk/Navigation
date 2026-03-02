@@ -69,6 +69,11 @@ public class SvgView : SKCanvasView
         BindableProperty.Create(nameof(ShowGraph), typeof(bool), typeof(SvgView),
             true, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
 
+    /// <summary>Когда true — узлы огнетушителей видны на карте (только в режиме ЧС).</summary>
+    public static readonly BindableProperty ShowFireExtinguishersProperty =
+        BindableProperty.Create(nameof(ShowFireExtinguishers), typeof(bool), typeof(SvgView),
+            false, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
     /// <summary>Когда true — зажатие на узле позволяет его перетащить (режим редактирования положения).</summary>
     public static readonly BindableProperty IsDragModeProperty =
         BindableProperty.Create(nameof(IsDragMode), typeof(bool), typeof(SvgView), false);
@@ -107,6 +112,11 @@ public class SvgView : SKCanvasView
     {
         get => (bool)GetValue(ShowGraphProperty);
         set => SetValue(ShowGraphProperty, value);
+    }
+    public bool ShowFireExtinguishers
+    {
+        get => (bool)GetValue(ShowFireExtinguishersProperty);
+        set => SetValue(ShowFireExtinguishersProperty, value);
     }
     public bool IsDragMode
     {
@@ -602,10 +612,11 @@ public class SvgView : SKCanvasView
         // В пользовательском режиме при наличии маршрута: скрываем кружки и рёбра, но оставляем подписи
         bool hideCirclesForRoute = !IsAdminMode && RouteNodes != null && RouteNodes.Count > 0;
 
-        // В пользовательском режиме скрываем служебные waypoint-узлы коридоров
+        // В пользовательском режиме скрываем служебные waypoint-узлы коридоров,
+        // а также узлы огнетушителей (если не активирован режим ЧС)
         var visibleNodes = IsAdminMode
             ? nodes.ToList()
-            : nodes.Where(n => !n.IsWaypoint).ToList();
+            : nodes.Where(n => !n.IsWaypoint && (!n.IsFireExtinguisher || ShowFireExtinguishers)).ToList();
 
         float sc = MatrixScale();
         if (sc < 0.001f) sc = 1f;
@@ -758,6 +769,7 @@ public class SvgView : SKCanvasView
         using var fillSel   = new SKPaint { Color = new SKColor(255, 152, 0),   IsAntialias = true };
         using var fillTrans = new SKPaint { Color = new SKColor(156, 39, 176),  IsAntialias = true };
         using var fillExit  = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
+        using var fillFireExt = new SKPaint { Color = new SKColor(76, 175, 80), IsAntialias = true };
         using var stroke    = new SKPaint { Color = SKColors.White, StrokeWidth = 2.5f / sc, IsStroke = true, IsAntialias = true };
         using var shadowP   = new SKPaint { Color = new SKColor(0, 0, 0, 60), IsAntialias = true,
                                             MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4f / sc) };
@@ -777,7 +789,12 @@ public class SvgView : SKCanvasView
             bool drawCircle = (IsAdminMode || !node.IsHidden) && !hideCirclesForRoute;
 
             var s    = new SKPoint(node.X, node.Y);
-            float nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
+            float nodeR;
+            if (node.IsFireExtinguisher)
+                // По умолчанию меньший радиус для огнетушителей (если не задан индивидуальный)
+                nodeR = r * (node.NodeRadiusScale is > 0.01f and < 0.99f ? node.NodeRadiusScale : 0.6f);
+            else
+                nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
 
             if (drawCircle)
             {
@@ -794,6 +811,7 @@ public class SvgView : SKCanvasView
                     else
                         fill = fillNorm;
                 }
+                else if (node.IsFireExtinguisher) fill = fillFireExt;
                 else if (node.IsExit)       fill = fillExit;
                 else if (node.IsTransition) fill = fillTrans;
                 else                        fill = fillNorm;
