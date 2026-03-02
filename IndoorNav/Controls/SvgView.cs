@@ -210,6 +210,9 @@ public class SvgView : SKCanvasView
     private int      _draggingBoundaryVertexIdx = -1;
     private bool     _didDrag;
 
+    // Отложенный зум, применяемый после завершения загрузки этажа
+    private Action? _pendingZoom;
+
     // ===== Route animation =====
     private float            _dashPhase = 0f;
     private float            _pulsePhase = 0f;
@@ -331,8 +334,7 @@ public class SvgView : SKCanvasView
                             _bitmap       = decoded;
                             _svgBounds    = new SKRect(0, 0, sw, sh);
                             _floorLoading = false;
-                            _matrix       = SKMatrix.Identity;
-                            InvalidateSurface();
+                            ApplyPendingZoomOrFit();
                         });
                         return;
                     }
@@ -361,8 +363,7 @@ public class SvgView : SKCanvasView
                             _bitmap       = decoded;
                             _svgBounds    = new SKRect(0, 0, sw, sh);
                             _floorLoading = false;
-                            _matrix       = SKMatrix.Identity;
-                            InvalidateSurface();
+                            ApplyPendingZoomOrFit();
                         });
                         return;
                     }
@@ -430,8 +431,7 @@ public class SvgView : SKCanvasView
                 _bitmap       = bitmap;
                 _svgBounds    = bounds;
                 _floorLoading = false;
-                _matrix       = SKMatrix.Identity;
-                InvalidateSurface();
+                ApplyPendingZoomOrFit();
             });
         }
         catch (Exception ex)
@@ -961,6 +961,46 @@ public class SvgView : SKCanvasView
     {
         _matrix = SKMatrix.Identity;
         InvalidateSurface();
+    }
+
+    /// <summary>
+    /// Применяет действие зума немедленно если этаж уже загружен, иначе откладывает до завершения загрузки.
+    /// Передайте null для сброса зума.
+    /// </summary>
+    public void ApplyOrQueueZoom(Action? zoomAction)
+    {
+        if (!_floorLoading && (_bitmap != null || _picture != null))
+        {
+            _pendingZoom = null;
+            if (zoomAction != null)
+                zoomAction();
+            else
+            {
+                _matrix = SKMatrix.Identity;
+                InvalidateSurface();
+            }
+        }
+        else
+        {
+            // Этаж ещё загружается — применим зум когда он прогрузится
+            _pendingZoom = zoomAction;
+        }
+    }
+
+    /// <summary>После загрузки этажа: применяет отложенный зум или сбрасывает матрицу для FitMatrix.</summary>
+    private void ApplyPendingZoomOrFit()
+    {
+        if (_pendingZoom != null)
+        {
+            var zoom = _pendingZoom;
+            _pendingZoom = null;
+            zoom();
+        }
+        else
+        {
+            _matrix = SKMatrix.Identity;
+            InvalidateSurface();
+        }
     }
 
     /// <summary>Программно центрирует и приближает указанную SVG-точку (без ограничения MaxZoom).</summary>

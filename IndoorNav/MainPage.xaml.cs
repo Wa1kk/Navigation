@@ -13,6 +13,13 @@ public partial class MainPage : ContentPage
         _vm = vm;
         BindingContext = vm;
         MainCanvas.NodeTapped += OnNodeTapped;
+        _vm.PropertyChanged += OnVmPropertyChanged;
+    }
+
+    private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainViewModel.HasRoute) && _vm.HasRoute)
+            ApplyStepZoom();
     }
 
     private void OnNodeTapped(object sender, NavNode node)
@@ -66,10 +73,10 @@ public partial class MainPage : ContentPage
     {
         var step = _vm.CurrentStep;
         if (step?.FocusRect is { } rect)
-            MainCanvas.ZoomToFitRect(rect.MinX, rect.MinY, rect.MaxX, rect.MaxY);
+            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToFitRect(rect.MinX, rect.MinY, rect.MaxX, rect.MaxY));
         else if (step?.FocusNode is { } node)
-            MainCanvas.ZoomToSvgPoint(node.X, node.Y);
+            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToSvgPoint(node.X, node.Y));
         else
-            MainCanvas.ResetZoom();
+            MainCanvas.ApplyOrQueueZoom(null);
     }
 }
