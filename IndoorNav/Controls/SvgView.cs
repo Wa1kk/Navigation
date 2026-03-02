@@ -192,6 +192,7 @@ public class SvgView : SKCanvasView
     private SKPicture? _picture;
     private SKBitmap?  _bitmap;     // растеризованный план (быстрый рендер)
     private SKRect     _svgBounds;  // оригинальные размеры SVG-пространства
+    private float      _canvasW, _canvasH;  // размер поверхности рисования (пиксели)
     private bool       _floorLoading;
     private int        _loadVersion; // для отмены устаревших загрузок
     private SKMatrix   _matrix = SKMatrix.Identity;
@@ -515,6 +516,9 @@ public class SvgView : SKCanvasView
         base.OnPaintSurface(e);
         var canvas = e.Surface.Canvas;
         var info   = e.Info;
+
+        _canvasW = info.Width;
+        _canvasH = info.Height;
 
         canvas.Clear(new SKColor(248, 248, 248));
 
@@ -950,6 +954,31 @@ public class SvgView : SKCanvasView
         float tx = (dstW - src.Width  * scale) / 2f - src.Left * scale;
         float ty = (dstH - src.Height * scale) / 2f - src.Top  * scale;
         return SKMatrix.CreateScaleTranslation(scale, scale, tx, ty);
+    }
+
+    /// <summary>Cбрасывает зум на исходный (FitMatrix).</summary>
+    public void ResetZoom()
+    {
+        _matrix = SKMatrix.Identity;
+        InvalidateSurface();
+    }
+
+    /// <summary>Программно центрирует и приближает указанную SVG-точку (без ограничения MaxZoom).</summary>
+    public void ZoomToSvgPoint(float svgX, float svgY)
+    {
+        if (_canvasW <= 0 || _canvasH <= 0) return;
+
+        float svgW = _svgBounds.Width  > 0 ? _svgBounds.Width  : 800f;
+        float svgH = _svgBounds.Height > 0 ? _svgBounds.Height : 600f;
+
+        // Показываем окно ~25% от меньшей из сторон SVG вокруг узла
+        float window = Math.Min(svgW, svgH) * 0.25f;
+        float scale  = Math.Min(_canvasW, _canvasH) / window;
+
+        float tx = _canvasW / 2f - svgX * scale;
+        float ty = _canvasH / 2f - svgY * scale;
+        _matrix = SKMatrix.CreateScaleTranslation(scale, scale, tx, ty);
+        InvalidateSurface();
     }
 
     // ===== Touch handling =====

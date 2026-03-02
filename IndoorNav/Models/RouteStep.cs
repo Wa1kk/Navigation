@@ -8,4 +8,7 @@ public class RouteStep
 
     /// <summary>Этаж, который нужно показать на карте при этом шаге.</summary>
     public Floor? TargetFloor { get; init; }
+
+    /// <summary>Узел, на который нужно приблизиться (зум) при отображении шага. null = обычный вид.</summary>
+    public NavNode? FocusNode { get; init; }
 }

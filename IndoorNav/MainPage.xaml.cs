@@ -36,6 +36,9 @@ public partial class MainPage : ContentPage
 
         // 4. Slide in from the right
         await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+
+        // 5. Ясли у шага есть узел фокуса — приближаемся, иначе сбрасываем зум
+        ApplyStepZoom();
     }
 
     private async void OnPrevStepClicked(object sender, EventArgs e)
@@ -54,5 +57,17 @@ public partial class MainPage : ContentPage
 
         // 4. Slide in from the left
         await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+
+        // 5. Зум / сброс
+        ApplyStepZoom();
+    }
+
+    private void ApplyStepZoom()
+    {
+        var focus = _vm.CurrentStep?.FocusNode;
+        if (focus != null)
+            MainCanvas.ZoomToSvgPoint(focus.X, focus.Y);
+        else
+            MainCanvas.ResetZoom();
     }
 }

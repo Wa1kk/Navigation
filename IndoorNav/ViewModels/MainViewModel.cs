@@ -534,14 +534,15 @@ public class MainViewModel : INotifyPropertyChanged
                 TargetFloor = GetFloor(firstFloorNum)
             });
 
-            // Один шаг перехода: сразу до конечного этажа (промежуточные этажи пропускаются)
+            // Один шаг перехода: зумировать на узел перехода (остаёмся на том же этаже)
             var lastFloorNum = segments[^1].FloorNum;
             string dir = lastFloorNum > firstFloorNum ? "Поднимайтесь" : "Спускайтесь";
             _routeStepsList.Add(new RouteStep
             {
                 Text = $"{dir} {transitKindVia} до {FloorNameAccusative(lastFloorNum)}",
-                Icon = isElevator ? "🛗" : "🪜",
-                TargetFloor = GetFloor(lastFloorNum)
+                Icon = isElevator ? "🛛" : "🪜",
+                TargetFloor = GetFloor(firstFloorNum),  // Остаёмся на текущем этаже
+                FocusNode   = firstTransition           // Приближаемся к лестнице/лифту
             });
 
             // Последний шаг: идти до пункта назначения
