@@ -576,17 +576,14 @@ public class AdminViewModel : INotifyPropertyChanged
                 initialValue: dept.Name, maxLength: 80);
             if (string.IsNullOrWhiteSpace(newName)) return;
             await _departmentService.RenameDepartmentAsync(dept.Id, newName);
-            dept.Name = newName.Trim();
-            OnPropertyChanged(nameof(Departments));
+            dept.Name = newName.Trim(); // INotifyPropertyChanged updates the label automatically
         });
 
         AddGroupCommand = new Command(async () =>
         {
             if (SelectedDept == null || string.IsNullOrWhiteSpace(NewGroupName)) return;
             var group = await _departmentService.AddGroupAsync(SelectedDept.Id, NewGroupName);
-            SelectedDept.Groups.Add(group);
-            OnPropertyChanged(nameof(SelectedDeptGroups));
-            // also refresh new-student picker
+            SelectedDept.Groups.Add(group); // ObservableCollection notifies the inner CollectionView
             if (NewStudentDept?.Id == SelectedDept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
             NewGroupName = string.Empty;
@@ -594,25 +591,28 @@ public class AdminViewModel : INotifyPropertyChanged
 
         RemoveGroupCommand = new Command<StudyGroup>(async group =>
         {
-            if (group == null || SelectedDept == null) return;
-            await _departmentService.RemoveGroupAsync(SelectedDept.Id, group.Id);
-            SelectedDept.Groups.Remove(group);
-            OnPropertyChanged(nameof(SelectedDeptGroups));
-            if (NewStudentDept?.Id == SelectedDept.Id)
+            if (group == null) return;
+            // Use group.DepartmentId — independent of which dept is "selected" in the UI
+            var dept = Departments.FirstOrDefault(d => d.Id == group.DepartmentId);
+            if (dept == null) return;
+            await _departmentService.RemoveGroupAsync(dept.Id, group.Id);
+            dept.Groups.Remove(group);
+            if (NewStudentDept?.Id == dept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
         });
 
         RenameGroupCommand = new Command<StudyGroup>(async group =>
         {
-            if (group == null || SelectedDept == null) return;
+            if (group == null) return;
             var newName = await Shell.Current.DisplayPromptAsync(
                 "Переименовать группу", "Новое название:",
                 initialValue: group.Name, maxLength: 40);
             if (string.IsNullOrWhiteSpace(newName)) return;
-            await _departmentService.RenameGroupAsync(SelectedDept.Id, group.Id, newName);
-            group.Name = newName.Trim();
-            OnPropertyChanged(nameof(SelectedDeptGroups));
-            if (NewStudentDept?.Id == SelectedDept.Id)
+            var dept = Departments.FirstOrDefault(d => d.Id == group.DepartmentId);
+            if (dept == null) return;
+            await _departmentService.RenameGroupAsync(dept.Id, group.Id, newName);
+            group.Name = newName.Trim(); // INotifyPropertyChanged updates the label automatically
+            if (NewStudentDept?.Id == dept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
         });
         SetNodeColorCommand = new Command<string>(hex =>

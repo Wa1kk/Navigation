@@ -83,7 +83,8 @@ public class DepartmentService
     public async Task RemoveGroupAsync(string departmentId, string groupId)
     {
         var dept = _departments.FirstOrDefault(d => d.Id == departmentId);
-        dept?.Groups.RemoveAll(g => g.Id == groupId);
+        var group = dept?.Groups.FirstOrDefault(g => g.Id == groupId);
+        if (group != null) dept!.Groups.Remove(group);
         await SaveAsync();
     }
 
