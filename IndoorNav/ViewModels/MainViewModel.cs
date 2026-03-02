@@ -515,11 +515,18 @@ public class MainViewModel : INotifyPropertyChanged
 
         if (segments.Count == 1)
         {
+            var singleNodes = segments[0].Nodes;
+            float sMinX = singleNodes.Min(n => n.X);
+            float sMinY = singleNodes.Min(n => n.Y);
+            float sMaxX = singleNodes.Max(n => n.X);
+            float sMaxY = singleNodes.Max(n => n.Y);
+
             _routeStepsList.Add(new RouteStep
             {
                 Text = $"Идите по {FloorNameInstrumental(segments[0].FloorNum)} до {destination}",
                 Icon = "🚶",
-                TargetFloor = GetFloor(segments[0].FloorNum)
+                TargetFloor = GetFloor(segments[0].FloorNum),
+                FocusRect   = (sMinX, sMinY, sMaxX, sMaxY)
             });
         }
         else
