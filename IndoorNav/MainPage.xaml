@@ -161,6 +161,7 @@
                                       Edges="{Binding EdgesOnCurrentFloor}"
                                       RouteNodes="{Binding RouteNodesOnFloor}"
                                       HighlightBoundaryNode="{Binding EndNode}"
+                                      HighlightStartNode="{Binding StartNode}"
                                       ShowGraph="True"
                                       HorizontalOptions="Fill" VerticalOptions="Fill" />
 

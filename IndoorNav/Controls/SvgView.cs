@@ -126,6 +126,17 @@ public class SvgView : SKCanvasView
         set => SetValue(HighlightBoundaryNodeProperty, value);
     }
 
+    /// <summary>Подсветка границы узла-отправления (пользовательский режим).</summary>
+    public static readonly BindableProperty HighlightStartNodeProperty =
+        BindableProperty.Create(nameof(HighlightStartNode), typeof(NavNode), typeof(SvgView),
+            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
+    public NavNode? HighlightStartNode
+    {
+        get => (NavNode?)GetValue(HighlightStartNodeProperty);
+        set => SetValue(HighlightStartNodeProperty, value);
+    }
+
     /// <summary>Индекс выбранной вершины границы в режиме редактирования (-1 = не выбрана).</summary>
     public static readonly BindableProperty SelectedBoundaryVertexIndexProperty =
         BindableProperty.Create(nameof(SelectedBoundaryVertexIndex), typeof(int), typeof(SvgView),
@@ -579,19 +590,15 @@ public class SvgView : SKCanvasView
         var hlNode = HighlightBoundaryNode;
         if (!IsAdminMode && hlNode?.Boundary != null && hlNode.Boundary.Count >= 3)
         {
-            using var hlPath = new SKPath();
-            hlPath.MoveTo(hlNode.Boundary[0][0], hlNode.Boundary[0][1]);
-            for (int bi = 1; bi < hlNode.Boundary.Count; bi++)
-                hlPath.LineTo(hlNode.Boundary[bi][0], hlNode.Boundary[bi][1]);
-            hlPath.Close();
-            using var hlFill = new SKPaint { Color = new SKColor(37, 99, 235, 50), IsAntialias = true };
-            canvas.DrawPath(hlPath, hlFill);
-            using var hlStroke = new SKPaint
-            {
-                Color = new SKColor(37, 99, 235, 230), StrokeWidth = 2.5f / sc,
-                IsStroke = true, IsAntialias = true, StrokeCap = SKStrokeCap.Round,
-            };
-            canvas.DrawPath(hlPath, hlStroke);
+            DrawBoundaryHighlight(canvas, hlNode.Boundary, new SKColor(37, 99, 235), sc);
+        }
+
+        // Подсветить границу узла-отправления (зелёный)
+        var hlStartNode = HighlightStartNode;
+        if (!IsAdminMode && hlStartNode?.Boundary != null && hlStartNode.Boundary.Count >= 3
+            && hlStartNode != hlNode)
+        {
+            DrawBoundaryHighlight(canvas, hlStartNode.Boundary, new SKColor(34, 197, 94), sc);
         }
 
         foreach (var node in visibleNodes)
@@ -771,6 +778,23 @@ public class SvgView : SKCanvasView
                 canvas.DrawText(nameStr, s.X, s.Y + nodeR + lblSize + 2f / sc, SKTextAlign.Center, nameFont, namePaint);
             }
         }
+    }
+
+    private static void DrawBoundaryHighlight(SKCanvas canvas, List<float[]> boundary, SKColor color, float sc)
+    {
+        using var hlPath = new SKPath();
+        hlPath.MoveTo(boundary[0][0], boundary[0][1]);
+        for (int bi = 1; bi < boundary.Count; bi++)
+            hlPath.LineTo(boundary[bi][0], boundary[bi][1]);
+        hlPath.Close();
+        using var hlFill = new SKPaint { Color = color.WithAlpha(50), IsAntialias = true };
+        canvas.DrawPath(hlPath, hlFill);
+        using var hlStroke = new SKPaint
+        {
+            Color = color.WithAlpha(230), StrokeWidth = 2.5f / sc,
+            IsStroke = true, IsAntialias = true, StrokeCap = SKStrokeCap.Round,
+        };
+        canvas.DrawPath(hlPath, hlStroke);
     }
 
     private void DrawRoute(SKCanvas canvas)
