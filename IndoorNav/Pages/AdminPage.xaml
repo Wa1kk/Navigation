@@ -349,7 +349,7 @@
         <!-- ═══════════════════════════════════════
              MAIN AREA
              ═══════════════════════════════════════ -->
-        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,Auto,Auto,*,Auto">
+        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
 
             <!-- ═══ PHONE TOP BAR (hidden on desktop) ═══ -->
             <Grid Grid.Row="0" BackgroundColor="#0F172A" Padding="10,8,10,8"
@@ -427,12 +427,38 @@
                                   ShowGraph="True"
                                   IsAdminMode="True"
                                   IsDragMode="{Binding IsMoveMode}"
+                                  HighlightedNodeId="{Binding SelectedNode.Id}"
                                   HorizontalOptions="Fill"
                                   VerticalOptions="Fill" />
             </Border>
 
+            <!-- Рёбра выбранной точки -->
+            <Border Grid.Row="4"
+                    BackgroundColor="#0F172A" Padding="8,6"
+                    StrokeThickness="0"
+                    IsVisible="{Binding HasSelectedNodeEdges}">
+                <VerticalStackLayout Spacing="3">
+                    <Label Text="Связи точки (нажмите чтобы удалить):" FontSize="11" TextColor="#64748B" Margin="2,0,0,2"/>
+                    <ScrollView Orientation="Horizontal">
+                        <HorizontalStackLayout Spacing="6" Padding="0,2"
+                                               BindableLayout.ItemsSource="{Binding SelectedNodeEdges}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SelectedEdgeItem">
+                                    <Button Text="{Binding OtherNodeName}"
+                                            Clicked="OnEdgeButtonClicked"
+                                            BackgroundColor="#7F1D1D"
+                                            TextColor="#FCA5A5"
+                                            FontSize="12" HeightRequest="38" CornerRadius="8"
+                                            Padding="12,0" />
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- ═══ PHONE BOTTOM TOOLBAR (hidden on desktop) ═══ -->
-            <Border Grid.Row="4" BackgroundColor="#0F172A" Padding="8,6"
+            <Border Grid.Row="5" BackgroundColor="#0F172A" Padding="8,6"
                     StrokeThickness="0"
                     IsVisible="{OnIdiom Phone=True, Default=False}">
                 <ScrollView Orientation="Horizontal">

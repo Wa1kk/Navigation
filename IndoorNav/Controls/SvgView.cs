@@ -57,6 +57,11 @@ public class SvgView : SKCanvasView
         BindableProperty.Create(nameof(SelectedNode), typeof(NavNode), typeof(SvgView),
             null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
 
+    /// <summary>Id узла, чьи рёбра нужно подсветить в режиме администратора.</summary>
+    public static readonly BindableProperty HighlightedNodeIdProperty =
+        BindableProperty.Create(nameof(HighlightedNodeId), typeof(string), typeof(SvgView),
+            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+
     public static readonly BindableProperty IsAdminModeProperty =
         BindableProperty.Create(nameof(IsAdminMode), typeof(bool), typeof(SvgView), false);
 
@@ -87,6 +92,11 @@ public class SvgView : SKCanvasView
     {
         get => (NavNode?)GetValue(SelectedNodeProperty);
         set => SetValue(SelectedNodeProperty, value);
+    }
+    public string? HighlightedNodeId
+    {
+        get => (string?)GetValue(HighlightedNodeIdProperty);
+        set => SetValue(HighlightedNodeIdProperty, value);
     }
     public bool IsAdminMode
     {
@@ -715,6 +725,29 @@ public class SvgView : SKCanvasView
                 if (from == null || to == null) continue;
                 // координаты — напрямую в SVG-пространстве, холст трансформирует сам
                 canvas.DrawLine(from.X, from.Y, to.X, to.Y, edgePaint);
+            }
+        }
+
+        // Подсветка рёбер выбранного узла (режим администратора)
+        var hlId = HighlightedNodeId;
+        if (IsAdminMode && !string.IsNullOrEmpty(hlId) && edges != null && !hideCirclesForRoute)
+        {
+            using var hlPaint = new SKPaint
+            {
+                Color       = new SKColor(255, 152, 0, 230),
+                StrokeWidth = 4f / sc,
+                IsAntialias = true,
+                IsStroke    = true,
+                StrokeCap   = SKStrokeCap.Round
+            };
+            var allNodesForEdge = nodes?.ToList();
+            foreach (var edge in edges)
+            {
+                if (edge.FromId != hlId && edge.ToId != hlId) continue;
+                var from = allNodesForEdge?.FirstOrDefault(n => n.Id == edge.FromId);
+                var to   = allNodesForEdge?.FirstOrDefault(n => n.Id == edge.ToId);
+                if (from == null || to == null) continue;
+                canvas.DrawLine(from.X, from.Y, to.X, to.Y, hlPaint);
             }
         }
 

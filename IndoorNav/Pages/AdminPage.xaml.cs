@@ -36,6 +36,21 @@ public partial class AdminPage : ContentPage
     private async void OnExitAdminClicked(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("..");
 
+    // Кнопка связи выбранной точки — предложить удалить с подтверждением
+    private async void OnEdgeButtonClicked(object sender, EventArgs e)
+    {
+        if (sender is not Button btn) return;
+        if (btn.BindingContext is not SelectedEdgeItem item) return;
+
+        bool ok = await DisplayAlert(
+            "Удалить связь",
+            $"Удалить связь с точкой «{item.OtherNodeName}»?",
+            "Удалить", "Отмена");
+
+        if (ok)
+            Vm.RemoveEdgeCommand.Execute(item);
+    }
+
     // При открытии: синхронизируем здание и этаж из пользовательского режима
     protected override void OnAppearing()
     {

@@ -76,6 +76,10 @@ public class AdminViewModel : INotifyPropertyChanged
         private set { _currentEdges = value; OnPropertyChanged(); }
     }
 
+    // Рёбра выбранного узла (для панели снизу)
+    public ObservableCollection<SelectedEdgeItem> SelectedNodeEdges { get; } = new();
+    public bool HasSelectedNodeEdges => SelectedNodeEdges.Count > 0;
+
     public NavNode? SelectedNode
     {
         get => _selectedNode;
@@ -92,6 +96,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedSearchTags));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
+            RefreshSelectedNodeEdges();
         }
     }
 
@@ -169,6 +174,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetBoundaryModeCommand        { get; }
     public Command FinishBoundaryCommand         { get; }
     public Command ClearBoundaryCommand          { get; }
+    public Command<SelectedEdgeItem> RemoveEdgeCommand { get; }
 
     // ──── Wrapper-свойства для кастомизации выбранного узла ────
     public bool SelectedHidden
@@ -472,6 +478,13 @@ public class AdminViewModel : INotifyPropertyChanged
         }, () => SelectedNode?.Boundary != null);
 
         SelectedBuilding = Buildings.FirstOrDefault();  // SelectedFloor auto-set to floor 1 via setter
+
+        RemoveEdgeCommand = new Command<SelectedEdgeItem>(item =>
+        {
+            _graphService.RemoveEdge(item.Edge.FromId, item.Edge.ToId);
+            RefreshOverlay();
+            RefreshSelectedNodeEdges();
+        });
     }
 
     // ---- Canvas interactions ----
@@ -718,6 +731,7 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             CurrentNodes = new ObservableCollection<NavNode>();
             CurrentEdges = new ObservableCollection<NavEdge>();
+            RefreshSelectedNodeEdges();
             return;
         }
 
@@ -741,6 +755,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 edges.Add(e);
         }
         CurrentEdges = new ObservableCollection<NavEdge>(edges);
+        RefreshSelectedNodeEdges();
     }
 
     private void UpdateStatus()
@@ -761,4 +776,37 @@ public class AdminViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void RefreshSelectedNodeEdges()
+    {
+        SelectedNodeEdges.Clear();
+        var sel = _selectedNode;
+        if (sel == null) { OnPropertyChanged(nameof(HasSelectedNodeEdges)); return; }
+
+        var allEdges = _graphService.Graph.Edges;
+        var allNodes = _graphService.Graph.Nodes;
+
+        foreach (var edge in allEdges)
+        {
+            string otherId;
+            if      (edge.FromId == sel.Id) otherId = edge.ToId;
+            else if (edge.ToId   == sel.Id) otherId = edge.FromId;
+            else continue;
+
+            var other = allNodes.FirstOrDefault(n => n.Id == otherId);
+            SelectedNodeEdges.Add(new SelectedEdgeItem
+            {
+                Edge          = edge,
+                OtherNodeName = other?.Name ?? otherId
+            });
+        }
+        OnPropertyChanged(nameof(HasSelectedNodeEdges));
+    }
+}
+
+/// <summary>Элемент списка рёбер выбранного узла для панели снизу.</summary>
+public sealed class SelectedEdgeItem
+{
+    public NavEdge Edge          { get; init; } = null!;
+    public string  OtherNodeName { get; init; } = "";
 }
