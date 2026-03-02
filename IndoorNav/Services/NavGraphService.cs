@@ -21,30 +21,49 @@ public class NavGraphService
     {
         try
         {
+            // Всегда читаем бандл чтобы сравнить версию
+            string? bundleJson = null;
+            NavGraph? bundleGraph = null;
+            try
+            {
+                using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
+                using var reader = new StreamReader(stream);
+                bundleJson = await reader.ReadToEndAsync();
+                bundleGraph = JsonSerializer.Deserialize<NavGraph>(bundleJson, JsonOpts);
+            }
+            catch { /* бандл недоступен */ }
+
             if (File.Exists(FilePath))
             {
-                // Локальный файл (отредактированный пользователем)
-                var json = await File.ReadAllTextAsync(FilePath);
-                _graph = JsonSerializer.Deserialize<NavGraph>(json, JsonOpts) ?? new NavGraph();
-                if (MigrateWaypoints()) await SaveAsync();
+                // Локальный файл — используем его, если его версия не старее бандла
+                var localJson = await File.ReadAllTextAsync(FilePath);
+                var localGraph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
+
+                if (bundleGraph != null && bundleGraph.DataVersion > localGraph.DataVersion)
+                {
+                    // Бандл новее — заменяем локальный файл обновлёнными точками
+                    System.Diagnostics.Debug.WriteLine(
+                        $"NavGraph: bundle v{bundleGraph.DataVersion} > local v{localGraph.DataVersion}, updating.");
+                    _graph = bundleGraph;
+                    MigrateWaypoints();
+                    await SaveAsync();
+                }
+                else
+                {
+                    _graph = localGraph;
+                    if (MigrateWaypoints()) await SaveAsync();
+                }
+            }
+            else if (bundleGraph != null)
+            {
+                // Первый запуск — копируем из бандла
+                _graph = bundleGraph;
+                MigrateWaypoints();
+                await SaveAsync();
             }
             else
             {
-                // Начальные данные, вшитые в бандл при сборке
-                try
-                {
-                    using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
-                    using var reader = new StreamReader(stream);
-                    var json = await reader.ReadToEndAsync();
-                    _graph = JsonSerializer.Deserialize<NavGraph>(json, JsonOpts) ?? new NavGraph();
-                    MigrateWaypoints();
-                    // Сохраняем в локальный файл, чтобы следующий запуск работал без бандла
-                    await SaveAsync();
-                }
-                catch
-                {
-                    _graph = new NavGraph();
-                }
+                _graph = new NavGraph();
             }
         }
         catch (Exception ex)

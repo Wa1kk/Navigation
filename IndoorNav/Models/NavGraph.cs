@@ -2,6 +2,9 @@ namespace IndoorNav.Models;
 
 public class NavGraph
 {
+    /// <summary>Увеличивай при каждом деплое новых точек, чтобы клиенты получали обновление.</summary>
+    public int DataVersion { get; set; } = 0;
+
     public List<NavNode> Nodes { get; set; } = new();
     public List<NavEdge> Edges { get; set; } = new();
 
