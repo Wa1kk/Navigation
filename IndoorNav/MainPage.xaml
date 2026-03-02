@@ -247,14 +247,20 @@
                                 </Grid>
                             </VerticalStackLayout>
                             <!-- Close button top-right -->
-                            <Button Text="✕"
-                                    Command="{Binding CloseNodePopupCommand}"
+                            <Border BackgroundColor="#E5E7EB"
+                                    StrokeShape="RoundRectangle 12"
+                                    StrokeThickness="0"
+                                    WidthRequest="24" HeightRequest="24"
                                     HorizontalOptions="End" VerticalOptions="Start"
                                     Margin="0,-10,-10,0"
-                                    BackgroundColor="#E5E7EB" TextColor="#6B7280"
-                                    FontSize="12" FontAttributes="Bold"
-                                    WidthRequest="18" HeightRequest="18"
-                                    CornerRadius="9" Padding="0" />
+                                    Padding="0">
+                                <Label Text="✕" FontSize="11" FontAttributes="Bold"
+                                       TextColor="#6B7280"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
                         </Grid>
                     </Border>
 
