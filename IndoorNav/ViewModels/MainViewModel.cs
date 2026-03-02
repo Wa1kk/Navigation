@@ -160,11 +160,16 @@ public class MainViewModel : INotifyPropertyChanged
     public NavNode? TappedNode
     {
         get => _tappedNode;
-        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); }
+        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); OnPropertyChanged(nameof(TappedNodeInfo)); }
     }
 
     /// <summary>Display name of the tapped node for the popup header.</summary>
     public string TappedNodeName => _tappedNode?.DisplayName ?? string.Empty;
+
+    /// <summary>Meta info line: "Name · Этаж N".</summary>
+    public string TappedNodeInfo =>
+        _tappedNode == null ? string.Empty
+        : $"{_tappedNode.Name} · Этаж {_tappedNode.FloorNumber}";
 
     /// <summary>Whether the node-tap popup is visible.</summary>
     public bool IsNodePopupOpen
