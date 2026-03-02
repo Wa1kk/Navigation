@@ -476,13 +476,8 @@
                                                     <Border Padding="22,11,16,11"
                                                             BackgroundColor="Transparent"
                                                             StrokeThickness="0">
-                                                        <VerticalStackLayout Spacing="1">
-                                                            <Label Text="{Binding Name}"
-                                                                   FontSize="14" TextColor="#1E293B" />
-                                                            <Label Text="{Binding SearchTags}"
-                                                                   FontSize="11" TextColor="#94A3B8"
-                                                                   IsVisible="{Binding SearchTags, Converter={StaticResource StringNotEmptyConverter}}" />
-                                                        </VerticalStackLayout>
+                                                        <Label Text="{Binding DisplayName}"
+                                                               FontSize="14" TextColor="#1E293B" />
                                                         <Border.GestureRecognizers>
                                                             <TapGestureRecognizer
                                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPickerNodeCommand}"
