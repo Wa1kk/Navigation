@@ -578,8 +578,8 @@ public class SvgView : SKCanvasView
         var nodes = Nodes;
         if (nodes == null) return;
 
-        // В пользовательском режиме: если уже есть маршрут — узлы не рисуем (только маршрут)
-        if (!IsAdminMode && RouteNodes != null && RouteNodes.Count > 0) return;
+        // В пользовательском режиме при наличии маршрута: скрываем кружки и рёбра, но оставляем подписи
+        bool hideCirclesForRoute = !IsAdminMode && RouteNodes != null && RouteNodes.Count > 0;
 
         // В пользовательском режиме скрываем служебные waypoint-узлы коридоров
         var visibleNodes = IsAdminMode
@@ -693,7 +693,7 @@ public class SvgView : SKCanvasView
             IsAntialias = true, IsStroke = true
         };
 
-        if (edges != null)
+        if (edges != null && !hideCirclesForRoute)
         {
             foreach (var edge in edges)
             {
@@ -722,7 +722,7 @@ public class SvgView : SKCanvasView
             // В польз. режиме: если скрыта и точка, и метка — пропускаем полностью
             if (!IsAdminMode && node.IsHidden && node.IsLabelHidden) continue;
 
-            bool drawCircle = IsAdminMode || !node.IsHidden;
+            bool drawCircle = (IsAdminMode || !node.IsHidden) && !hideCirclesForRoute;
 
             var s    = new SKPoint(node.X, node.Y);
             float nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
@@ -775,11 +775,13 @@ public class SvgView : SKCanvasView
                 using var nameFont  = new SKFont(SKTypeface.Default, lblSize);
                 var nameStr = node.Name;
                 var nameW   = nameFont.MeasureText(nameStr, namePaint);
-                var pillRect = new SKRect(s.X - nameW / 2f - 4f / sc, s.Y + nodeR + 2f / sc,
-                                          s.X + nameW / 2f + 4f / sc, s.Y + nodeR + lblSize + 6f / sc);
+                // Если кружок скрыт из-за маршрута — подпись располагаем прямо у координаты узла
+                float labelYOffset = hideCirclesForRoute ? -lblSize / 2f : nodeR + 2f / sc;
+                var pillRect = new SKRect(s.X - nameW / 2f - 4f / sc, s.Y + labelYOffset,
+                                          s.X + nameW / 2f + 4f / sc, s.Y + labelYOffset + lblSize + 4f / sc);
                 using var pillPaint = new SKPaint { Color = new SKColor(255, 255, 255, (byte)(210 * lblOpacity)), IsAntialias = true };
                 canvas.DrawRoundRect(pillRect, 4f / sc, 4f / sc, pillPaint);
-                canvas.DrawText(nameStr, s.X, s.Y + nodeR + lblSize + 2f / sc, SKTextAlign.Center, nameFont, namePaint);
+                canvas.DrawText(nameStr, s.X, s.Y + labelYOffset + lblSize, SKTextAlign.Center, nameFont, namePaint);
             }
         }
     }
