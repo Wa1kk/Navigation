@@ -213,8 +213,9 @@ public class MainViewModel : INotifyPropertyChanged
         _                                       => string.Empty
     };
 
-    /// <summary>Category of the tapped node, empty when not set.</summary>
-    public string TappedNodeCategory => _tappedNode?.Category ?? string.Empty;
+    /// <summary>Category of the tapped node; empty when not set or hidden.</summary>
+    public string TappedNodeCategory =>
+        (_tappedNode == null || _tappedNode.IsCategoryHidden) ? string.Empty : _tappedNode.Category;
 
     /// <summary>Meta info line: "Name · N этаж".</summary>
     public string TappedNodeInfo =>

@@ -12,8 +12,9 @@
              BackgroundColor="#F1F5F9">
 
     <ContentPage.Resources>
-        <conv:BoolToColorConverter x:Key="BoolToColorConverter" />
-        <conv:NullToBoolConverter  x:Key="NullToBoolConverter" />
+        <conv:BoolToColorConverter  x:Key="BoolToColorConverter" />
+        <conv:NullToBoolConverter   x:Key="NullToBoolConverter" />
+        <conv:InverseBoolConverter  x:Key="InverseBoolConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
@@ -344,11 +345,18 @@
                                     FontSize="12" HeightRequest="32" CornerRadius="6" />
 
                             <!-- Категория -->
-                            <Button Text="{Binding SelectedCategory, StringFormat='🏷️ Категория: {0}'}"
-                                    Command="{Binding EditCategoryCommand}"
-                                    BackgroundColor="#162032" TextColor="#7DD3FC"
-                                    LineBreakMode="TailTruncation"
-                                    FontSize="12" HeightRequest="32" CornerRadius="6" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                <Button Grid.Column="0"
+                                        Text="{Binding SelectedCategory, StringFormat='🏷️ Категория: {0}'}"
+                                        Command="{Binding EditCategoryCommand}"
+                                        BackgroundColor="#162032" TextColor="#7DD3FC"
+                                        LineBreakMode="TailTruncation"
+                                        FontSize="12" HeightRequest="32" CornerRadius="6" />
+                                <Switch Grid.Column="1"
+                                        IsToggled="{Binding SelectedCategoryHidden, Mode=TwoWay, Converter={StaticResource InverseBoolConverter}}"
+                                        OnColor="#2563EB"
+                                        VerticalOptions="Center" />
+                            </Grid>
 
                             <!-- Тип: аудитория -->
                             <Button Text="{Binding SelectedNodeIsRoomText}"

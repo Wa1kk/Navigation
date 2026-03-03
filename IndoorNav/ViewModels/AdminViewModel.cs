@@ -129,6 +129,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedInnerLabel));
             OnPropertyChanged(nameof(SelectedSearchTags));
             OnPropertyChanged(nameof(SelectedCategory));
+            OnPropertyChanged(nameof(SelectedCategoryHidden));
             OnPropertyChanged(nameof(SelectedNodeIsRoom));
             OnPropertyChanged(nameof(SelectedNodeIsRoomText));
             SelectedBoundaryVertexIndex = -1;
@@ -404,6 +405,11 @@ public class AdminViewModel : INotifyPropertyChanged
     {
         get => SelectedNode?.Category ?? string.Empty;
         set { if (SelectedNode != null) { SelectedNode.Category = value; OnPropertyChanged(); } }
+    }
+    public bool SelectedCategoryHidden
+    {
+        get => SelectedNode?.IsCategoryHidden ?? false;
+        set { if (SelectedNode != null) { SelectedNode.IsCategoryHidden = value; OnPropertyChanged(); } }
     }
     public bool SelectedNodeIsRoom
     {

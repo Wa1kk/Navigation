@@ -55,6 +55,9 @@ public class NavNode
     /// <summary>Категория точки (например: "Кафедра", "Туалет", "Столовая"). Отображается в попапе пользователя.</summary>
     public string Category { get; set; } = string.Empty;
 
+    /// <summary>Скрыть категорию в попапе пользователя.</summary>
+    public bool IsCategoryHidden { get; set; }
+
     /// <summary>Отображаемое имя в пикере поиска: если SearchTags заданы — выводится "Имя · Теги", иначе просто Имя.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(SearchTags)
         ? Name
