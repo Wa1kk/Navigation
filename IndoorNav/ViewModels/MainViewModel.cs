@@ -204,9 +204,14 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Display name of the tapped node for the popup header.</summary>
     public string TappedNodeName => _tappedNode?.DisplayName ?? string.Empty;
 
-    /// <summary>"Аудитория" for room nodes (IsRoom=true), empty otherwise.</summary>
-    public string TappedNodeTypeLabel =>
-        _tappedNode?.IsRoom == true ? "Аудитория" : string.Empty;
+    /// <summary>"Аудитория" / "Лифт" / "Лестница" depending on node type, empty for others.</summary>
+    public string TappedNodeTypeLabel => _tappedNode switch
+    {
+        { IsRoom: true }                        => "Аудитория",
+        { IsTransition: true, IsElevator: true } => "Лифт",
+        { IsTransition: true }                  => "Лестница",
+        _                                       => string.Empty
+    };
 
     /// <summary>Meta info line: "Name · N этаж".</summary>
     public string TappedNodeInfo =>
