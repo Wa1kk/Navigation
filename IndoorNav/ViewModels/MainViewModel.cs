@@ -729,24 +729,9 @@ public class MainViewModel : INotifyPropertyChanged
         return exclude;
     }
 
-    private static string FloorNameInstrumental(int n) => n switch
-    {
-        -1 => "подвальном этаже",
-         0 => "цокольном этаже",
-         1 => "1 этажу",
-         2 => "2 этажу",
-         3 => "3 этажу",
-         4 => "4 этажу",
-         5 => "5 этажу",
-         _ => $"{n} этажу"
-    };
+    private static string FloorNameInstrumental(int n) => $"{n} этажу";
 
-    private static string FloorNameAccusative(int n) => n switch
-    {
-        -1 => "подвальный этаж",
-         0 => "цокольный этаж",
-         _ => $"{n} этажа"
-    };
+    private static string FloorNameAccusative(int n) => $"{n} этажа";
 
     private void ExecuteClearRoute()
     {
