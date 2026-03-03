@@ -186,8 +186,8 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<SKPoint> CanvasTappedCommand  { get; }
     public Command<NavNode> NodeTappedCommand    { get; }
     public Command<(NavNode, SKPoint)> NodeMovedCommand { get; }
-    public Command<(int idx, SKPoint svgPos)> BoundaryVertexMovedCommand { get; }
-    public Command<int> BoundaryVertexTappedCommand { get; }
+    public Command<(int polyIdx, int vtxIdx, SKPoint svgPos)> BoundaryVertexMovedCommand { get; }
+    public Command<(int polyIdx, int vtxIdx)> BoundaryVertexTappedCommand { get; }
     public Command RenameSelectedCommand         { get; }
     public Command DeleteSelectedCommand         { get; }
     public Command DeleteBoundaryVertexCommand   { get; }
@@ -217,6 +217,7 @@ public class AdminViewModel : INotifyPropertyChanged
 
     // ── Students ──
     public ObservableCollection<StudentRowVm> Students { get; } = new();
+    public ObservableCollection<StudentFacultyVm> StudentFaculties { get; } = new();
     private string _newStudentName     = string.Empty;
     private string _newStudentLogin    = string.Empty;
     private string _newStudentPassword = string.Empty;
@@ -260,6 +261,7 @@ public class AdminViewModel : INotifyPropertyChanged
 
     // ── Departments ──
     public ObservableCollection<Department> Departments { get; } = new();
+    public ObservableCollection<DeptViewVm>  DeptViewItems { get; } = new();
 
     private Department? _selectedDept;
     public Department? SelectedDept
@@ -357,6 +359,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetBoundaryModeCommand        { get; }
     public Command FinishBoundaryCommand         { get; }
     public Command ClearBoundaryCommand          { get; }
+    public Command RemoveLastBoundaryCommand     { get; }
     public Command<SelectedEdgeItem> RemoveEdgeCommand { get; }
 
     // ──── Wrapper-свойства для кастомизации выбранного узла ────
@@ -416,6 +419,17 @@ public class AdminViewModel : INotifyPropertyChanged
     }
     public bool HasBoundaryVertexSelected => _selectedBoundaryVertexIndex >= 0;
 
+    private int _selectedBoundaryPolygonIndex = -1;
+    public int SelectedBoundaryPolygonIndex
+    {
+        get => _selectedBoundaryPolygonIndex;
+        set
+        {
+            _selectedBoundaryPolygonIndex = value;
+            OnPropertyChanged();
+        }
+    }
+
     // Буфер копирования
     private NavNode? _copiedNode;
 
@@ -454,27 +468,45 @@ public class AdminViewModel : INotifyPropertyChanged
         CanvasTappedCommand   = new Command<SKPoint>(OnCanvasTapped);
         NodeTappedCommand     = new Command<NavNode>(OnNodeTapped);
         NodeMovedCommand      = new Command<(NavNode, SKPoint)>(OnNodeMoved);
-        BoundaryVertexMovedCommand = new Command<(int idx, SKPoint svgPos)>(args =>
+        BoundaryVertexMovedCommand = new Command<(int polyIdx, int vtxIdx, SKPoint svgPos)>(args =>
         {
-            if (SelectedNode?.Boundary == null || args.idx < 0 || args.idx >= SelectedNode.Boundary.Count) return;
-            SelectedNode.Boundary[args.idx][0] = args.svgPos.X;
-            SelectedNode.Boundary[args.idx][1] = args.svgPos.Y;
+            if (SelectedNode?.Boundaries == null) return;
+            if (args.polyIdx < 0 || args.polyIdx >= SelectedNode.Boundaries.Count) return;
+            var poly = SelectedNode.Boundaries[args.polyIdx];
+            if (args.vtxIdx < 0 || args.vtxIdx >= poly.Count) return;
+            poly[args.vtxIdx][0] = args.svgPos.X;
+            poly[args.vtxIdx][1] = args.svgPos.Y;
             RefreshOverlay();
         });
-        BoundaryVertexTappedCommand = new Command<int>(idx =>
+        BoundaryVertexTappedCommand = new Command<(int polyIdx, int vtxIdx)>(args =>
         {
-            SelectedBoundaryVertexIndex = SelectedBoundaryVertexIndex == idx ? -1 : idx;
+            if (SelectedBoundaryPolygonIndex == args.polyIdx && SelectedBoundaryVertexIndex == args.vtxIdx)
+            {
+                SelectedBoundaryPolygonIndex = -1;
+                SelectedBoundaryVertexIndex  = -1;
+            }
+            else
+            {
+                SelectedBoundaryPolygonIndex = args.polyIdx;
+                SelectedBoundaryVertexIndex  = args.vtxIdx;
+            }
         });
         RenameSelectedCommand = new Command(async () => await RenameSelectedAsync(), () => SelectedNode != null);
         DeleteSelectedCommand = new Command(DeleteSelected, () => SelectedNode != null);
         DeleteBoundaryVertexCommand = new Command(() =>
         {
-            if (SelectedNode?.Boundary == null || _selectedBoundaryVertexIndex < 0 ||
-                _selectedBoundaryVertexIndex >= SelectedNode.Boundary.Count) return;
-            SelectedNode.Boundary.RemoveAt(_selectedBoundaryVertexIndex);
-            SelectedBoundaryVertexIndex = -1;
+            if (SelectedNode?.Boundaries == null) return;
+            if (_selectedBoundaryPolygonIndex < 0 || _selectedBoundaryPolygonIndex >= SelectedNode.Boundaries.Count) return;
+            var poly = SelectedNode.Boundaries[_selectedBoundaryPolygonIndex];
+            if (_selectedBoundaryVertexIndex < 0 || _selectedBoundaryVertexIndex >= poly.Count) return;
+            poly.RemoveAt(_selectedBoundaryVertexIndex);
+            // Удалить пустой полигон
+            if (poly.Count == 0)
+                SelectedNode.Boundaries.RemoveAt(_selectedBoundaryPolygonIndex);
+            SelectedBoundaryPolygonIndex = -1;
+            SelectedBoundaryVertexIndex  = -1;
             RefreshOverlay();
-            StatusText = $"Вершина удалена [{SelectedNode.Name}]. Точек: {SelectedNode.Boundary?.Count ?? 0}";
+            StatusText = $"Вершина удалена [{SelectedNode.Name}].\u00a0Границ: {SelectedNode.Boundaries?.Count ?? 0}";
         }, () => _selectedBoundaryVertexIndex >= 0);
         EditInnerLabelCommand = new Command(async () =>
         {
@@ -640,9 +672,16 @@ public class AdminViewModel : INotifyPropertyChanged
 
         AddStudentCommand = new Command(async () =>
         {
+            var login = NewStudentLogin.Trim();
+            // Проверка дубликата логина
+            if (_authService.GetStudents().Any(u => u.Username.Equals(login, StringComparison.OrdinalIgnoreCase)))
+            {
+                await Shell.Current.DisplayAlert("Ошибка", $"Пользователь с логином «{login}» уже существует.", "ОК");
+                return;
+            }
             var user = new AuthUser
             {
-                Username     = NewStudentLogin.Trim(),
+                Username     = login,
                 PasswordHash = NewStudentPassword.Trim(),
                 Role         = UserRole.Student,
                 DisplayName  = NewStudentName.Trim(),
@@ -650,6 +689,7 @@ public class AdminViewModel : INotifyPropertyChanged
             };
             await _authService.AddUserAsync(user);
             Students.Add(MakeStudentRow(user));
+            RebuildStudentTree();
             NewStudentName = NewStudentLogin = NewStudentPassword = string.Empty;
             NewStudentGroup = null;
             NewStudentDept  = null;
@@ -661,8 +701,14 @@ public class AdminViewModel : INotifyPropertyChanged
         RemoveStudentCommand = new Command<StudentRowVm>(async row =>
         {
             if (row == null) return;
+            bool ok = await Shell.Current.DisplayAlert(
+                "Удалить студента",
+                $"Удалить «{row.DisplayName}»?",
+                "Удалить", "Отмена");
+            if (!ok) return;
             await _authService.RemoveUserAsync(row.User.Id);
             Students.Remove(row);
+            RebuildStudentTree();
         });
 
         EditStudentCommand = new Command<StudentRowVm>(async row =>
@@ -716,6 +762,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 row.FacultyName  = dept.Name;
                 row.GroupName    = group.Name;
                 await _authService.UpdateUserAsync();
+                RebuildStudentTree();
             }
         });
 
@@ -725,6 +772,7 @@ public class AdminViewModel : INotifyPropertyChanged
             if (string.IsNullOrWhiteSpace(NewDeptName)) return;
             var dept = await _departmentService.AddDepartmentAsync(NewDeptName);
             Departments.Add(dept);
+            DeptViewItems.Add(MakeDeptViewVm(dept));
             NewDeptName = string.Empty;
         }, () => !string.IsNullOrWhiteSpace(NewDeptName));
 
@@ -738,6 +786,8 @@ public class AdminViewModel : INotifyPropertyChanged
             if (!ok) return;
             await _departmentService.RemoveDepartmentAsync(dept.Id);
             Departments.Remove(dept);
+            var vItem = DeptViewItems.FirstOrDefault(v => v.Dept.Id == dept.Id);
+            if (vItem != null) DeptViewItems.Remove(vItem);
             if (SelectedDept?.Id == dept.Id) SelectedDept = null;
         });
 
@@ -875,30 +925,49 @@ public class AdminViewModel : INotifyPropertyChanged
             {
                 StatusText = "Нужно не менее 3 точек для замыкания полигона."; return;
             }
-            SelectedNode.Boundary = _boundaryPoints
+            var newPoly = _boundaryPoints
                 .Select(p => new float[] { p.X, p.Y })
                 .ToList();
+            (SelectedNode.Boundaries ??= new List<List<float[]>>()).Add(newPoly);
             _boundaryPoints.Clear();
             CurrentAction = AdminAction.None;
             await _graphService.SaveAsync();
-            StatusText = $"Граница [{SelectedNode.Name}] сохранена ({SelectedNode.Boundary.Count} углов).";
+            int polyCount = SelectedNode.Boundaries.Count;
+            StatusText = $"Граница [{SelectedNode.Name}] добавлена ({newPoly.Count} углов). Всего полигонов: {polyCount}.";
             OnPropertyChanged(nameof(BoundaryPreview));
             RefreshOverlay();
+            ClearBoundaryCommand.ChangeCanExecute();
+            RemoveLastBoundaryCommand.ChangeCanExecute();
         });
 
         ClearBoundaryCommand = new Command(async () =>
         {
             if (SelectedNode == null) return;
             bool ok = await Shell.Current.DisplayAlert(
-                "Очистить границу",
-                $"Удалить границу аудитории [{SelectedNode.Name}]?",
+                "Очистить границы",
+                $"Удалить все границы аудитории [{SelectedNode.Name}]?",
                 "Удалить", "Отмена");
             if (!ok) return;
-            SelectedNode.Boundary = null;
+            SelectedNode.Boundaries = null;
             await _graphService.SaveAsync();
-            StatusText = $"Граница [{SelectedNode.Name}] удалена."; 
+            StatusText = $"Границы [{SelectedNode.Name}] удалены."; 
             RefreshOverlay();
-        }, () => SelectedNode?.Boundary != null);
+            ClearBoundaryCommand.ChangeCanExecute();
+            RemoveLastBoundaryCommand.ChangeCanExecute();
+        }, () => SelectedNode?.Boundaries?.Count > 0);
+
+        RemoveLastBoundaryCommand = new Command(async () =>
+        {
+            if (SelectedNode?.Boundaries == null || SelectedNode.Boundaries.Count == 0) return;
+            SelectedNode.Boundaries.RemoveAt(SelectedNode.Boundaries.Count - 1);
+            SelectedBoundaryPolygonIndex = -1;
+            SelectedBoundaryVertexIndex  = -1;
+            await _graphService.SaveAsync();
+            StatusText = $"Последняя граница [{SelectedNode.Name}] удалена. Осталось: {SelectedNode.Boundaries.Count}.";
+            RefreshOverlay();
+            ClearBoundaryCommand.ChangeCanExecute();
+            RemoveLastBoundaryCommand.ChangeCanExecute();
+        }, () => SelectedNode?.Boundaries?.Count > 0);
 
         SelectedBuilding = Buildings.FirstOrDefault();  // SelectedFloor auto-set to floor 1 via setter
 
@@ -1118,6 +1187,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 RenameSelectedCommand.ChangeCanExecute();
                 SetBoundaryModeCommand.ChangeCanExecute();
                 ClearBoundaryCommand.ChangeCanExecute();
+                RemoveLastBoundaryCommand.ChangeCanExecute();
                 break;
         }
     }
@@ -1213,12 +1283,17 @@ public class AdminViewModel : INotifyPropertyChanged
     {
         await _departmentService.LoadAsync();
         Departments.Clear();
+        DeptViewItems.Clear();
         foreach (var d in _departmentService.Departments)
+        {
             Departments.Add(d);
+            DeptViewItems.Add(MakeDeptViewVm(d));
+        }
         // Load students after departments so faculty/group names resolve correctly
         Students.Clear();
         foreach (var s in _authService.GetStudents())
             Students.Add(MakeStudentRow(s));
+        RebuildStudentTree();
     }
 
     private StudentRowVm MakeStudentRow(AuthUser user)
@@ -1227,6 +1302,30 @@ public class AdminViewModel : INotifyPropertyChanged
         var dept  = group != null ? _departmentService.FindDepartmentByGroup(user.GroupId) : null;
         return new StudentRowVm(user, dept?.Name ?? "—", group?.Name ?? "—");
     }
+
+    private void RebuildStudentTree()
+    {
+        StudentFaculties.Clear();
+        var byFaculty = Students
+            .GroupBy(s => s.FacultyName)
+            .OrderBy(g => g.Key);
+        foreach (var fg in byFaculty)
+        {
+            var fvm = new StudentFacultyVm(fg.Key);
+            var byGroup = fg.GroupBy(s => s.GroupName).OrderBy(g => g.Key);
+            foreach (var gg in byGroup)
+            {
+                var gvm = new StudentGroupVm(fg.Key, gg.Key);
+                foreach (var s in gg)
+                    gvm.Students.Add(s);
+                fvm.Groups.Add(gvm);
+            }
+            StudentFaculties.Add(fvm);
+        }
+    }
+
+    private DeptViewVm MakeDeptViewVm(Department dept) =>
+        new DeptViewVm(dept, () => SelectedDept = dept);
 
     private async Task LoadScheduleAsync()
     {
@@ -1327,7 +1426,8 @@ public sealed class StudentRowVm : INotifyPropertyChanged
     private bool _showDetails;
     public bool ShowDetails   { get => _showDetails; set { _showDetails = value; Notify(); } }
 
-    public string Login => User.Username;
+    public string Login    => User.Username;
+    public string Password  => User.PasswordHash;
 
     public Command ToggleDetailsCommand { get; }
 
@@ -1347,6 +1447,90 @@ public sealed class SelectedEdgeItem
 {
     public NavEdge Edge          { get; init; } = null!;
     public string  OtherNodeName { get; init; } = "";
+}
+
+// ── \u0414\u0435\u0440\u0435\u0432\u043e \u0441\u0442\u0443\u0434\u0435\u043d\u0442\u043e\u0432: \u0424\u0430\u043a\u0443\u043b\u044c\u0442\u0435\u0442 \u2192 \u0413\u0440\u0443\u043f\u043f\u0430 \u2192 \u0421\u0442\u0443\u0434\u0435\u043d\u0442 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+public sealed class StudentGroupVm : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    public string FacultyName { get; }
+    public string GroupName   { get; }
+    public ObservableCollection<StudentRowVm> Students { get; } = new();
+
+    private bool _expanded = true;
+    public bool IsExpanded
+    {
+        get => _expanded;
+        set { _expanded = value; Notify(); Notify(nameof(ChevronText)); }
+    }
+    public string ChevronText => IsExpanded ? "\u25be" : "\u25b8";
+    public Command ToggleCommand { get; }
+
+    public StudentGroupVm(string facultyName, string groupName)
+    {
+        FacultyName  = facultyName;
+        GroupName    = groupName;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+}
+
+public sealed class StudentFacultyVm : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    public string FacultyName { get; }
+    public ObservableCollection<StudentGroupVm> Groups { get; } = new();
+
+    public int StudentCount => Groups.Sum(g => g.Students.Count);
+
+    private bool _expanded = false; // \u0437\u0430\u043a\u0440\u044b\u0442 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e
+    public bool IsExpanded
+    {
+        get => _expanded;
+        set { _expanded = value; Notify(); Notify(nameof(ChevronText)); }
+    }
+    public string ChevronText => IsExpanded ? "\u25be" : "\u25b8";
+    public Command ToggleCommand { get; }
+
+    public StudentFacultyVm(string facultyName)
+    {
+        FacultyName  = facultyName;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+}
+
+// ── \u041e\u0431\u0451\u0440\u0442\u043a\u0430 \u0444\u0430\u043a\u0443\u043b\u044c\u0442\u0435\u0442\u0430 \u0441 \u043a\u043d\u043e\u043f\u043a\u043e\u0439 \u0440\u0430\u0437\u0432\u0451\u0440\u0442\u044b\u0432\u0430\u043d\u0438\u044f \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+public sealed class DeptViewVm : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    public Department Dept { get; }
+    public string Name => Dept.Name;
+    public ObservableCollection<StudyGroup> Groups => Dept.Groups;
+
+    private bool _expanded = false; // \u0437\u0430\u043a\u0440\u044b\u0442 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e
+    public bool IsExpanded
+    {
+        get => _expanded;
+        set { _expanded = value; Notify(); Notify(nameof(ChevronText)); }
+    }
+    public string ChevronText => IsExpanded ? "\u25be" : "\u25b8";
+
+    private readonly Action _selectAction;
+    public Command ToggleCommand { get; }
+
+    public DeptViewVm(Department dept, Action selectAction)
+    {
+        Dept          = dept;
+        _selectAction = selectAction;
+        ToggleCommand = new Command(() => { IsExpanded = !IsExpanded; _selectAction(); });
+    }
 }
 
 // ── Schedule picker tree helpers ────────────────────────────────────────────────

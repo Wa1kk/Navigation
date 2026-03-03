@@ -29,7 +29,7 @@ public partial class AdminPage : ContentPage
             Vm.BoundaryVertexMovedCommand.Execute(args);
             AdminCanvas.InvalidateSurface();
         };
-        AdminCanvas.BoundaryVertexTapped += (_, idx) => Vm.BoundaryVertexTappedCommand.Execute(idx);
+        AdminCanvas.BoundaryVertexTapped += (_, args) => Vm.BoundaryVertexTappedCommand.Execute(args);
     }
 
     // ← Выход из режима администратора (кнопка на телефоне)

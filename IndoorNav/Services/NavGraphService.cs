@@ -52,6 +52,7 @@ public class NavGraphService
     /// Исправляет данные: только узлы с именем "wp*" являются waypoint-ами.
     /// Все остальные не-транзитные узлы — видимые точки (аудитории и т.п.).
     /// Запускается при каждой загрузке чтобы исправить ошибку предыдущей миграции.
+    /// Также мигрирует устаревшее поле Boundary → Boundaries[0].
     /// </summary>
     private bool MigrateWaypoints()
     {
@@ -65,6 +66,14 @@ public class NavGraphService
             if (n.IsWaypoint != shouldBeWaypoint && !n.IsTransition)
             {
                 n.IsWaypoint = shouldBeWaypoint;
+                anyChange    = true;
+            }
+
+            // Миграция: перенести единственный полигон Boundary → Boundaries[0]
+            if (n.Boundary != null && n.Boundaries == null)
+            {
+                n.Boundaries = new List<List<float[]>> { n.Boundary };
+                n.Boundary   = null;
                 anyChange    = true;
             }
         }
