@@ -204,10 +204,10 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Display name of the tapped node for the popup header.</summary>
     public string TappedNodeName => _tappedNode?.DisplayName ?? string.Empty;
 
-    /// <summary>Meta info line: "Name · Этаж N".</summary>
+    /// <summary>Meta info line: "Name · N этаж".</summary>
     public string TappedNodeInfo =>
         _tappedNode == null ? string.Empty
-        : $"{_tappedNode.Name} · Этаж {_tappedNode.FloorNumber}";
+        : $"{_tappedNode.Name} · {_tappedNode.FloorNumber} этаж";
 
     /// <summary>Whether the node-tap popup is visible.</summary>
     public bool IsNodePopupOpen
