@@ -629,7 +629,7 @@ public class MainViewModel : INotifyPropertyChanged
         Floor? GetFloor(int num) =>
             _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == num);
 
-        var destination = EndNode?.Name ?? "назначение";
+        var destination = "места назначения";
 
         if (segments.Count == 1)
         {
