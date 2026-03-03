@@ -375,8 +375,8 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command AddScheduleEntryCommand                   { get; }
     public Command<ScheduleEntry> RemoveScheduleEntryCommand  { get; }
     public Command ClearAllScheduleEntriesCommand             { get; }
-    public Command<NavNode> SelectScheduleRoomCommand         { get; }
-    public Command<StudyGroup> SelectScheduleGroupCommand     { get; }
+    public Command<SchedRoomItem> SelectScheduleRoomCommand  { get; }
+    public Command<SchedGroupItem> SelectScheduleGroupCommand { get; }
     public Command<string>     SwitchScheduleViewCommand      { get; }
     public Command<StudentRowVm> ChangeStudentPasswordCommand  { get; }
     public Command ResetNodeStyleCommand          { get; }
@@ -681,14 +681,21 @@ public class AdminViewModel : INotifyPropertyChanged
         _ = LoadScheduleAsync();
 
         // Schedule commands
-        SelectScheduleRoomCommand = new Command<NavNode>(node =>
+        SelectScheduleRoomCommand = new Command<SchedRoomItem>(item =>
         {
-            NewEntrySelectedRoom = node;
+            foreach (var b in ScheduleRoomTree)
+                foreach (var f in b.Floors)
+                    foreach (var r in f.Rooms)
+                        r.IsSelected = r == item;
+            NewEntrySelectedRoom = item.Node;
         });
 
-        SelectScheduleGroupCommand = new Command<StudyGroup>(group =>
+        SelectScheduleGroupCommand = new Command<SchedGroupItem>(item =>
         {
-            NewEntrySelectedGroup = group;
+            foreach (var d in ScheduleDeptGroups)
+                foreach (var g in d.Groups)
+                    g.IsSelected = g == item;
+            NewEntrySelectedGroup = item.Group;
         });
 
         SwitchScheduleViewCommand = new Command<string>(m => ScheduleViewMode = int.TryParse(m, out var i) ? i : 0);
@@ -745,6 +752,13 @@ public class AdminViewModel : INotifyPropertyChanged
             RebuildScheduleEntriesView();
             NewEntrySelectedRoom  = null;
             NewEntrySelectedGroup = null;
+            foreach (var b in ScheduleRoomTree)
+                foreach (var f in b.Floors)
+                    foreach (var r in f.Rooms)
+                        r.IsSelected = false;
+            foreach (var d in ScheduleDeptGroups)
+                foreach (var g in d.Groups)
+                    g.IsSelected = false;
             NewEntryDayOfWeek = 5;
             NewEntryStart = "08:00";
             NewEntryEnd   = "09:30";
@@ -1441,7 +1455,7 @@ public class AdminViewModel : INotifyPropertyChanged
                                  && !string.IsNullOrWhiteSpace(n.Name))
                         .OrderBy(n => n.Name)
                         .ToList();
-                    return new SchedFloorGroup($"Этаж {f.Number}", rooms);
+                    return new SchedFloorGroup($"Этаж {f.Number}", rooms.Select(n => new SchedRoomItem(n)));
                 })
                 .Where(g => g.Rooms.Count > 0)
                 .ToList();
@@ -1454,7 +1468,7 @@ public class AdminViewModel : INotifyPropertyChanged
     {
         ScheduleDeptGroups.Clear();
         foreach (var dept in Departments)
-            ScheduleDeptGroups.Add(new SchedDeptGroup(dept));
+            ScheduleDeptGroups.Add(new SchedDeptGroup(dept, _authService));
     }
 
     private void RebuildScheduleEntriesView()
@@ -1665,16 +1679,39 @@ public sealed class DeptViewVm : INotifyPropertyChanged
 
 // ── Schedule picker tree helpers ────────────────────────────────────────────────
 
+public sealed class SchedRoomItem : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public NavNode Node { get; }
+    public string Name => Node.Name;
+    bool _selected;
+    public bool IsSelected { get => _selected; set { _selected = value; Notify(); } }
+    public SchedRoomItem(NavNode node) { Node = node; }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class SchedGroupItem : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public StudyGroup Group { get; }
+    public string Name => Group.Name;
+    public int StudentCount { get; }
+    bool _selected;
+    public bool IsSelected { get => _selected; set { _selected = value; Notify(); } }
+    public SchedGroupItem(StudyGroup group, int count) { Group = group; StudentCount = count; }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
 public sealed class SchedFloorGroup : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public string FloorLabel { get; }
-    public IReadOnlyList<NavNode> Rooms { get; }
+    public IReadOnlyList<SchedRoomItem> Rooms { get; }
     private bool _expanded;
     public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
     public string ChevronText => IsExpanded ? "▲" : "▼";
     public Command ToggleCommand { get; }
-    public SchedFloorGroup(string label, IEnumerable<NavNode> rooms)
+    public SchedFloorGroup(string label, IEnumerable<SchedRoomItem> rooms)
     {
         FloorLabel = label;
         Rooms = rooms.ToList();
@@ -1706,14 +1743,17 @@ public sealed class SchedDeptGroup : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public Department Dept { get; }
     public string Name => Dept.Name;
-    public ObservableCollection<StudyGroup> Groups => Dept.Groups;
+    public IReadOnlyList<SchedGroupItem> Groups { get; }
     private bool _expanded;
     public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
     public string ChevronText => IsExpanded ? "▲" : "▼";
     public Command ToggleCommand { get; }
-    public SchedDeptGroup(Department dept)
+    public SchedDeptGroup(Department dept, AuthService authService)
     {
         Dept = dept;
+        Groups = dept.Groups
+            .Select(g => new SchedGroupItem(g, authService.GetStudents().Count(s => s.GroupId == g.Id)))
+            .ToList();
         ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
     }
     void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));

@@ -1014,6 +1014,15 @@
                                                     </FormattedString>
                                                 </Label.FormattedText>
                                             </Label>
+                                            <Label FontSize="12" TextColor="#64748B">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="👤 " />
+                                                        <Span Text="{Binding PersonCount}" FontAttributes="Bold"/>
+                                                        <Span Text=" студентов" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
                                         </VerticalStackLayout>
                                         <Button Grid.Column="1" Text="🗑"
                                                 Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveScheduleEntryCommand}"
@@ -1086,7 +1095,14 @@
                                                                                             </FormattedString>
                                                                                         </Label.FormattedText>
                                                                                     </Label>
-                                                                                    <Label Text="{Binding RoomName}" FontSize="12" TextColor="#64748B" />
+                                                                                    <Label FontSize="12" TextColor="#64748B">
+                                                                                        <Label.FormattedText>
+                                                                                            <FormattedString>
+                                                                                                <Span Text="👤 " /><Span Text="{Binding PersonCount}" FontAttributes="Bold"/><Span Text=" студентов" />
+                                                                                            </FormattedString>
+                                                                                        </Label.FormattedText>
+                                                                                    </Label>
+                                                                                    <Label Text="{Binding RoomName}" FontSize="12" TextColor="#94A3B8" />
                                                                                 </VerticalStackLayout>
                                                                                 <Button Grid.Column="1" Text="🗑"
                                                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveScheduleEntryCommand}"
@@ -1166,6 +1182,13 @@
                                                                                             <FormattedString>
                                                                                                 <Span Text="📅 " /><Span Text="{Binding DisplayDate}" FontAttributes="Bold"/>
                                                                                                 <Span Text="  " /><Span Text="{Binding TimeSlots[0]}" />
+                                                                                            </FormattedString>
+                                                                                        </Label.FormattedText>
+                                                                                    </Label>
+                                                                                    <Label FontSize="12" TextColor="#64748B">
+                                                                                        <Label.FormattedText>
+                                                                                            <FormattedString>
+                                                                                                <Span Text="👤 " /><Span Text="{Binding PersonCount}" FontAttributes="Bold"/><Span Text=" студентов" />
                                                                                             </FormattedString>
                                                                                         </Label.FormattedText>
                                                                                     </Label>
@@ -1279,9 +1302,12 @@
                                                                                      BindableLayout.ItemsSource="{Binding Rooms}">
                                                                     <BindableLayout.ItemTemplate>
                                                                         <DataTemplate x:DataType="{x:Null}">
-                                                                            <Border Padding="30,10" BackgroundColor="Transparent" StrokeThickness="0">
+                                                                            <Border Padding="30,10"
+                                                                                    BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#BFDBFE|Transparent'}"
+                                                                                    StrokeShape="RoundRectangle 6" StrokeThickness="0">
                                                                                 <Label Text="{Binding Name}"
-                                                                                       FontSize="13" TextColor="#1E293B" />
+                                                                                       FontSize="13"
+                                                                                       TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E40AF|#1E293B'}" />
                                                                                 <Border.GestureRecognizers>
                                                                                     <TapGestureRecognizer
                                                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.SelectScheduleRoomCommand}"
@@ -1343,9 +1369,21 @@
                                                                      BindableLayout.ItemsSource="{Binding Groups}">
                                                     <BindableLayout.ItemTemplate>
                                                         <DataTemplate x:DataType="{x:Null}">
-                                                            <Border Padding="22,10" BackgroundColor="Transparent" StrokeThickness="0">
-                                                                <Label Text="{Binding Name}"
-                                                                       FontSize="13" TextColor="#1E293B" />
+                                                            <Border Padding="22,10"
+                                                                    BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#BBF7D0|Transparent'}"
+                                                                    StrokeShape="RoundRectangle 6" StrokeThickness="0">
+                                                                <VerticalStackLayout Spacing="1">
+                                                                    <Label Text="{Binding Name}"
+                                                                           FontSize="13"
+                                                                           TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#15803D|#1E293B'}" />
+                                                                    <Label FontSize="11" TextColor="#94A3B8">
+                                                                        <Label.FormattedText>
+                                                                            <FormattedString>
+                                                                                <Span Text="👤 " /><Span Text="{Binding StudentCount}" FontAttributes="Bold"/><Span Text=" студентов" />
+                                                                            </FormattedString>
+                                                                        </Label.FormattedText>
+                                                                    </Label>
+                                                                </VerticalStackLayout>
                                                                 <Border.GestureRecognizers>
                                                                     <TapGestureRecognizer
                                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.SelectScheduleGroupCommand}"
