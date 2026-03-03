@@ -10,7 +10,7 @@ namespace IndoorNav.ViewModels;
 public enum AdminMainTab  { Map, Management }
 public enum ManagementTab { Users, Departments, Schedule }
 
-public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddOther, AddFireExtinguisher, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddEvacuationExit, AddOther, AddFireExtinguisher, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
 
 
 public class AdminViewModel : INotifyPropertyChanged
@@ -154,6 +154,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsElevatorMode));
             OnPropertyChanged(nameof(IsStaircaseMode));
             OnPropertyChanged(nameof(IsExitMode));
+            OnPropertyChanged(nameof(IsEvacuationExitMode));
             OnPropertyChanged(nameof(IsOtherMode));
             OnPropertyChanged(nameof(IsFireExtinguisherMode));
             OnPropertyChanged(nameof(IsBoundaryMode));
@@ -165,8 +166,9 @@ public class AdminViewModel : INotifyPropertyChanged
     public bool IsTransitionMode => CurrentAction == AdminAction.AddTransition;
     public bool IsElevatorMode   => CurrentAction == AdminAction.AddElevator;
     public bool IsStaircaseMode  => CurrentAction == AdminAction.AddStaircase;
-    public bool IsExitMode       => CurrentAction == AdminAction.AddExit;
-    public bool IsOtherMode      => CurrentAction == AdminAction.AddOther;
+    public bool IsExitMode           => CurrentAction == AdminAction.AddExit;
+    public bool IsEvacuationExitMode  => CurrentAction == AdminAction.AddEvacuationExit;
+    public bool IsOtherMode           => CurrentAction == AdminAction.AddOther;
     public bool IsFireExtinguisherMode => CurrentAction == AdminAction.AddFireExtinguisher;
     public bool IsConnectMode    => CurrentAction == AdminAction.ConnectNode;
     public bool IsDisconnectMode => CurrentAction == AdminAction.DisconnectNode;
@@ -211,6 +213,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetElevatorModeCommand         { get; }
     public Command SetStaircaseModeCommand        { get; }
     public Command SetExitModeCommand             { get; }
+    public Command SetEvacuationExitModeCommand    { get; }
     public Command SetFireExtinguisherModeCommand { get; }
     public Command ToggleEmergencyCommand         { get; }
     public Command AddStudentCommand              { get; }
@@ -620,6 +623,11 @@ public class AdminViewModel : INotifyPropertyChanged
             CurrentAction = AdminAction.AddExit;
             StatusText    = "Режим выхода: нажмите на план — будет добавлена точка выхода.";
         });
+        SetEvacuationExitModeCommand = new Command(() =>
+        {
+            CurrentAction = AdminAction.AddEvacuationExit;
+            StatusText    = "Режим эвак. выхода: нажмите на план — будет добавлена точка эвак. выхода (видна только в режиме ЧС).";
+        });
         SetFireExtinguisherModeCommand = new Command(() =>
         {
             CurrentAction = AdminAction.AddFireExtinguisher;
@@ -1025,11 +1033,13 @@ public class AdminViewModel : INotifyPropertyChanged
          || CurrentAction == AdminAction.AddStaircase
          || CurrentAction == AdminAction.AddExit
          || CurrentAction == AdminAction.AddOther
-         || CurrentAction == AdminAction.AddFireExtinguisher)
+         || CurrentAction == AdminAction.AddFireExtinguisher
+         || CurrentAction == AdminAction.AddEvacuationExit)
         {
             bool isElevatorAction        = CurrentAction == AdminAction.AddElevator;
             bool isStaircaseAction       = CurrentAction == AdminAction.AddStaircase;
             bool isExitAction            = CurrentAction == AdminAction.AddExit;
+            bool isEvacuationExitAction  = CurrentAction == AdminAction.AddEvacuationExit;
             bool isOtherAction           = CurrentAction == AdminAction.AddOther;
             bool isFireExtinguisherAction = CurrentAction == AdminAction.AddFireExtinguisher;
             bool forceTransit            = CurrentAction == AdminAction.AddTransition || isElevatorAction || isStaircaseAction;
@@ -1038,6 +1048,10 @@ public class AdminViewModel : INotifyPropertyChanged
             if (isFireExtinguisherAction)
             {
                 title = "Огнетушитель"; promptMsg = "Название/номер огнетушителя:"; placeholder = "Например: Огнетушитель 1, ОП-5";
+            }
+            else if (isEvacuationExitAction)
+            {
+                title = "Эвак. выход"; promptMsg = "Название эвак. выхода:"; placeholder = "Например: Эвак. выход 1, Западный выход";
             }
             else if (isExitAction)
             {
@@ -1089,18 +1103,19 @@ public class AdminViewModel : INotifyPropertyChanged
                 IsTransition       = isTransit,
                 IsElevator         = isElevator,
                 IsExit             = isExitAction,
+                IsEvacuationExit   = isEvacuationExitAction,
                 IsHidden           = isHidden,
                 IsRoom             = CurrentAction == AdminAction.AddNode,
                 IsFireExtinguisher = isFireExtinguisherAction,
-                NodeColorHex       = isFireExtinguisherAction ? "4CAF50" : null,
-                NodeRadiusScale    = isFireExtinguisherAction ? 0.6f : 1f,
-                InnerLabel         = isFireExtinguisherAction ? "🧯" : null,
+                NodeColorHex       = isEvacuationExitAction ? "DC2626" : isFireExtinguisherAction ? "4CAF50" : null,
+                NodeRadiusScale    = (isFireExtinguisherAction || isEvacuationExitAction) ? 0.8f : 1f,
+                InnerLabel         = isEvacuationExitAction ? "🚪" : isFireExtinguisherAction ? "🧯" : null,
             };
 
             _graphService.AddNode(node);
             RefreshOverlay();
             CurrentAction = AdminAction.None;
-            string typeLabel = isFireExtinguisherAction ? " (огнетушитель)" : isExitAction ? " (выход)" : isElevator ? " (лифт)" : isTransit ? " (лестница)" : isOtherAction ? " (прочее)" : " (аудитория)";
+            string typeLabel = isFireExtinguisherAction ? " (огнетушитель)" : isEvacuationExitAction ? " (эвак. выход)" : isExitAction ? " (выход)" : isElevator ? " (лифт)" : isTransit ? " (лестница)" : isOtherAction ? " (прочее)" : " (аудитория)";
             StatusText    = $"Добавлен: {node.Name}{typeLabel}";
         }
         else if (CurrentAction == AdminAction.DrawCorridor)

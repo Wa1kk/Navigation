@@ -169,6 +169,12 @@
                             TextColor="{Binding IsFireExtinguisherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                             CornerRadius="8" HeightRequest="38" />
 
+                    <Button Text="🚪 Эвак. выход"
+                            Command="{Binding SetEvacuationExitModeCommand}"
+                            BackgroundColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7F1D1D|#1E293B'}"
+                            TextColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
                     <Button Text="••• Прочее"
                             Command="{Binding SetOtherModeCommand}"
                             BackgroundColor="{Binding IsOtherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#B45309|#1E293B'}"
@@ -555,6 +561,11 @@
                                 Command="{Binding SetExitModeCommand}"
                                 BackgroundColor="{Binding IsExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#15803D|#1E293B'}"
                                 TextColor="{Binding IsExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                                FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="🚪 Эвак."
+                                Command="{Binding SetEvacuationExitModeCommand}"
+                                BackgroundColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7F1D1D|#1E293B'}"
+                                TextColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                                 FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
                         <Button Text="••• Проч."
                                 Command="{Binding SetOtherModeCommand}"

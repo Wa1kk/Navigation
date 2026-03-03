@@ -25,6 +25,9 @@ public class NavNode
     /// <summary>Огнетушитель — отображается только в режиме ЧС.</summary>
     public bool IsFireExtinguisher { get; set; }
 
+    /// <summary>Эвакуационный выход — виден пользователю только в режиме ЧС. Также является конечным узлом при построении маршрута эвакуации.</summary>
+    public bool IsEvacuationExit { get; set; }
+
     /// <summary>Скрыть точку в пользовательском режиме (admin видит всегда).</summary>
     public bool IsHidden { get; set; }
 

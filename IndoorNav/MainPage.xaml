@@ -310,7 +310,9 @@
                                 <Label Text="{Binding TappedNodeInfo}"
                                        FontSize="12" TextColor="#64748B"
                                        HorizontalOptions="Center" />
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <!-- Нормальный режим: две кнопки -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                                      IsVisible="{Binding IsNormalMode}">
                                     <Button Grid.Column="0" Text="Отсюда"
                                             Command="{Binding SetTappedAsStartCommand}"
                                             BackgroundColor="#2B4EDB" TextColor="White"
@@ -324,6 +326,14 @@
                                             FontSize="13" FontAttributes="Bold"
                                             CornerRadius="22" HeightRequest="44" />
                                 </Grid>
+                                <!-- Режим ЧС: только кнопка Отсюда на всю ширину -->
+                                <Button Text="Отсюда"
+                                        Command="{Binding SetTappedAsStartCommand}"
+                                        IsVisible="{Binding IsEmergencyActive}"
+                                        BackgroundColor="#DC2626" TextColor="White"
+                                        BorderWidth="0"
+                                        FontSize="13" FontAttributes="Bold"
+                                        CornerRadius="22" HeightRequest="44" />
                             </VerticalStackLayout>
                             <!-- Close button top-right -->
                             <Border BackgroundColor="#E5E7EB"

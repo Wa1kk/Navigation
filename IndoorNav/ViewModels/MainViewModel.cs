@@ -207,6 +207,7 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>"Аудитория" / "Лифт" / "Лестница" depending on node type, empty for others.</summary>
     public string TappedNodeTypeLabel => _tappedNode switch
     {
+        { IsEvacuationExit: true }              => "🚪 Эвак. выход",
         { IsRoom: true }                        => "Аудитория",
         { IsTransition: true, IsElevator: true } => "Лифт",
         { IsTransition: true }                  => "Лестница",

@@ -628,7 +628,7 @@ public class SvgView : SKCanvasView
         // а также узлы огнетушителей (если не активирован режим ЧС)
         var visibleNodes = IsAdminMode
             ? nodes.ToList()
-            : nodes.Where(n => !n.IsWaypoint && (!n.IsFireExtinguisher || ShowFireExtinguishers)).ToList();
+            : nodes.Where(n => !n.IsWaypoint && (!n.IsFireExtinguisher || ShowFireExtinguishers) && (!n.IsEvacuationExit || ShowFireExtinguishers)).ToList();
 
         float sc = MatrixScale();
         if (sc < 0.001f) sc = 1f;
@@ -798,8 +798,9 @@ public class SvgView : SKCanvasView
         using var fillNorm  = new SKPaint { Color = new SKColor(33, 150, 243),  IsAntialias = true };
         using var fillSel   = new SKPaint { Color = new SKColor(255, 152, 0),   IsAntialias = true };
         using var fillTrans = new SKPaint { Color = new SKColor(156, 39, 176),  IsAntialias = true };
-        using var fillExit  = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
-        using var fillFireExt = new SKPaint { Color = new SKColor(76, 175, 80), IsAntialias = true };
+        using var fillExit     = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
+        using var fillFireExt  = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
+        using var fillEvacExit = new SKPaint { Color = new SKColor(220, 38, 38),   IsAntialias = true };
         using var stroke    = new SKPaint { Color = SKColors.White, StrokeWidth = 2.5f / sc, IsStroke = true, IsAntialias = true };
         using var shadowP   = new SKPaint { Color = new SKColor(0, 0, 0, 60), IsAntialias = true,
                                             MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4f / sc) };
@@ -842,7 +843,8 @@ public class SvgView : SKCanvasView
                         fill = fillNorm;
                 }
                 else if (node.IsFireExtinguisher) fill = fillFireExt;
-                else if (node.IsExit)       fill = fillExit;
+                else if (node.IsEvacuationExit)   fill = fillEvacExit;
+                else if (node.IsExit)              fill = fillExit;
                 else if (node.IsTransition) fill = fillTrans;
                 else                        fill = fillNorm;
 
