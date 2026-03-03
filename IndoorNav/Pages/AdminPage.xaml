@@ -398,22 +398,15 @@
 
             <!-- ═══ PHONE TOP BAR (hidden on desktop) ═══ -->
             <Grid Grid.Row="0" BackgroundColor="#0F172A" Padding="10,8,10,8"
-                  ColumnDefinitions="Auto,*,*" ColumnSpacing="6"
+                  ColumnDefinitions="*,*" ColumnSpacing="6"
                   IsVisible="{OnIdiom Phone=True, Default=False}">
-                <Button Grid.Column="0"
-                        Text="←"
-                        Clicked="OnExitAdminClicked"
-                        BackgroundColor="#1E3A5F" TextColor="#93C5FD"
-                        FontSize="16" FontAttributes="Bold"
-                        WidthRequest="44" HeightRequest="44" CornerRadius="8"
-                        Padding="0" />
-                <Picker Grid.Column="1"
+                <Picker Grid.Column="0"
                         ItemsSource="{Binding Buildings}"
                         SelectedItem="{Binding SelectedBuilding, Mode=TwoWay}"
                         ItemDisplayBinding="{Binding Name}"
                         Title="Здание" TitleColor="#475569"
                         TextColor="White" BackgroundColor="#1E293B" />
-                <Picker Grid.Column="2"
+                <Picker Grid.Column="1"
                         ItemsSource="{Binding Floors}"
                         SelectedItem="{Binding SelectedFloor, Mode=TwoWay}"
                         ItemDisplayBinding="{Binding Name}"

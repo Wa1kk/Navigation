@@ -27,6 +27,9 @@ public class AuthService
     public bool IsLoggedIn       => CurrentUser != null;
     public UserRole CurrentRole  => CurrentUser?.Role ?? UserRole.Guest;
 
+    /// <summary>Fired whenever the current user changes (login, logout, guest).</summary>
+    public event EventHandler? UserChanged;
+
     private string FilePath => Path.Combine(FileSystem.AppDataDirectory, UsersFileName);
 
     // ── Initialisation ───────────────────────────────────────────────────────────
@@ -111,6 +114,7 @@ public class AuthService
         CurrentUser = guest;
         // Don't persist guest session across restarts
         Preferences.Default.Remove(SessionUserIdKey);
+        UserChanged?.Invoke(this, EventArgs.Empty);
         return guest;
     }
 
@@ -119,6 +123,7 @@ public class AuthService
         CurrentUser = null;
         Preferences.Default.Remove(SessionUserIdKey);
         Preferences.Default.Remove(SessionRoleKey);
+        UserChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public IReadOnlyList<AuthUser> GetAllUsers() => _users;
@@ -157,6 +162,7 @@ public class AuthService
         CurrentUser = user;
         Preferences.Default.Set(SessionUserIdKey, user.Id);
         Preferences.Default.Set(SessionRoleKey, user.Role.ToString());
+        UserChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public static string Hash(string input)

@@ -326,6 +326,8 @@ public class MainViewModel : INotifyPropertyChanged
 
         // Subscribe to emergency state changes
         _emergencyService.EmergencyChanged += OnEmergencyChanged;
+        // Subscribe to auth changes to refresh role-dependent UI
+        _authService.UserChanged += OnUserChanged;
 
         BuildRouteCommand = new Command(ExecuteBuildRoute,
             () => StartNode != null && EndNode != null);
@@ -824,6 +826,36 @@ public class MainViewModel : INotifyPropertyChanged
     {
         TappedNode = node;
         IsNodePopupOpen = true;
+    }
+
+    private void OnUserChanged(object? sender, EventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            OnPropertyChanged(nameof(IsAdminUser));
+            OnPropertyChanged(nameof(CurrentUserName));
+            ((Command)GoToAdminCommand).ChangeCanExecute();
+
+            // If emergency is already active when a student logs in, trigger auto-detection
+            if (_isEmergencyActive && _authService.CurrentRole == UserRole.Student)
+            {
+                var groupId = _authService.CurrentUser?.GroupId;
+                if (!string.IsNullOrEmpty(groupId))
+                {
+                    var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
+                    if (entry != null)
+                    {
+                        var autoRoomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
+                        if (autoRoomNode != null)
+                        {
+                            StartNode = autoRoomNode;
+                            EmergencyAutoLocationName = autoRoomNode.DisplayName;
+                            ShowEmergencyConfirmation = true;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void OnEmergencyChanged(object? sender, bool isActive)
