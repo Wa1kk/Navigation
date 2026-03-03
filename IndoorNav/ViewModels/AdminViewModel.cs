@@ -128,6 +128,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeColor));
             OnPropertyChanged(nameof(SelectedInnerLabel));
             OnPropertyChanged(nameof(SelectedSearchTags));
+            OnPropertyChanged(nameof(SelectedCategory));
             OnPropertyChanged(nameof(SelectedNodeIsRoom));
             OnPropertyChanged(nameof(SelectedNodeIsRoomText));
             SelectedBoundaryVertexIndex = -1;
@@ -193,6 +194,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command DeleteBoundaryVertexCommand   { get; }
     public Command EditInnerLabelCommand         { get; }
     public Command EditSearchTagsCommand         { get; }
+    public Command EditCategoryCommand           { get; }
     public Command ToggleIsRoomCommand           { get; }
     public Command SaveCommand                   { get; }
     public Command CancelActionCommand           { get; }
@@ -398,6 +400,11 @@ public class AdminViewModel : INotifyPropertyChanged
         get => SelectedNode?.SearchTags ?? string.Empty;
         set { if (SelectedNode != null) { SelectedNode.SearchTags = value; OnPropertyChanged(); } }
     }
+    public string SelectedCategory
+    {
+        get => SelectedNode?.Category ?? string.Empty;
+        set { if (SelectedNode != null) { SelectedNode.Category = value; OnPropertyChanged(); } }
+    }
     public bool SelectedNodeIsRoom
     {
         get => SelectedNode?.IsRoom ?? false;
@@ -531,6 +538,18 @@ public class AdminViewModel : INotifyPropertyChanged
                 maxLength: 200);
             if (val == null) return; // cancel
             SelectedSearchTags = val.Trim();
+        });
+        EditCategoryCommand = new Command(async () =>
+        {
+            if (SelectedNode == null) return;
+            var val = await Shell.Current.DisplayPromptAsync(
+                "Категория точки",
+                "Категория отображается пользователю при выборе точки (например: Кафедра, Туалет, Столовая)",
+                initialValue: SelectedNode.Category,
+                placeholder: "Пусто = без категории",
+                maxLength: 100);
+            if (val == null) return; // cancel
+            SelectedCategory = val.Trim();
         });
         ToggleIsRoomCommand = new Command(() =>
         {

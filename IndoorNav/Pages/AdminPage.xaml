@@ -343,6 +343,13 @@
                                     LineBreakMode="TailTruncation"
                                     FontSize="12" HeightRequest="32" CornerRadius="6" />
 
+                            <!-- Категория -->
+                            <Button Text="{Binding SelectedCategory, StringFormat='🏷️ Категория: {0}'}"
+                                    Command="{Binding EditCategoryCommand}"
+                                    BackgroundColor="#162032" TextColor="#7DD3FC"
+                                    LineBreakMode="TailTruncation"
+                                    FontSize="12" HeightRequest="32" CornerRadius="6" />
+
                             <!-- Тип: аудитория -->
                             <Button Text="{Binding SelectedNodeIsRoomText}"
                                     Command="{Binding ToggleIsRoomCommand}"

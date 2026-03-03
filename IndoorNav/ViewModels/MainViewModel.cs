@@ -198,7 +198,7 @@ public class MainViewModel : INotifyPropertyChanged
     public NavNode? TappedNode
     {
         get => _tappedNode;
-        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); OnPropertyChanged(nameof(TappedNodeTypeLabel)); OnPropertyChanged(nameof(TappedNodeInfo)); }
+        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); OnPropertyChanged(nameof(TappedNodeTypeLabel)); OnPropertyChanged(nameof(TappedNodeInfo)); OnPropertyChanged(nameof(TappedNodeCategory)); }
     }
 
     /// <summary>Display name of the tapped node for the popup header.</summary>
@@ -212,6 +212,9 @@ public class MainViewModel : INotifyPropertyChanged
         { IsTransition: true }                  => "Лестница",
         _                                       => string.Empty
     };
+
+    /// <summary>Category of the tapped node, empty when not set.</summary>
+    public string TappedNodeCategory => _tappedNode?.Category ?? string.Empty;
 
     /// <summary>Meta info line: "Name · N этаж".</summary>
     public string TappedNodeInfo =>

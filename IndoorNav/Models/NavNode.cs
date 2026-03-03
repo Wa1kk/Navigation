@@ -52,6 +52,9 @@ public class NavNode
     /// <summary>Доп. ключевые слова для поиска. Не отображаются на карте, учитываются при фильтрации.</summary>
     public string SearchTags { get; set; } = string.Empty;
 
+    /// <summary>Категория точки (например: "Кафедра", "Туалет", "Столовая"). Отображается в попапе пользователя.</summary>
+    public string Category { get; set; } = string.Empty;
+
     /// <summary>Отображаемое имя в пикере поиска: если SearchTags заданы — выводится "Имя · Теги", иначе просто Имя.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(SearchTags)
         ? Name
