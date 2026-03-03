@@ -155,6 +155,7 @@
                         TextColor="White" BackgroundColor="#1E293B" />
                 <Button Grid.Column="2" Text="⚙"
                         Command="{Binding GoToAdminCommand}"
+                        IsVisible="{Binding IsAdminUser}"
                         BackgroundColor="#1E293B" TextColor="#64748B"
                         WidthRequest="44" HeightRequest="44"
                         CornerRadius="8" Padding="0" />

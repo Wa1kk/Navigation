@@ -32,9 +32,20 @@
                         StrokeShape="RoundRectangle 12"
                         Stroke="#E2E8F0" StrokeThickness="1"
                         Padding="6" Margin="0,0,0,24">
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
-                        <!-- Student pill -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                        <!-- Admin pill -->
                         <Border Grid.Column="0"
+                                BackgroundColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
+                            <Label Text="Админ" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                   HorizontalOptions="Center" />
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectAdminRoleCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                        <!-- Student pill -->
+                        <Border Grid.Column="1"
                                 BackgroundColor="{Binding IsStudent, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
                                 StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
                             <Label Text="Студент" FontSize="13" FontAttributes="Bold"
@@ -45,7 +56,7 @@
                             </Border.GestureRecognizers>
                         </Border>
                         <!-- Guest pill -->
-                        <Border Grid.Column="1"
+                        <Border Grid.Column="2"
                                 BackgroundColor="{Binding IsGuest, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
                                 StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
                             <Label Text="Гость" FontSize="13" FontAttributes="Bold"
