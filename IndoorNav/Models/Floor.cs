@@ -9,12 +9,7 @@ public class Floor
     public Floor(int number, string svgPath)
     {
         Number = number;
-        Name = number switch
-        {
-            -1 => "Подвал",
-             0 => "Цоколь",
-             _ => $"Этаж {number}"
-        };
+        Name = $"Этаж {number}";
         SvgPath = svgPath;
     }
 }
