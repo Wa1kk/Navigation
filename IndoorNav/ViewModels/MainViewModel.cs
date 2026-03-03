@@ -115,11 +115,30 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsEmergencyActive
     {
         get => _isEmergencyActive;
-        private set { _isEmergencyActive = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShowFireExtinguishers)); OnPropertyChanged(nameof(EmergencyMessage)); }
+        private set { _isEmergencyActive = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShowFireExtinguishers)); OnPropertyChanged(nameof(EmergencyMessage)); OnPropertyChanged(nameof(IsNormalMode)); }
     }
     public string EmergencyMessage => _emergencyService?.EmergencyMessage ?? string.Empty;
     /// <summary>Передаётся в SvgView.ShowFireExtinguishers — огнетушители видны только при ЧС.</summary>
     public bool ShowFireExtinguishers => _isEmergencyActive;
+    /// <summary>Инверсия для скрытия поля ДО в обычном режиме.</summary>
+    public bool IsNormalMode => !_isEmergencyActive;
+
+    // ── Emergency confirmation UX ────────────────────────────────────────────
+    private bool _showEmergencyConfirmation;
+    /// <summary>Visible when emergency is active and an auto-location was detected from schedule.</summary>
+    public bool ShowEmergencyConfirmation
+    {
+        get => _showEmergencyConfirmation;
+        private set { _showEmergencyConfirmation = value; OnPropertyChanged(); }
+    }
+
+    private string _emergencyAutoLocationName = string.Empty;
+    /// <summary>Display name of the room auto-detected for the student via schedule.</summary>
+    public string EmergencyAutoLocationName
+    {
+        get => _emergencyAutoLocationName;
+        private set { _emergencyAutoLocationName = value; OnPropertyChanged(); }
+    }
 
     // ── Routing properties ──────────────────────────────────────────────────
 
@@ -141,6 +160,7 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(StartNodeDisplay));
             OnPropertyChanged(nameof(HasAnySelection));
             ((Command)BuildRouteCommand).ChangeCanExecute();
+            ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
         }
     }
 
@@ -291,6 +311,9 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SetTappedAsEndCommand   { get; }
     public ICommand CloseNodePopupCommand   { get; }
     public ICommand LogoutCommand           { get; }
+    public ICommand ConfirmEmergencyLocationCommand  { get; }
+    public ICommand CancelEmergencyConfirmationCommand { get; }
+    public ICommand BuildEmergencyRouteCommand { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
@@ -362,6 +385,23 @@ public class MainViewModel : INotifyPropertyChanged
             IsNodePopupOpen = false;
         });
         CloseNodePopupCommand = new Command(() => IsNodePopupOpen = false);
+
+        ConfirmEmergencyLocationCommand = new Command(() =>
+        {
+            ShowEmergencyConfirmation = false;
+            // StartNode already set from schedule detection — route to nearest exit
+            ExecuteBuildEmergencyRoute();
+        });
+
+        CancelEmergencyConfirmationCommand = new Command(() =>
+        {
+            ShowEmergencyConfirmation = false;
+            // Clear auto-set start node so user picks manually
+            StartNode = null;
+        });
+
+        BuildEmergencyRouteCommand = new Command(() => ExecuteBuildEmergencyRoute(),
+            () => StartNode != null);
 
         _ = InitializeAsync();
     }
@@ -791,48 +831,59 @@ public class MainViewModel : INotifyPropertyChanged
         IsEmergencyActive = isActive;
         OnPropertyChanged(nameof(IsAdminUser));
         ((Command)GoToAdminCommand).ChangeCanExecute();
+        ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
 
-        if (isActive)
+        if (!isActive)
         {
-            // Show notification on the UI thread
-            MainThread.BeginInvokeOnMainThread(async () =>
+            ShowEmergencyConfirmation = false;
+            return;
+        }
+
+        // Emergency became active — try to auto-detect student's room from schedule
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            NavNode? autoRoomNode = null;
+
+            if (_authService.CurrentRole == UserRole.Student)
             {
-                // For students: try to auto-determine current room via schedule
-                if (StartNode == null && _authService.CurrentRole == UserRole.Student)
+                var groupId = _authService.CurrentUser?.GroupId;
+                if (!string.IsNullOrEmpty(groupId))
                 {
-                    var groupId = _authService.CurrentUser?.GroupId;
-                    if (!string.IsNullOrEmpty(groupId))
+                    var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
+                    if (entry != null)
                     {
-                        var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
-                        if (entry != null)
-                        {
-                            var roomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
-                            if (roomNode != null)
-                                StartNode = roomNode;
-                        }
+                        autoRoomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
                     }
                 }
+            }
 
-                string locationHint = StartNode != null
-                    ? $"Ваше местоположение: {StartNode.DisplayName}. Строю маршрут до выхода."
-                    : "Выберите своё местоположение на карте для построения маршрута.";
+            if (autoRoomNode != null)
+            {
+                // Pre-fill start node and show confirmation card
+                StartNode = autoRoomNode;
+                EmergencyAutoLocationName = autoRoomNode.DisplayName;
+                ShowEmergencyConfirmation = true;
+            }
+            else
+            {
+                // No schedule entry — user picks manually, no confirmation card
+                ShowEmergencyConfirmation = false;
+            }
+        });
+    }
 
-                await Shell.Current.DisplayAlert(
-                    "⚠ РЕЖИМ ЧРЕЗВЫЧАЙНОЙ СИТУАЦИИ",
-                    $"Активирован режим ЧС! Следуйте к ближайшему выходу.\n\n{locationHint}",
-                    "OK");
-
-                // Auto-route to nearest exit from current start node
-                if (StartNode != null)
-                {
-                    var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph);
-                    if (path.Count > 1)
-                    {
-                        EndNode = path.Last();
-                        ExecuteBuildRoute();
-                    }
-                }
-            });
+    private void ExecuteBuildEmergencyRoute()
+    {
+        if (StartNode == null) return;
+        var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph);
+        if (path.Count > 1)
+        {
+            EndNode = path.Last();
+            ExecuteBuildRoute();
+        }
+        else
+        {
+            RouteStatus = "Выход не найден. Обратитесь к сотрудникам.";
         }
     }
 

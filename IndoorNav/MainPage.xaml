@@ -218,6 +218,50 @@
                                FontSize="13" HorizontalTextAlignment="Center" />
                     </Border>
 
+                    <!-- Подтверждение местоположения (автоопределено по расписанию) -->
+                    <Border HorizontalOptions="Center" VerticalOptions="Center"
+                            BackgroundColor="White" Padding="20,18"
+                            StrokeShape="RoundRectangle 16"
+                            Stroke="#DC2626" StrokeThickness="2"
+                            IsVisible="{Binding ShowEmergencyConfirmation}"
+                            ZIndex="30"
+                            MaximumWidthRequest="360">
+                        <VerticalStackLayout Spacing="14">
+                            <Label Text="⚠️ Чрезвычайная ситуация"
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="#DC2626"
+                                   HorizontalOptions="Center" />
+                            <Label FontSize="14" TextColor="#334155"
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Вы сейчас в " />
+                                        <Span Text="{Binding EmergencyAutoLocationName}" FontAttributes="Bold" TextColor="#2563EB" />
+                                        <Span Text="?" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Подтвердите своё местоположение или выберите другую точку."
+                                   FontSize="12" TextColor="#64748B"
+                                   HorizontalTextAlignment="Center"
+                                   LineBreakMode="WordWrap" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Grid.Column="0"
+                                        Text="✖ Отмена"
+                                        Command="{Binding CancelEmergencyConfirmationCommand}"
+                                        BackgroundColor="#F1F5F9" TextColor="#475569"
+                                        FontSize="14" HeightRequest="46" CornerRadius="10" />
+                                <Button Grid.Column="1"
+                                        Text="✔ Я здесь"
+                                        Command="{Binding ConfirmEmergencyLocationCommand}"
+                                        BackgroundColor="#DC2626" TextColor="White"
+                                        FontAttributes="Bold"
+                                        FontSize="14" HeightRequest="46" CornerRadius="10" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
                     <!-- Breadcrumb pill (top-left overlay) -->
                     <Border HorizontalOptions="Start" VerticalOptions="Start"
                             Margin="12" Padding="12,6"
@@ -316,7 +360,8 @@
                                 </Border.GestureRecognizers>
                             </Border>
                         </Grid>
-                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
+                        <!-- ДО — скрыто в режиме ЧС -->
+                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
                             <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
                                    TextColor="#94A3B8" VerticalOptions="Center" />
                             <Border Grid.Column="1" Padding="12,12"
@@ -328,10 +373,24 @@
                                 </Border.GestureRecognizers>
                             </Border>
                         </Grid>
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <!-- Обычные кнопки маршрута -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
                             <Button Grid.Column="0" Text="Построить маршрут"
                                     Command="{Binding BuildRouteCommand}"
                                     BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="14" HeightRequest="48" CornerRadius="10" />
+                            <Button Grid.Column="1" Text="✕"
+                                    Command="{Binding ClearRouteCommand}"
+                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                    TextColor="White" FontSize="15"
+                                    WidthRequest="48" HeightRequest="48" CornerRadius="10" Padding="0" />
+                        </Grid>
+                        <!-- Кнопка эвакуации (только в режиме ЧС) -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsEmergencyActive}">
+                            <Button Grid.Column="0" Text="🚨  До выхода"
+                                    Command="{Binding BuildEmergencyRouteCommand}"
+                                    BackgroundColor="#DC2626" TextColor="White"
+                                    FontAttributes="Bold"
                                     FontSize="14" HeightRequest="48" CornerRadius="10" />
                             <Button Grid.Column="1" Text="✕"
                                     Command="{Binding ClearRouteCommand}"
@@ -366,8 +425,8 @@
                             </Border>
                         </VerticalStackLayout>
 
-                        <!-- Куда field -->
-                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <!-- Куда field — скрыто в режиме ЧС -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding IsNormalMode}">
                             <Label Text="ДО" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
                             <Border Padding="10,8"
                                     StrokeShape="RoundRectangle 8"
@@ -382,12 +441,35 @@
                             </Border>
                         </VerticalStackLayout>
 
+                        <!-- Подсказка местоположения в режиме ЧС (вместо ДО) -->
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding IsEmergencyActive}">
+                            <Label Text="ЧС — выберите точку выхода" FontSize="10" CharacterSpacing="1.5" TextColor="#DC2626" />
+                            <Border Padding="10,8"
+                                    StrokeShape="RoundRectangle 8"
+                                    Stroke="#FCA5A5" StrokeThickness="1"
+                                    BackgroundColor="#FEF2F2">
+                                <Label Text="Автоматически — ближайший выход"
+                                       FontSize="13" TextColor="#991B1B"
+                                       LineBreakMode="TailTruncation" />
+                            </Border>
+                        </VerticalStackLayout>
+
                         <!-- Build + Clear buttons -->
                         <Grid Grid.Column="2" ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="End">
+                            <!-- Обычная кнопка маршрута -->
                             <Button Grid.Column="0"
                                     Text="Построить маршрут"
                                     Command="{Binding BuildRouteCommand}"
+                                    IsVisible="{Binding IsNormalMode}"
                                     BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="13" Padding="18,9" CornerRadius="8" />
+                            <!-- Кнопка эвакуации в режиме ЧС -->
+                            <Button Grid.Column="0"
+                                    Text="🚨 До выхода"
+                                    Command="{Binding BuildEmergencyRouteCommand}"
+                                    IsVisible="{Binding IsEmergencyActive}"
+                                    BackgroundColor="#DC2626" TextColor="White"
+                                    FontAttributes="Bold"
                                     FontSize="13" Padding="18,9" CornerRadius="8" />
                             <Button Grid.Column="1"
                                     Text="✕"
