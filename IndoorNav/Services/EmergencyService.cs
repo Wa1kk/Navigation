@@ -34,7 +34,13 @@ public class EmergencyService
     /// </summary>
     public List<NavNode> FindNearestExitRoute(NavNode start, NavGraph graph)
     {
-        var exits = graph.Nodes.Where(n => n.IsExit).ToList();
+        // Only consider exits in the same building as the start node.
+        // Fall back to all exits if the building has none marked.
+        var exits = graph.Nodes
+            .Where(n => n.IsExit && n.BuildingId == start.BuildingId)
+            .ToList();
+        if (!exits.Any())
+            exits = graph.Nodes.Where(n => n.IsExit).ToList();
         if (!exits.Any()) return new();
 
         // Dijkstra
