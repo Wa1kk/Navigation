@@ -354,10 +354,25 @@ public class AdminViewModel : INotifyPropertyChanged
     // Tree models for group picker: Department → Groups
     public ObservableCollection<SchedDeptGroup> ScheduleDeptGroups { get; } = new();
 
+    // Entry display trees
+    public ObservableCollection<EntryBuildingGroup> ScheduleEntriesViewByRoom  { get; } = new();
+    public ObservableCollection<EntryFacultyGroup>  ScheduleEntriesViewByGroup { get; } = new();
+
+    private int _scheduleViewMode = 0;
+    public int ScheduleViewMode
+    {
+        get => _scheduleViewMode;
+        set { _scheduleViewMode = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsScheduleViewAll)); OnPropertyChanged(nameof(IsScheduleViewRoom)); OnPropertyChanged(nameof(IsScheduleViewGroup)); }
+    }
+    public bool IsScheduleViewAll   => _scheduleViewMode == 0;
+    public bool IsScheduleViewRoom  => _scheduleViewMode == 1;
+    public bool IsScheduleViewGroup => _scheduleViewMode == 2;
+
     public Command AddScheduleEntryCommand                   { get; }
     public Command<ScheduleEntry> RemoveScheduleEntryCommand  { get; }
     public Command<NavNode> SelectScheduleRoomCommand         { get; }
     public Command<StudyGroup> SelectScheduleGroupCommand     { get; }
+    public Command<string>     SwitchScheduleViewCommand      { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -670,6 +685,8 @@ public class AdminViewModel : INotifyPropertyChanged
             NewEntrySelectedGroup = group;
         });
 
+        SwitchScheduleViewCommand = new Command<string>(m => ScheduleViewMode = int.TryParse(m, out var i) ? i : 0);
+
         AddScheduleEntryCommand = new Command(async () =>
         {
             if (_newEntrySelectedRoom == null || _newEntrySelectedGroup == null) return;
@@ -688,6 +705,7 @@ public class AdminViewModel : INotifyPropertyChanged
             };
             await _scheduleService.AddEntryAsync(entry);
             ScheduleEntries.Add(entry);
+            RebuildScheduleEntriesView();
             NewEntrySelectedRoom  = null;
             NewEntrySelectedGroup = null;
             NewEntryDate  = DateTime.Today;
@@ -701,6 +719,7 @@ public class AdminViewModel : INotifyPropertyChanged
             if (entry == null) return;
             await _scheduleService.RemoveEntryAsync(entry.Id);
             ScheduleEntries.Remove(entry);
+            RebuildScheduleEntriesView();
         });
 
         AddStudentCommand = new Command(async () =>
@@ -1373,6 +1392,7 @@ public class AdminViewModel : INotifyPropertyChanged
         ScheduleEntries.Clear();
         foreach (var e in _scheduleService.Entries)
             ScheduleEntries.Add(e);
+        RebuildScheduleEntriesView();
     }
 
     private void RebuildScheduleRoomTree()
@@ -1406,6 +1426,48 @@ public class AdminViewModel : INotifyPropertyChanged
         ScheduleDeptGroups.Clear();
         foreach (var dept in Departments)
             ScheduleDeptGroups.Add(new SchedDeptGroup(dept));
+    }
+
+    private void RebuildScheduleEntriesView()
+    {
+        // ─── By Room: Building → Floor → Entries
+        ScheduleEntriesViewByRoom.Clear();
+        var nodeMap     = _graphService.Graph.Nodes.ToDictionary(n => n.Id);
+        var buildingMap = Buildings.ToDictionary(b => b.Id, b => b.Name);
+
+        var byBuilding = ScheduleEntries
+            .GroupBy(e => nodeMap.TryGetValue(e.RoomNodeId, out var n) ? n.BuildingId : string.Empty)
+            .Where(g => !string.IsNullOrEmpty(g.Key));
+
+        foreach (var bGrp in byBuilding.OrderBy(g => buildingMap.TryGetValue(g.Key, out var bn) ? bn : g.Key))
+        {
+            var buildingName = buildingMap.TryGetValue(bGrp.Key, out var name) ? name : bGrp.Key;
+            var byFloor = bGrp
+                .GroupBy(e => nodeMap.TryGetValue(e.RoomNodeId, out var n) ? n.FloorNumber : 0)
+                .OrderBy(g => g.Key)
+                .Select(fg => new EntryFloorGroup($"\u042d\u0442\u0430\u0436 {fg.Key}", fg.ToList()))
+                .ToList();
+            ScheduleEntriesViewByRoom.Add(new EntryBuildingGroup(buildingName, byFloor));
+        }
+
+        // ─── By Group: Faculty → StudyGroup → Entries
+        ScheduleEntriesViewByGroup.Clear();
+        var groupToFaculty = new Dictionary<string, string>();
+        foreach (var dept in Departments)
+            foreach (var g in dept.Groups)
+                groupToFaculty[g.Id] = dept.Name;
+
+        var byFaculty = ScheduleEntries
+            .GroupBy(e => groupToFaculty.TryGetValue(e.GroupId, out var f) ? f : "\u0411\u0435\u0437 \u0444\u0430\u043a\u0443\u043b\u044c\u0442\u0435\u0442\u0430");
+
+        foreach (var fGrp in byFaculty.OrderBy(g => g.Key))
+        {
+            var byGroup = fGrp.GroupBy(e => e.GroupName)
+                .OrderBy(g => g.Key)
+                .Select(gg => new EntryGroupEntries(gg.Key, gg.ToList()))
+                .ToList();
+            ScheduleEntriesViewByGroup.Add(new EntryFacultyGroup(fGrp.Key, byGroup));
+        }
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
@@ -1500,7 +1562,7 @@ public sealed class StudentGroupVm : INotifyPropertyChanged
     public string GroupName   { get; }
     public ObservableCollection<StudentRowVm> Students { get; } = new();
 
-    private bool _expanded = true;
+    private bool _expanded = false;
     public bool IsExpanded
     {
         get => _expanded;
@@ -1624,6 +1686,76 @@ public sealed class SchedDeptGroup : INotifyPropertyChanged
     public SchedDeptGroup(Department dept)
     {
         Dept = dept;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+// ── Entry display trees ────────────────────────────────────────────────────────
+
+public sealed class EntryFloorGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string FloorLabel { get; }
+    public List<ScheduleEntry> Entries { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▾" : "▸";
+    public Command ToggleCommand { get; }
+    public EntryFloorGroup(string label, List<ScheduleEntry> entries)
+    {
+        FloorLabel = label; Entries = entries;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class EntryBuildingGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string BuildingName { get; }
+    public List<EntryFloorGroup> Floors { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▾" : "▸";
+    public Command ToggleCommand { get; }
+    public EntryBuildingGroup(string name, List<EntryFloorGroup> floors)
+    {
+        BuildingName = name; Floors = floors;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class EntryGroupEntries : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string GroupName { get; }
+    public List<ScheduleEntry> Entries { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▾" : "▸";
+    public Command ToggleCommand { get; }
+    public EntryGroupEntries(string groupName, List<ScheduleEntry> entries)
+    {
+        GroupName = groupName; Entries = entries;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class EntryFacultyGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string FacultyName { get; }
+    public List<EntryGroupEntries> Groups { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▾" : "▸";
+    public Command ToggleCommand { get; }
+    public EntryFacultyGroup(string facultyName, List<EntryGroupEntries> groups)
+    {
+        FacultyName = facultyName; Groups = groups;
         ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
     }
     void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
