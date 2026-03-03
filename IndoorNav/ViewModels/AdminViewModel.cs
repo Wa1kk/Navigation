@@ -298,18 +298,11 @@ public class AdminViewModel : INotifyPropertyChanged
     // ── Schedule ──────────────────────────────────────────────────────────────
     public ObservableCollection<ScheduleEntry> ScheduleEntries { get; } = new();
 
-    private string _newEntryRoomName = string.Empty;
-    public string NewEntryRoomName
+    private DateTime _newEntryDate = DateTime.Today;
+    public DateTime NewEntryDate
     {
-        get => _newEntryRoomName;
-        set { _newEntryRoomName = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
-    }
-
-    private string _newEntryGroupName = string.Empty;
-    public string NewEntryGroupName
-    {
-        get => _newEntryGroupName;
-        set { _newEntryGroupName = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
+        get => _newEntryDate;
+        set { _newEntryDate = value; OnPropertyChanged(); }
     }
 
     private string _newEntryStart = "08:00";
@@ -326,27 +319,34 @@ public class AdminViewModel : INotifyPropertyChanged
         set { _newEntryEnd = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
     }
 
-    private string _newEntryPersonCount = "0";
-    public string NewEntryPersonCount
+    private NavNode? _newEntrySelectedRoom;
+    public NavNode? NewEntrySelectedRoom
     {
-        get => _newEntryPersonCount;
-        set { _newEntryPersonCount = value; OnPropertyChanged(); }
+        get => _newEntrySelectedRoom;
+        set { _newEntrySelectedRoom = value; OnPropertyChanged(); OnPropertyChanged(nameof(NewEntryRoomDisplay)); AddScheduleEntryCommand?.ChangeCanExecute(); }
     }
+    public string NewEntryRoomDisplay => _newEntrySelectedRoom?.Name ?? "Не выбрана";
 
-    // Flat list of all named graph nodes for room picker
-    public IReadOnlyList<NavNode> AllRoomNodes =>
-        _graphService.Graph.Nodes
-            .Where(n => !string.IsNullOrWhiteSpace(n.Name))
-            .OrderBy(n => n.Name)
-            .ToList();
+    private StudyGroup? _newEntrySelectedGroup;
+    public StudyGroup? NewEntrySelectedGroup
+    {
+        get => _newEntrySelectedGroup;
+        set { _newEntrySelectedGroup = value; OnPropertyChanged(); OnPropertyChanged(nameof(NewEntryGroupDisplay)); OnPropertyChanged(nameof(NewEntryPersonCountAuto)); AddScheduleEntryCommand?.ChangeCanExecute(); }
+    }
+    public string NewEntryGroupDisplay => _newEntrySelectedGroup?.Name ?? "Не выбрана";
+    public int NewEntryPersonCountAuto =>
+        _newEntrySelectedGroup == null ? 0
+        : _authService.GetStudents().Count(s => s.GroupId == _newEntrySelectedGroup.Id);
 
-    // Flat list of all groups across all departments for group picker
-    public IReadOnlyList<StudyGroup> AllGroups =>
-        Departments.SelectMany(d => d.Groups).OrderBy(g => g.Name).ToList();
+    // Tree models for room picker: Building → Floor → Rooms
+    public ObservableCollection<SchedBuildingGroup> ScheduleRoomTree { get; } = new();
+    // Tree models for group picker: Department → Groups
+    public ObservableCollection<SchedDeptGroup> ScheduleDeptGroups { get; } = new();
 
-    public Command AddScheduleEntryCommand        { get; }
-    public Command<ScheduleEntry> RemoveScheduleEntryCommand { get; }
-    public Command<ScheduleEntry> AddTimeSlotToEntryCommand  { get; }
+    public Command AddScheduleEntryCommand                   { get; }
+    public Command<ScheduleEntry> RemoveScheduleEntryCommand  { get; }
+    public Command<NavNode> SelectScheduleRoomCommand         { get; }
+    public Command<StudyGroup> SelectScheduleGroupCommand     { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -572,8 +572,8 @@ public class AdminViewModel : INotifyPropertyChanged
         SwitchToScheduleTabCommand     = new Command(() =>
         {
             ActiveManagementTab = ManagementTab.Schedule;
-            OnPropertyChanged(nameof(AllRoomNodes));
-            OnPropertyChanged(nameof(AllGroups));
+            RebuildScheduleRoomTree();
+            RebuildScheduleDeptGroups();
         });
 
         // Students are loaded after departments in LoadDepartmentsAsync (for name resolution)
@@ -581,48 +581,47 @@ public class AdminViewModel : INotifyPropertyChanged
         _ = LoadScheduleAsync();
 
         // Schedule commands
+        SelectScheduleRoomCommand = new Command<NavNode>(node =>
+        {
+            NewEntrySelectedRoom = node;
+        });
+
+        SelectScheduleGroupCommand = new Command<StudyGroup>(group =>
+        {
+            NewEntrySelectedGroup = group;
+        });
+
         AddScheduleEntryCommand = new Command(async () =>
         {
+            if (_newEntrySelectedRoom == null || _newEntrySelectedGroup == null) return;
             var entry = new ScheduleEntry
             {
-                RoomName    = NewEntryRoomName.Trim(),
-                GroupName   = NewEntryGroupName.Trim(),
-                PersonCount = int.TryParse(NewEntryPersonCount, out var pc) ? pc : 0,
+                RoomName    = _newEntrySelectedRoom.Name,
+                RoomNodeId  = _newEntrySelectedRoom.Id,
+                GroupName   = _newEntrySelectedGroup.Name,
+                GroupId     = _newEntrySelectedGroup.Id,
+                PersonCount = NewEntryPersonCountAuto,
+                Date        = _newEntryDate.ToString("yyyy-MM-dd"),
                 TimeSlots   = new List<TimeSlot>
                 {
                     new TimeSlot { StartTime = NewEntryStart.Trim(), EndTime = NewEntryEnd.Trim() }
                 }
             };
-            // Try to resolve RoomNodeId from graph nodes by name
-            var matchedNode = _graphService.Graph.Nodes.FirstOrDefault(n =>
-                string.Equals(n.Name, entry.RoomName, StringComparison.OrdinalIgnoreCase));
-            entry.RoomNodeId = matchedNode?.Id ?? string.Empty;
             await _scheduleService.AddEntryAsync(entry);
             ScheduleEntries.Add(entry);
-            NewEntryRoomName    = string.Empty;
-            NewEntryGroupName   = string.Empty;
-            NewEntryStart       = "08:00";
-            NewEntryEnd         = "09:30";
-            NewEntryPersonCount = "0";
-        }, () => !string.IsNullOrWhiteSpace(NewEntryRoomName) &&
-                 !string.IsNullOrWhiteSpace(NewEntryGroupName));
+            NewEntrySelectedRoom  = null;
+            NewEntrySelectedGroup = null;
+            NewEntryDate  = DateTime.Today;
+            NewEntryStart = "08:00";
+            NewEntryEnd   = "09:30";
+            OnPropertyChanged(nameof(NewEntryPersonCountAuto));
+        }, () => _newEntrySelectedRoom != null && _newEntrySelectedGroup != null);
 
         RemoveScheduleEntryCommand = new Command<ScheduleEntry>(async entry =>
         {
             if (entry == null) return;
             await _scheduleService.RemoveEntryAsync(entry.Id);
             ScheduleEntries.Remove(entry);
-        });
-
-        AddTimeSlotToEntryCommand = new Command<ScheduleEntry>(async entry =>
-        {
-            if (entry == null) return;
-            var start = await Shell.Current.DisplayPromptAsync("Добавить слот", "Начало (HH:mm):", initialValue: "08:00", maxLength: 5);
-            if (string.IsNullOrWhiteSpace(start)) return;
-            var end   = await Shell.Current.DisplayPromptAsync("Добавить слот", "Конец (HH:mm):", initialValue: "09:30", maxLength: 5);
-            if (string.IsNullOrWhiteSpace(end)) return;
-            entry.TimeSlots.Add(new TimeSlot { StartTime = start.Trim(), EndTime = end.Trim() });
-            await _scheduleService.UpdateEntryAsync(entry);
         });
 
         AddStudentCommand = new Command(async () =>
@@ -1222,6 +1221,39 @@ public class AdminViewModel : INotifyPropertyChanged
             ScheduleEntries.Add(e);
     }
 
+    private void RebuildScheduleRoomTree()
+    {
+        ScheduleRoomTree.Clear();
+        foreach (var building in Buildings)
+        {
+            var floorGroups = building.Floors
+                .Select(f =>
+                {
+                    var rooms = _graphService.Graph.Nodes
+                        .Where(n => n.BuildingId == building.Id
+                                 && n.FloorNumber == f.Number
+                                 && !n.IsWaypoint
+                                 && !n.IsTransition
+                                 && !n.IsExit
+                                 && !string.IsNullOrWhiteSpace(n.Name))
+                        .OrderBy(n => n.Name)
+                        .ToList();
+                    return new SchedFloorGroup($"Этаж {f.Number}", rooms);
+                })
+                .Where(g => g.Rooms.Count > 0)
+                .ToList();
+            if (floorGroups.Count > 0)
+                ScheduleRoomTree.Add(new SchedBuildingGroup(building.Name, floorGroups));
+        }
+    }
+
+    private void RebuildScheduleDeptGroups()
+    {
+        ScheduleDeptGroups.Clear();
+        foreach (var dept in Departments)
+            ScheduleDeptGroups.Add(new SchedDeptGroup(dept));
+    }
+
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
@@ -1300,4 +1332,60 @@ public sealed class SelectedEdgeItem
 {
     public NavEdge Edge          { get; init; } = null!;
     public string  OtherNodeName { get; init; } = "";
+}
+
+// ── Schedule picker tree helpers ────────────────────────────────────────────────
+
+public sealed class SchedFloorGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string FloorLabel { get; }
+    public IReadOnlyList<NavNode> Rooms { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▲" : "▼";
+    public Command ToggleCommand { get; }
+    public SchedFloorGroup(string label, IEnumerable<NavNode> rooms)
+    {
+        FloorLabel = label;
+        Rooms = rooms.ToList();
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class SchedBuildingGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string BuildingName { get; }
+    public IReadOnlyList<SchedFloorGroup> Floors { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▲" : "▼";
+    public Command ToggleCommand { get; }
+    public SchedBuildingGroup(string name, IEnumerable<SchedFloorGroup> floors)
+    {
+        BuildingName = name;
+        Floors = floors.ToList();
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class SchedDeptGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public Department Dept { get; }
+    public string Name => Dept.Name;
+    public ObservableCollection<StudyGroup> Groups => Dept.Groups;
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▲" : "▼";
+    public Command ToggleCommand { get; }
+    public SchedDeptGroup(Department dept)
+    {
+        Dept = dept;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 }

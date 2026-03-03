@@ -9,9 +9,14 @@ public class ScheduleEntry
     public string RoomNodeId { get; set; } = string.Empty;   // NavNode.Id of the classroom
     public string RoomName   { get; set; } = string.Empty;   // cached for display
     public string GroupName  { get; set; } = string.Empty;
+    public string GroupId    { get; set; } = string.Empty;
     public int    PersonCount{ get; set; }
-    // Daily time slots — each entry covers HH:mm – HH:mm
+    /// <summary>Date string "yyyy-MM-dd". Empty = applies every day (legacy).</summary>
+    public string Date { get; set; } = string.Empty;
+    // Time slots — each covers HH:mm – HH:mm on the given date
     public List<TimeSlot> TimeSlots { get; set; } = new();
+
+    public string DisplayDate => string.IsNullOrEmpty(Date) ? "Без даты" : Date;
 }
 
 public class TimeSlot

@@ -50,20 +50,26 @@ public class ScheduleService
         await SaveAsync();
     }
 
+    private static string TodayStr => DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
+    private static bool EntryMatchesDate(ScheduleEntry e) =>
+        string.IsNullOrEmpty(e.Date) || e.Date == TodayStr;
+
     /// <summary>Returns the first active schedule entry for a given room right now.</summary>
     public ScheduleEntry? GetCurrentEntryForRoom(string roomNodeId) =>
         _entries.FirstOrDefault(e =>
             e.RoomNodeId == roomNodeId &&
+            EntryMatchesDate(e) &&
             e.TimeSlots.Any(t => t.IsActiveNow()));
 
     /// <summary>All rooms currently occupied (used for emergency routing).</summary>
     public IEnumerable<ScheduleEntry> GetCurrentlyActiveEntries() =>
-        _entries.Where(e => e.TimeSlots.Any(t => t.IsActiveNow()));
+        _entries.Where(e => EntryMatchesDate(e) && e.TimeSlots.Any(t => t.IsActiveNow()));
 
     /// <summary>Returns the active entry for a group right now (for emergency auto-routing).</summary>
-    public ScheduleEntry? GetCurrentEntryForGroup(string groupName) =>
-        string.IsNullOrWhiteSpace(groupName) ? null :
+    public ScheduleEntry? GetCurrentEntryForGroup(string groupId) =>
+        string.IsNullOrWhiteSpace(groupId) ? null :
         _entries.FirstOrDefault(e =>
-            string.Equals(e.GroupName, groupName, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(e.GroupId, groupId, StringComparison.OrdinalIgnoreCase) &&
+            EntryMatchesDate(e) &&
             e.TimeSlots.Any(t => t.IsActiveNow()));
 }
