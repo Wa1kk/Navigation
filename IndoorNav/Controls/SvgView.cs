@@ -700,17 +700,19 @@ public class SvgView : SKCanvasView
                     };
                     canvas.DrawPath(boundaryPath, strokeP);
 
-                    // Вершины границы (редактируемые ручки) только для выбранного полигона
-                    if (isSelPoly)
+                    // Вершины границы (редактируемые ручки) — для всех полигонов выбранного узла
+                    if (isSelected)
                     {
                         float vtxR = 6f / sc;
-                        using var vtxFill    = new SKPaint { Color = new SKColor(255, 152, 0, 220), IsAntialias = true };
+                        bool isThisSelPoly = pi == selPolyIdx;
+                        using var vtxFill    = new SKPaint { Color = new SKColor(255, 152, 0, 200), IsAntialias = true };
                         using var vtxSelFill = new SKPaint { Color = new SKColor(255, 80,  0, 255), IsAntialias = true };
                         using var vtxStroke  = new SKPaint { Color = SKColors.White, StrokeWidth = 1.5f / sc, IsStroke = true, IsAntialias = true };
                         for (int vi = 0; vi < poly.Count; vi++)
                         {
                             var vp = new SKPoint(poly[vi][0], poly[vi][1]);
-                            canvas.DrawCircle(vp, vtxR, vi == selVtx ? vtxSelFill : vtxFill);
+                            bool isSelVtx = isThisSelPoly && vi == selVtx;
+                            canvas.DrawCircle(vp, vtxR, isSelVtx ? vtxSelFill : vtxFill);
                             canvas.DrawCircle(vp, vtxR, vtxStroke);
                         }
                     }
