@@ -40,6 +40,9 @@ public class NavNode
     /// <summary>Цвет точки в hex-формате "RRGGBB" без #. null/пусто = автоматически.</summary>
     public string? NodeColorHex { get; set; }
 
+    /// <summary>Узел является аудиторией/помещением — отображается подпись "Аудитория" в попапе пользователя.</summary>
+    public bool IsRoom { get; set; }
+
     /// <summary>Промежуточная точка коридора — скрывается в пользовательском режиме.</summary>
     public bool IsWaypoint { get; set; }
 

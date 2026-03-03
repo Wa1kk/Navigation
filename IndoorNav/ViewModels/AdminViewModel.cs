@@ -128,6 +128,8 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeColor));
             OnPropertyChanged(nameof(SelectedInnerLabel));
             OnPropertyChanged(nameof(SelectedSearchTags));
+            OnPropertyChanged(nameof(SelectedNodeIsRoom));
+            OnPropertyChanged(nameof(SelectedNodeIsRoomText));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
             RefreshSelectedNodeEdges();
@@ -191,6 +193,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command DeleteBoundaryVertexCommand   { get; }
     public Command EditInnerLabelCommand         { get; }
     public Command EditSearchTagsCommand         { get; }
+    public Command ToggleIsRoomCommand           { get; }
     public Command SaveCommand                   { get; }
     public Command CancelActionCommand           { get; }
     public Command SetAddModeCommand             { get; }
@@ -392,6 +395,12 @@ public class AdminViewModel : INotifyPropertyChanged
         get => SelectedNode?.SearchTags ?? string.Empty;
         set { if (SelectedNode != null) { SelectedNode.SearchTags = value; OnPropertyChanged(); } }
     }
+    public bool SelectedNodeIsRoom
+    {
+        get => SelectedNode?.IsRoom ?? false;
+        set { if (SelectedNode != null) { SelectedNode.IsRoom = value; OnPropertyChanged(); OnPropertyChanged(nameof(SelectedNodeIsRoomText)); } }
+    }
+    public string SelectedNodeIsRoomText => SelectedNodeIsRoom ? "🏠 Аудитория: Да" : "🏠 Аудитория: Нет";
 
     private int _selectedBoundaryVertexIndex = -1;
     public int SelectedBoundaryVertexIndex
@@ -490,6 +499,11 @@ public class AdminViewModel : INotifyPropertyChanged
                 maxLength: 200);
             if (val == null) return; // cancel
             SelectedSearchTags = val.Trim();
+        });
+        ToggleIsRoomCommand = new Command(() =>
+        {
+            if (SelectedNode == null) return;
+            SelectedNodeIsRoom = !SelectedNodeIsRoom;
         });
         SaveCommand           = new Command(async () => await _graphService.SaveAsync());
         CancelActionCommand   = new Command(() =>
@@ -982,6 +996,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 IsElevator         = isElevator,
                 IsExit             = isExitAction,
                 IsHidden           = isHidden,
+                IsRoom             = CurrentAction == AdminAction.AddNode,
                 IsFireExtinguisher = isFireExtinguisherAction,
                 NodeColorHex       = isFireExtinguisherAction ? "4CAF50" : null,
                 NodeRadiusScale    = isFireExtinguisherAction ? 0.6f : 1f,

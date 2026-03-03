@@ -343,6 +343,13 @@
                                     LineBreakMode="TailTruncation"
                                     FontSize="12" HeightRequest="32" CornerRadius="6" />
 
+                            <!-- Тип: аудитория -->
+                            <Button Text="{Binding SelectedNodeIsRoomText}"
+                                    Command="{Binding ToggleIsRoomCommand}"
+                                    BackgroundColor="{Binding SelectedNodeIsRoom, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#1E293B'}"
+                                    TextColor="{Binding SelectedNodeIsRoom, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                    FontSize="12" HeightRequest="32" CornerRadius="6" />
+
                             <!-- Удаление вершины границы -->
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6"
                                   IsVisible="{Binding HasBoundaryVertexSelected}">
