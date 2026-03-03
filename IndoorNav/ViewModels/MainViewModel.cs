@@ -198,11 +198,17 @@ public class MainViewModel : INotifyPropertyChanged
     public NavNode? TappedNode
     {
         get => _tappedNode;
-        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); OnPropertyChanged(nameof(TappedNodeInfo)); }
+        private set { _tappedNode = value; OnPropertyChanged(); OnPropertyChanged(nameof(TappedNodeName)); OnPropertyChanged(nameof(TappedNodeTypeLabel)); OnPropertyChanged(nameof(TappedNodeInfo)); }
     }
 
     /// <summary>Display name of the tapped node for the popup header.</summary>
     public string TappedNodeName => _tappedNode?.DisplayName ?? string.Empty;
+
+    /// <summary>"Аудитория" for room nodes, empty otherwise.</summary>
+    public string TappedNodeTypeLabel =>
+        _tappedNode is { IsWaypoint: false, IsTransition: false, IsExit: false, IsFireExtinguisher: false }
+            ? "Аудитория"
+            : string.Empty;
 
     /// <summary>Meta info line: "Name · N этаж".</summary>
     public string TappedNodeInfo =>
