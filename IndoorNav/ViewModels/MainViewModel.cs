@@ -907,6 +907,17 @@ public class MainViewModel : INotifyPropertyChanged
     private void ExecuteBuildEmergencyRoute()
     {
         if (StartNode == null) return;
+
+        // Switch to the building that contains the start node BEFORE building
+        // the route, so that BuildRouteSteps can find the correct floors.
+        if (!string.IsNullOrEmpty(StartNode.BuildingId) &&
+            _selectedBuilding?.Id != StartNode.BuildingId)
+        {
+            var targetBuilding = Buildings.FirstOrDefault(b => b.Id == StartNode.BuildingId);
+            if (targetBuilding != null)
+                SelectedBuilding = targetBuilding;
+        }
+
         var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph);
         if (path.Count > 1)
         {
