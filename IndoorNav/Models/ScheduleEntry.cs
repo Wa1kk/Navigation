@@ -11,12 +11,15 @@ public class ScheduleEntry
     public string GroupName  { get; set; } = string.Empty;
     public string GroupId    { get; set; } = string.Empty;
     public int    PersonCount{ get; set; }
-    /// <summary>Date string "yyyy-MM-dd". Empty = applies every day (legacy).</summary>
-    public string Date { get; set; } = string.Empty;
-    // Time slots — each covers HH:mm – HH:mm on the given date
+    /// <summary>Recurring day of week: 0=Sunday, 1=Monday, ..., 5=Friday, 6=Saturday.</summary>
+    public int DayOfWeek { get; set; } = 5; // default Friday
+    // Time slots — each covers HH:mm – HH:mm on the given day
     public List<TimeSlot> TimeSlots { get; set; } = new();
 
-    public string DisplayDate => string.IsNullOrEmpty(Date) ? "Без даты" : Date;
+    private static readonly string[] _ruDayNames =
+        { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
+
+    public string DisplayDate => _ruDayNames[Math.Clamp(DayOfWeek, 0, 6)];
 }
 
 public class TimeSlot

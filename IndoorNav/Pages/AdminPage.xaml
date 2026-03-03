@@ -955,8 +955,14 @@
                 <VerticalStackLayout Spacing="12">
 
                     <!-- ═══ Entries List ═══ -->
-                    <Label Text="РАСПИСАНИЕ ЗАНЯТИЙ" FontSize="11" CharacterSpacing="1.5"
-                           TextColor="#64748B" Margin="0,0,0,4" />
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                        <Label Grid.Column="0" Text="РАСПИСАНИЕ ЗАНЯТИЙ" FontSize="11" CharacterSpacing="1.5"
+                               TextColor="#64748B" VerticalOptions="Center" />
+                        <Button Grid.Column="1" Text="🗑 Удалить все"
+                                Command="{Binding ClearAllScheduleEntriesCommand}"
+                                BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                FontSize="11" HeightRequest="30" CornerRadius="8" Padding="8,0" />
+                    </Grid>
 
                     <!-- View mode toggle -->
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
@@ -1199,11 +1205,12 @@
                             StrokeShape="RoundRectangle 12" Stroke="#E2E8F0" StrokeThickness="1">
                         <VerticalStackLayout Spacing="12">
 
-                            <!-- Date + Time -->
-                            <Label Text="ДАТА И ВРЕМЯ" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
-                            <DatePicker Date="{Binding NewEntryDate, Mode=TwoWay}"
-                                        TextColor="#1E293B" BackgroundColor="#F8FAFC"
-                                        Format="dd.MM.yyyy" />
+                            <!-- Day of week + Time -->
+                            <Label Text="ДЕНЬ НЕДЕЛИ И ВРЕМЯ" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
+                            <Picker ItemsSource="{Binding DayNames}"
+                                    SelectedIndex="{Binding NewEntryDayOfWeek, Mode=TwoWay}"
+                                    Title="Выберите день недели"
+                                    TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="13" />
                             <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
                                 <Entry Grid.Column="0" Placeholder="Начало 08:00"
                                        Text="{Binding NewEntryStart, Mode=TwoWay}"

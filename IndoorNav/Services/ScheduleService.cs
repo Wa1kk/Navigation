@@ -43,6 +43,12 @@ public class ScheduleService
         await SaveAsync();
     }
 
+    public async Task ClearAllAsync()
+    {
+        _entries.Clear();
+        await SaveAsync();
+    }
+
     public async Task UpdateEntryAsync(ScheduleEntry entry)
     {
         var idx = _entries.FindIndex(e => e.Id == entry.Id);
@@ -50,9 +56,8 @@ public class ScheduleService
         await SaveAsync();
     }
 
-    private static string TodayStr => DateOnly.FromDateTime(DateTime.Now).ToString("yyyy-MM-dd");
     private static bool EntryMatchesDate(ScheduleEntry e) =>
-        string.IsNullOrEmpty(e.Date) || e.Date == TodayStr;
+        e.DayOfWeek == (int)DateTime.Now.DayOfWeek;
 
     /// <summary>Returns the first active schedule entry for a given room right now.</summary>
     public ScheduleEntry? GetCurrentEntryForRoom(string roomNodeId) =>

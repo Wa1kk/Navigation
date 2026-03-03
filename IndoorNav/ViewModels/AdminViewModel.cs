@@ -309,11 +309,15 @@ public class AdminViewModel : INotifyPropertyChanged
     // ── Schedule ──────────────────────────────────────────────────────────────
     public ObservableCollection<ScheduleEntry> ScheduleEntries { get; } = new();
 
-    private DateTime _newEntryDate = DateTime.Today;
-    public DateTime NewEntryDate
+    /// <summary>Russian day names indexed by System.DayOfWeek (0=Sun..6=Sat).</summary>
+    public static List<string> DayNames { get; } = new()
+        { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
+
+    private int _newEntryDayOfWeek = 5; // default Friday
+    public int NewEntryDayOfWeek
     {
-        get => _newEntryDate;
-        set { _newEntryDate = value; OnPropertyChanged(); }
+        get => _newEntryDayOfWeek;
+        set { _newEntryDayOfWeek = value; OnPropertyChanged(); }
     }
 
     private string _newEntryStart = "08:00";
@@ -370,6 +374,7 @@ public class AdminViewModel : INotifyPropertyChanged
 
     public Command AddScheduleEntryCommand                   { get; }
     public Command<ScheduleEntry> RemoveScheduleEntryCommand  { get; }
+    public Command ClearAllScheduleEntriesCommand             { get; }
     public Command<NavNode> SelectScheduleRoomCommand         { get; }
     public Command<StudyGroup> SelectScheduleGroupCommand     { get; }
     public Command<string>     SwitchScheduleViewCommand      { get; }
@@ -687,6 +692,18 @@ public class AdminViewModel : INotifyPropertyChanged
 
         SwitchScheduleViewCommand = new Command<string>(m => ScheduleViewMode = int.TryParse(m, out var i) ? i : 0);
 
+        ClearAllScheduleEntriesCommand = new Command(async () =>
+        {
+            bool confirmed = await Application.Current!.MainPage!.DisplayAlert(
+                "Удалить все занятия",
+                "Вы уверены? Все записи расписания будут удалены без возможности восстановления.",
+                "Удалить всё", "Отмена");
+            if (!confirmed) return;
+            await _scheduleService.ClearAllAsync();
+            ScheduleEntries.Clear();
+            RebuildScheduleEntriesView();
+        });
+
         AddScheduleEntryCommand = new Command(async () =>
         {
             if (_newEntrySelectedRoom == null || _newEntrySelectedGroup == null) return;
@@ -697,7 +714,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 GroupName   = _newEntrySelectedGroup.Name,
                 GroupId     = _newEntrySelectedGroup.Id,
                 PersonCount = NewEntryPersonCountAuto,
-                Date        = _newEntryDate.ToString("yyyy-MM-dd"),
+                DayOfWeek   = _newEntryDayOfWeek,
                 TimeSlots   = new List<TimeSlot>
                 {
                     new TimeSlot { StartTime = NewEntryStart.Trim(), EndTime = NewEntryEnd.Trim() }
@@ -708,7 +725,7 @@ public class AdminViewModel : INotifyPropertyChanged
             RebuildScheduleEntriesView();
             NewEntrySelectedRoom  = null;
             NewEntrySelectedGroup = null;
-            NewEntryDate  = DateTime.Today;
+            NewEntryDayOfWeek = 5;
             NewEntryStart = "08:00";
             NewEntryEnd   = "09:30";
             OnPropertyChanged(nameof(NewEntryPersonCountAuto));
