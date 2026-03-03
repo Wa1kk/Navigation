@@ -378,6 +378,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<NavNode> SelectScheduleRoomCommand         { get; }
     public Command<StudyGroup> SelectScheduleGroupCommand     { get; }
     public Command<string>     SwitchScheduleViewCommand      { get; }
+    public Command<StudentRowVm> ChangeStudentPasswordCommand  { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -692,6 +693,25 @@ public class AdminViewModel : INotifyPropertyChanged
 
         SwitchScheduleViewCommand = new Command<string>(m => ScheduleViewMode = int.TryParse(m, out var i) ? i : 0);
 
+        ChangeStudentPasswordCommand = new Command<StudentRowVm>(async row =>
+        {
+            if (row == null) return;
+            var pwd = await Shell.Current.DisplayPromptAsync(
+                "🔑 Изменить пароль",
+                $"Новый пароль для {row.DisplayName}:",
+                maxLength: 100, keyboard: Keyboard.Default);
+            if (string.IsNullOrWhiteSpace(pwd)) return;
+            var confirm = await Shell.Current.DisplayPromptAsync(
+                "🔑 Подтверждение",
+                "Повторите новый пароль:",
+                maxLength: 100, keyboard: Keyboard.Default);
+            if (pwd != confirm)
+            {
+                await Shell.Current.DisplayAlert("Ошибка", "Пароли не совпадают.", "ОК"); return;
+            }
+            await _authService.ChangePasswordAsync(row.User.Id, pwd);
+        });
+
         ClearAllScheduleEntriesCommand = new Command(async () =>
         {
             bool confirmed = await Application.Current!.MainPage!.DisplayAlert(
@@ -786,7 +806,6 @@ public class AdminViewModel : INotifyPropertyChanged
             var action = await Shell.Current.DisplayActionSheet(
                 $"Редактировать: {row.DisplayName}", "Отмена", null,
                 "✒ Изменить имя",
-                "🔑 Изменить пароль",
                 "🏛 Изменить факультет/группу");
 
             if (action == "✒ Изменить имя")
@@ -797,13 +816,6 @@ public class AdminViewModel : INotifyPropertyChanged
                 row.User.DisplayName = name.Trim();
                 row.RefreshNames();
                 await _authService.UpdateUserAsync();
-            }
-            else if (action == "🔑 Изменить пароль")
-            {
-                var pwd = await Shell.Current.DisplayPromptAsync(
-                    "Пароль", "Новый пароль:", maxLength: 100);
-                if (string.IsNullOrWhiteSpace(pwd)) return;
-                await _authService.ChangePasswordAsync(row.User.Id, pwd);
             }
             else if (action == "🏛 Изменить факультет/группу")
             {
@@ -1546,7 +1558,6 @@ public sealed class StudentRowVm : INotifyPropertyChanged
     public bool ShowDetails   { get => _showDetails; set { _showDetails = value; Notify(); } }
 
     public string Login    => User.Username;
-    public string Password  => User.PasswordHash;
 
     public Command ToggleDetailsCommand { get; }
 

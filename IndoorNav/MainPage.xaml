@@ -122,6 +122,12 @@
                             IsVisible="{Binding IsAdminUser}"
                             BackgroundColor="#1E293B" TextColor="#64748B"
                             FontSize="13" CornerRadius="8" HeightRequest="38" />
+                    <!-- Change password button (only for students) -->
+                    <Button Text="🔑 Изменить пароль"
+                            Command="{Binding ChangePasswordCommand}"
+                            IsVisible="{Binding IsStudentUser}"
+                            BackgroundColor="#1E293B" TextColor="#FCD34D"
+                            FontSize="13" CornerRadius="8" HeightRequest="38" />
                     <!-- Logout button -->
                     <Button Text="Выйти"
                             Command="{Binding LogoutCommand}"

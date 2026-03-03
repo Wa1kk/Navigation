@@ -719,20 +719,27 @@
                                                                             StrokeShape="RoundRectangle 8"
                                                                             Stroke="#E2E8F0" StrokeThickness="1">
                                                                         <VerticalStackLayout Spacing="4">
-                                                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
+                                                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="5">
                                                                                 <Label Grid.Column="0"
                                                                                        Text="{Binding DisplayName}"
                                                                                        FontSize="13" TextColor="#1E293B"
                                                                                        FontAttributes="Bold"
                                                                                        VerticalOptions="Center" />
-                                                                                <Button Grid.Column="1" Text="✏"
+                                                                                <Button Grid.Column="1" Text="🔑"
+                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.ChangeStudentPasswordCommand}"
+                                                                                        CommandParameter="{Binding .}"
+                                                                                        BackgroundColor="#FFF7ED" TextColor="#D97706"
+                                                                                        WidthRequest="34" HeightRequest="34"
+                                                                                        CornerRadius="6" Padding="0" FontSize="12"
+                                                                                        VerticalOptions="Center" />
+                                                                                <Button Grid.Column="2" Text="✏"
                                                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.EditStudentCommand}"
                                                                                         CommandParameter="{Binding .}"
                                                                                         BackgroundColor="#EFF6FF" TextColor="#2563EB"
                                                                                         WidthRequest="34" HeightRequest="34"
                                                                                         CornerRadius="6" Padding="0" FontSize="12"
                                                                                         VerticalOptions="Center" />
-                                                                                <Button Grid.Column="2" Text="🗑"
+                                                                                <Button Grid.Column="3" Text="🗑"
                                                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveStudentCommand}"
                                                                                         CommandParameter="{Binding .}"
                                                                                         BackgroundColor="#FEF2F2" TextColor="#DC2626"
@@ -751,24 +758,14 @@
                                                                                     StrokeShape="RoundRectangle 6"
                                                                                     StrokeThickness="0"
                                                                                     IsVisible="{Binding ShowDetails}">
-                                                                                <VerticalStackLayout Spacing="2">
-                                                                                    <Label FontSize="12" TextColor="#334155">
-                                                                                        <Label.FormattedText>
-                                                                                            <FormattedString>
-                                                                                                <Span Text="Логин: " FontAttributes="Bold" />
-                                                                                                <Span Text="{Binding Login}" />
-                                                                                            </FormattedString>
-                                                                                        </Label.FormattedText>
-                                                                                    </Label>
-                                                                                    <Label FontSize="12" TextColor="#334155">
-                                                                                        <Label.FormattedText>
-                                                                                            <FormattedString>
-                                                                                                <Span Text="Пароль: " FontAttributes="Bold" />
-                                                                                                <Span Text="{Binding Password}" />
-                                                                                            </FormattedString>
-                                                                                        </Label.FormattedText>
-                                                                                    </Label>
-                                                                                </VerticalStackLayout>
+                                                                                <Label FontSize="12" TextColor="#334155">
+                                                                                    <Label.FormattedText>
+                                                                                        <FormattedString>
+                                                                                            <Span Text="Логин: " FontAttributes="Bold" />
+                                                                                            <Span Text="{Binding Login}" />
+                                                                                        </FormattedString>
+                                                                                    </Label.FormattedText>
+                                                                                </Label>
                                                                             </Border>
                                                                         </VerticalStackLayout>
                                                                     </Border>

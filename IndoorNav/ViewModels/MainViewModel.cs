@@ -108,7 +108,8 @@ public class MainViewModel : INotifyPropertyChanged
     public bool HasLoadError => !string.IsNullOrEmpty(_loadError);
 
     // ── Auth / Emergency ──────────────────────────────────────────────────────
-    public bool IsAdminUser => _authService?.CurrentRole == UserRole.Admin;
+    public bool IsAdminUser   => _authService?.CurrentRole == UserRole.Admin;
+    public bool IsStudentUser  => _authService?.CurrentRole == UserRole.Student;
     public string CurrentUserName => _authService?.CurrentUser?.DisplayName ?? "Гость";
 
     private bool _isEmergencyActive;
@@ -325,6 +326,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SetTappedAsEndCommand   { get; }
     public ICommand CloseNodePopupCommand   { get; }
     public ICommand LogoutCommand           { get; }
+    public ICommand ChangePasswordCommand   { get; }
     public ICommand ConfirmEmergencyLocationCommand  { get; }
     public ICommand CancelEmergencyConfirmationCommand { get; }
     public ICommand BuildEmergencyRouteCommand { get; }
@@ -356,6 +358,30 @@ public class MainViewModel : INotifyPropertyChanged
             var loginPage = IPlatformApplication.Current?.Services.GetService<IndoorNav.Pages.LoginPage>();
             if (loginPage != null && Application.Current?.Windows.Count > 0)
                 Application.Current.Windows[0].Page = loginPage;
+        });
+        ChangePasswordCommand = new Command(async () =>
+        {
+            var user = _authService.CurrentUser;
+            if (user == null) return;
+            var oldPwd = await Application.Current!.MainPage!.DisplayPromptAsync(
+                "🔑 Изменение пароля", "Текущий пароль:");
+            if (string.IsNullOrWhiteSpace(oldPwd)) return;
+            var verified = await _authService.LoginAsync(user.Username, oldPwd);
+            if (verified == null)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Неверный текущий пароль.", "ОК"); return;
+            }
+            var newPwd = await Application.Current.MainPage.DisplayPromptAsync(
+                "🔑 Новый пароль", "Введите новый пароль:");
+            if (string.IsNullOrWhiteSpace(newPwd)) return;
+            var confirmPwd = await Application.Current.MainPage.DisplayPromptAsync(
+                "🔑 Подтверждение", "Повторите новый пароль:");
+            if (newPwd != confirmPwd)
+            {
+                await Application.Current.MainPage.DisplayAlert("Ошибка", "Пароли не совпадают.", "ОК"); return;
+            }
+            await _authService.ChangePasswordAsync(user.Id, newPwd);
+            await Application.Current.MainPage.DisplayAlert("Готово", "Пароль успешно изменён.", "ОК");
         });
         GoToFloorCommand  = new Command<Floor>(f => { if (f != null) SelectedFloor = f; });
         NextStepCommand     = new Command(ExecuteNextStep, () => HasNextStep);
@@ -832,6 +858,7 @@ public class MainViewModel : INotifyPropertyChanged
         MainThread.BeginInvokeOnMainThread(() =>
         {
             OnPropertyChanged(nameof(IsAdminUser));
+            OnPropertyChanged(nameof(IsStudentUser));
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
 
