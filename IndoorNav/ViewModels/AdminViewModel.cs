@@ -8,7 +8,7 @@ using SkiaSharp;
 namespace IndoorNav.ViewModels;
 
 public enum AdminMainTab  { Map, Management }
-public enum ManagementTab { Users, Departments }
+public enum ManagementTab { Users, Departments, Schedule }
 
 public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddOther, AddFireExtinguisher, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
 
@@ -21,6 +21,7 @@ public class AdminViewModel : INotifyPropertyChanged
     private readonly EmergencyService _emergencyService;
     private readonly AuthService _authService;
     private readonly DepartmentService _departmentService;
+    private readonly ScheduleService _scheduleService;
 
     // ── Main tabs ──────────────────────────────────────────────────────────────
     private AdminMainTab _activeTab = AdminMainTab.Map;
@@ -36,15 +37,17 @@ public class AdminViewModel : INotifyPropertyChanged
     public ManagementTab ActiveManagementTab
     {
         get => _managementTab;
-        set { _managementTab = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsUsersTab)); OnPropertyChanged(nameof(IsDepartmentsTab)); }
+        set { _managementTab = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsUsersTab)); OnPropertyChanged(nameof(IsDepartmentsTab)); OnPropertyChanged(nameof(IsScheduleTab)); }
     }
     public bool IsUsersTab       => _managementTab == ManagementTab.Users;
     public bool IsDepartmentsTab => _managementTab == ManagementTab.Departments;
+    public bool IsScheduleTab    => _managementTab == ManagementTab.Schedule;
 
     public Command SwitchToMapCommand        { get; }
     public Command SwitchToManagementCommand { get; }
     public Command SwitchToUsersTabCommand        { get; }
     public Command SwitchToDepartmentsTabCommand  { get; }
+    public Command SwitchToScheduleTabCommand     { get; }
 
     // ---- Навигация по зданиям/этажам ----
     private Building?      _selectedBuilding;
@@ -291,6 +294,59 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command AddGroupCommand                 { get; }
     public Command<StudyGroup> RemoveGroupCommand  { get; }
     public Command<StudyGroup> RenameGroupCommand  { get; }
+
+    // ── Schedule ──────────────────────────────────────────────────────────────
+    public ObservableCollection<ScheduleEntry> ScheduleEntries { get; } = new();
+
+    private string _newEntryRoomName = string.Empty;
+    public string NewEntryRoomName
+    {
+        get => _newEntryRoomName;
+        set { _newEntryRoomName = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
+    }
+
+    private string _newEntryGroupName = string.Empty;
+    public string NewEntryGroupName
+    {
+        get => _newEntryGroupName;
+        set { _newEntryGroupName = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
+    }
+
+    private string _newEntryStart = "08:00";
+    public string NewEntryStart
+    {
+        get => _newEntryStart;
+        set { _newEntryStart = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
+    }
+
+    private string _newEntryEnd = "09:30";
+    public string NewEntryEnd
+    {
+        get => _newEntryEnd;
+        set { _newEntryEnd = value; OnPropertyChanged(); AddScheduleEntryCommand?.ChangeCanExecute(); }
+    }
+
+    private string _newEntryPersonCount = "0";
+    public string NewEntryPersonCount
+    {
+        get => _newEntryPersonCount;
+        set { _newEntryPersonCount = value; OnPropertyChanged(); }
+    }
+
+    // Flat list of all named graph nodes for room picker
+    public IReadOnlyList<NavNode> AllRoomNodes =>
+        _graphService.Graph.Nodes
+            .Where(n => !string.IsNullOrWhiteSpace(n.Name))
+            .OrderBy(n => n.Name)
+            .ToList();
+
+    // Flat list of all groups across all departments for group picker
+    public IReadOnlyList<StudyGroup> AllGroups =>
+        Departments.SelectMany(d => d.Groups).OrderBy(g => g.Name).ToList();
+
+    public Command AddScheduleEntryCommand        { get; }
+    public Command<ScheduleEntry> RemoveScheduleEntryCommand { get; }
+    public Command<ScheduleEntry> AddTimeSlotToEntryCommand  { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -366,12 +422,13 @@ public class AdminViewModel : INotifyPropertyChanged
     private NavNode? _corridorLastNode;
     private int      _corridorStepCount;
 
-    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, DepartmentService departmentService, MainViewModel mainViewModel)
+    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, DepartmentService departmentService, ScheduleService scheduleService, MainViewModel mainViewModel)
     {
         _graphService      = graphService;
         _emergencyService  = emergencyService;
         _authService       = authService;
         _departmentService = departmentService;
+        _scheduleService   = scheduleService;
 
         foreach (var b in mainViewModel.Buildings)
             Buildings.Add(b);
@@ -512,9 +569,61 @@ public class AdminViewModel : INotifyPropertyChanged
         SwitchToManagementCommand = new Command(() => ActiveTab = AdminMainTab.Management);
         SwitchToUsersTabCommand        = new Command(() => ActiveManagementTab = ManagementTab.Users);
         SwitchToDepartmentsTabCommand  = new Command(() => ActiveManagementTab = ManagementTab.Departments);
+        SwitchToScheduleTabCommand     = new Command(() =>
+        {
+            ActiveManagementTab = ManagementTab.Schedule;
+            OnPropertyChanged(nameof(AllRoomNodes));
+            OnPropertyChanged(nameof(AllGroups));
+        });
 
         // Students are loaded after departments in LoadDepartmentsAsync (for name resolution)
         _ = LoadDepartmentsAsync();
+        _ = LoadScheduleAsync();
+
+        // Schedule commands
+        AddScheduleEntryCommand = new Command(async () =>
+        {
+            var entry = new ScheduleEntry
+            {
+                RoomName    = NewEntryRoomName.Trim(),
+                GroupName   = NewEntryGroupName.Trim(),
+                PersonCount = int.TryParse(NewEntryPersonCount, out var pc) ? pc : 0,
+                TimeSlots   = new List<TimeSlot>
+                {
+                    new TimeSlot { StartTime = NewEntryStart.Trim(), EndTime = NewEntryEnd.Trim() }
+                }
+            };
+            // Try to resolve RoomNodeId from graph nodes by name
+            var matchedNode = _graphService.Graph.Nodes.FirstOrDefault(n =>
+                string.Equals(n.Name, entry.RoomName, StringComparison.OrdinalIgnoreCase));
+            entry.RoomNodeId = matchedNode?.Id ?? string.Empty;
+            await _scheduleService.AddEntryAsync(entry);
+            ScheduleEntries.Add(entry);
+            NewEntryRoomName    = string.Empty;
+            NewEntryGroupName   = string.Empty;
+            NewEntryStart       = "08:00";
+            NewEntryEnd         = "09:30";
+            NewEntryPersonCount = "0";
+        }, () => !string.IsNullOrWhiteSpace(NewEntryRoomName) &&
+                 !string.IsNullOrWhiteSpace(NewEntryGroupName));
+
+        RemoveScheduleEntryCommand = new Command<ScheduleEntry>(async entry =>
+        {
+            if (entry == null) return;
+            await _scheduleService.RemoveEntryAsync(entry.Id);
+            ScheduleEntries.Remove(entry);
+        });
+
+        AddTimeSlotToEntryCommand = new Command<ScheduleEntry>(async entry =>
+        {
+            if (entry == null) return;
+            var start = await Shell.Current.DisplayPromptAsync("Добавить слот", "Начало (HH:mm):", initialValue: "08:00", maxLength: 5);
+            if (string.IsNullOrWhiteSpace(start)) return;
+            var end   = await Shell.Current.DisplayPromptAsync("Добавить слот", "Конец (HH:mm):", initialValue: "09:30", maxLength: 5);
+            if (string.IsNullOrWhiteSpace(end)) return;
+            entry.TimeSlots.Add(new TimeSlot { StartTime = start.Trim(), EndTime = end.Trim() });
+            await _scheduleService.UpdateEntryAsync(entry);
+        });
 
         AddStudentCommand = new Command(async () =>
         {
@@ -1103,6 +1212,14 @@ public class AdminViewModel : INotifyPropertyChanged
         var group = _departmentService.FindGroup(user.GroupId);
         var dept  = group != null ? _departmentService.FindDepartmentByGroup(user.GroupId) : null;
         return new StudentRowVm(user, dept?.Name ?? "—", group?.Name ?? "—");
+    }
+
+    private async Task LoadScheduleAsync()
+    {
+        await _scheduleService.LoadAsync();
+        ScheduleEntries.Clear();
+        foreach (var e in _scheduleService.Entries)
+            ScheduleEntries.Add(e);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
