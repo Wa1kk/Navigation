@@ -1051,7 +1051,9 @@ public class MainViewModel : INotifyPropertyChanged
         _routeStepsList.Clear();
         _currentStepIndex = 0;
         RouteStatus = string.Empty;
-        StartNode = null;
+        // В режиме ЧС сохраняем точку отправки — пользователь уже указал своё местоположение
+        if (!_isEmergencyActive)
+            StartNode = null;
         EndNode = null;
         OnPropertyChanged(nameof(HasRoute));
         OnPropertyChanged(nameof(HasEmergencyRoute));
@@ -1176,13 +1178,17 @@ public class MainViewModel : INotifyPropertyChanged
 
         if (!e.IsActive)
         {
-            // Emergency lifted — clear blocking state and hide confirmation
+            // Emergency lifted — clear blocking state, route and start node
             _blockedNodeIds.Clear();
             IsBlockingMode = false;
             PendingBlockNode = null;
             OnPropertyChanged(nameof(BlockedNodeIds));
             if (!_emergencyService.IsEmergencyActive)
+            {
                 ShowEmergencyConfirmation = false;
+                // Сбрасываем маршрут и точку отправки при снятии ЧС
+                MainThread.BeginInvokeOnMainThread(ExecuteClearRoute);
+            }
             return;
         }
 
