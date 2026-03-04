@@ -677,6 +677,8 @@ public class MainViewModel : INotifyPropertyChanged
                 Buildings.Add(b);
 
             SelectedBuilding = Buildings.FirstOrDefault();
+            // Автопереключение на здание текущей пары по расписанию
+            TryAutoSelectBuildingFromSchedule();
         }
         catch (Exception ex)
         {
@@ -1132,6 +1134,28 @@ public class MainViewModel : INotifyPropertyChanged
         IsNodePopupOpen = true;
     }
 
+    /// <summary>
+    /// Если у текущего студента есть активная пара по расписанию, переключает SelectedBuilding
+    /// на здание этой аудитории и возвращает соответствующий NavNode.
+    /// Возвращает null если пользователь не студент или активных пар нет.
+    /// Должен вызываться из главного потока.
+    /// </summary>
+    private NavNode? TryAutoSelectBuildingFromSchedule()
+    {
+        if (_authService.CurrentRole != UserRole.Student) return null;
+        var groupId = _authService.CurrentUser?.GroupId;
+        if (string.IsNullOrEmpty(groupId)) return null;
+        var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
+        if (entry == null) return null;
+        var node = _graphService.Graph.GetNode(entry.RoomNodeId);
+        if (node == null) return null;
+        // Переключаемся на здание аудитории из расписания
+        var targetBuilding = Buildings.FirstOrDefault(b => b.Id == node.BuildingId);
+        if (targetBuilding != null && targetBuilding != _selectedBuilding)
+            SelectedBuilding = targetBuilding;
+        return node;
+    }
+
     private void OnUserChanged(object? sender, EventArgs e)
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -1141,32 +1165,21 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
 
-            // If emergency is already active when a student logs in, trigger auto-detection
-            if (_isEmergencyActive && _authService.CurrentRole == UserRole.Student)
+            // При входе переключаемся на здание текущей пары по расписанию
+            var scheduleNode = TryAutoSelectBuildingFromSchedule();
+
+            // Если уже активен режим ЧС для (возможно нового) здания — показываем подтверждение
+            if (scheduleNode != null && _isEmergencyActive)
             {
-                var groupId = _authService.CurrentUser?.GroupId;
-                if (!string.IsNullOrEmpty(groupId))
-                {
-                    var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
-                    if (entry != null)
-                    {
-                        var autoRoomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
-                        if (autoRoomNode != null)
-                        {
-                            StartNode = autoRoomNode;
-                            EmergencyAutoLocationName = autoRoomNode.DisplayName;
-                            ShowEmergencyConfirmation = true;
-                        }
-                    }
-                }
+                StartNode = scheduleNode;
+                EmergencyAutoLocationName = scheduleNode.DisplayName;
+                ShowEmergencyConfirmation = true;
             }
         });
     }
 
     private void OnEmergencyChanged(object? sender, EmergencyChangedArgs e)
     {
-        // Recompute whether THIS building is now in emergency
-        bool myBuildingAffected = e.BuildingId == null || e.BuildingId == _selectedBuilding?.Id;
         IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
 
         OnPropertyChanged(nameof(IsAdminUser));
@@ -1190,37 +1203,20 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
-        // If this building is not affected, skip confirmation
-        if (!myBuildingAffected) return;
-
-        // Emergency became active for this building — try to auto-detect student's room from schedule
+        // ЧС активирован — переключаемся на здание аудитории из расписания, показываем подтверждение
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            NavNode? autoRoomNode = null;
+            // Переключаем здание по расписанию (независимо от того, на каком здании был пользователь)
+            var scheduleNode = TryAutoSelectBuildingFromSchedule();
+            // После возможного переключения здания обновляем IsEmergencyActive
+            IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
+            ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
+            ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
 
-            if (_authService.CurrentRole == UserRole.Student)
+            if (scheduleNode != null && _isEmergencyActive)
             {
-                var groupId = _authService.CurrentUser?.GroupId;
-                if (!string.IsNullOrEmpty(groupId))
-                {
-                    var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
-                    if (entry != null)
-                    {
-                        var candidate = _graphService.Graph.GetNode(entry.RoomNodeId);
-                        // Only use this node if it belongs to the affected building
-                        if (candidate != null &&
-                            (e.BuildingId == null || candidate.BuildingId == e.BuildingId))
-                        {
-                            autoRoomNode = candidate;
-                        }
-                    }
-                }
-            }
-
-            if (autoRoomNode != null)
-            {
-                StartNode = autoRoomNode;
-                EmergencyAutoLocationName = autoRoomNode.DisplayName;
+                StartNode = scheduleNode;
+                EmergencyAutoLocationName = scheduleNode.DisplayName;
                 ShowEmergencyConfirmation = true;
             }
             else
