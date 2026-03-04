@@ -473,6 +473,8 @@ public class MainViewModel : INotifyPropertyChanged
         SelectPickerNodeCommand = new Command<NavNode>(n =>
         {
             if (n == null) return;
+            // В режиме ЧС выходы нельзя выбрать как точку отправки
+            if (_pickerTarget == "start" && _isEmergencyActive && (n.IsExit || n.IsEvacuationExit)) return;
             if (_pickerTarget == "start") StartNode = n;
             else                          EndNode   = n;
             IsPickerOpen = false;
@@ -482,6 +484,8 @@ public class MainViewModel : INotifyPropertyChanged
         SetTappedAsStartCommand = new Command(() =>
         {
             if (_tappedNode == null) return;
+            // В режиме ЧС выходы нельзя выбрать как точку отправки
+            if (_isEmergencyActive && (_tappedNode.IsExit || _tappedNode.IsEvacuationExit)) return;
             StartNode = _tappedNode;
             IsNodePopupOpen = false;
             if (_isEmergencyActive)
@@ -700,12 +704,16 @@ public class MainViewModel : INotifyPropertyChanged
         NodesByFloor = _selectedBuilding.Floors
             .Select(f =>
             {
+                // В режиме ЧС выходы и запасные выходы нельзя выбрать как точку отправки
+                bool excludeExitsForStart = _isEmergencyActive && _pickerTarget == "start";
+
                 var nodes = _graphService.Graph.Nodes
                     .Where(n => n.BuildingId == _selectedBuilding.Id
                                 && n.FloorNumber == f.Number
                                 && !n.IsWaypoint
                                 && !n.IsFireExtinguisher
-                                && !n.IsQrAnchor)
+                                && !n.IsQrAnchor
+                                && !(excludeExitsForStart && (n.IsExit || n.IsEvacuationExit)))
                     .OrderBy(n => n.Name);
 
                 var filtered = searching
