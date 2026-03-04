@@ -14,4 +14,7 @@ public class RouteStep
 
     /// <summary>Прямоугольная область SVG для зума (bounding box сегмента маршрута). Приоритетнее FocusNode.</summary>
     public (float MinX, float MinY, float MaxX, float MaxY)? FocusRect { get; init; }
+
+    /// <summary>Если задано — показывается в подписи рядом с кнопкой «назад» вместо «Этаж N».</summary>
+    public string? FloorLabel { get; init; }
 }

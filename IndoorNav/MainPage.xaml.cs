@@ -27,7 +27,7 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private void OnNodeTapped(object sender, NavNode node)
+    private void OnNodeTapped(object? sender, NavNode node)
     {
         _vm.OnCanvasNodeTapped(node);
     }
@@ -38,7 +38,7 @@ public partial class MainPage : ContentPage
         double w = this.Width > 0 ? this.Width : 400;
 
         // 1. Slide current content out to the left
-        await StepContent.TranslateTo(-w, 0, 160, Easing.CubicIn);
+        await StepTextContent.TranslateTo(-w, 0, 160, Easing.CubicIn);
 
         // 2. Update VM — labels now show the new step text
         _vm.NextStepCommand.Execute(null);
@@ -48,19 +48,27 @@ public partial class MainPage : ContentPage
         ApplyStepZoom();
 
         // 3. Reposition off-screen to the right (so it slides in from the right)
-        StepContent.TranslationX = w;
+        StepTextContent.TranslationX = w;
 
         // 4. Slide in from the right
-        await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+        await StepTextContent.TranslateTo(0, 0, 160, Easing.CubicOut);
     }
 
     private async void OnPrevStepClicked(object sender, EventArgs e)
     {
-        if (!_vm.HasPreviousStep) return;
         double w = this.Width > 0 ? this.Width : 400;
 
+        if (!_vm.HasPreviousStep)
+        {
+            // На первом шаге — очистить маршрут и вернуться к поиску
+            await StepTextContent.TranslateTo(w, 0, 160, Easing.CubicIn);
+            _vm.ClearRouteCommand.Execute(null);
+            StepTextContent.TranslationX = 0;
+            return;
+        }
+
         // 1. Slide current content out to the right
-        await StepContent.TranslateTo(w, 0, 160, Easing.CubicIn);
+        await StepTextContent.TranslateTo(w, 0, 160, Easing.CubicIn);
 
         // 2. Update VM
         _vm.PreviousStepCommand.Execute(null);
@@ -69,10 +77,10 @@ public partial class MainPage : ContentPage
         ApplyStepZoom();
 
         // 3. Reposition off-screen to the left
-        StepContent.TranslationX = -w;
+        StepTextContent.TranslationX = -w;
 
         // 4. Slide in from the left
-        await StepContent.TranslateTo(0, 0, 160, Easing.CubicOut);
+        await StepTextContent.TranslateTo(0, 0, 160, Easing.CubicOut);
     }
 
     private void ApplyStepZoom()

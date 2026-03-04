@@ -19,6 +19,14 @@ public class NavNode
     /// <summary>true — лифт, false — лестница. Актуально только когда IsTransition=true.</summary>
     public bool IsElevator { get; set; }
 
+    /// <summary>Идентификатор группы перехода. Несколько узлов (лестниц/лифтов) на разных этажах
+    /// с одинаковым непустым TransitionGroupId считаются одним физическим переходом (одной лестницей/лифтом).</summary>
+    public string TransitionGroupId { get; set; } = string.Empty;
+
+    /// <summary>QR-якорь — точка входа через QR-код. Невидима для пользователей до сканирования.
+    /// После сканирования отображается как начальная точка маршрута.</summary>
+    public bool IsQrAnchor { get; set; }
+
     /// <summary>Узел выхода (выход из здания).</summary>
     public bool IsExit { get; set; }
 

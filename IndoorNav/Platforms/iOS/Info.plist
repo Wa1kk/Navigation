@@ -28,5 +28,22 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+
+	<!-- Deep link URI scheme: indoornav://node/{nodeId} -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.companyname.indoornav</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>indoornav</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Camera permission for in-app QR scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>Для сканирования QR-кодов навигационных точек</string>
 </dict>
 </plist>

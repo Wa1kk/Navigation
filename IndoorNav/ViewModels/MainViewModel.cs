@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IndoorNav.Models;
 using IndoorNav.Services;
-using Microsoft.Maui;
 using Microsoft.Maui.Storage;
 
 namespace IndoorNav.ViewModels;
@@ -18,6 +17,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly AuthService _authService;
     private readonly EmergencyService _emergencyService;
     private readonly ScheduleService _scheduleService;
+    private readonly DepartmentService _departmentService;
 
     private Building? _selectedBuilding;
     private Floor? _selectedFloor;
@@ -36,7 +36,17 @@ public class MainViewModel : INotifyPropertyChanged
     private ObservableCollection<NavNode> _routeNodesOnFloor = new();
     private ObservableCollection<NavNode> _nodesOnCurrentFloor = new();
     private ObservableCollection<NavEdge> _edgesOnCurrentFloor = new();
-    private ObservableCollection<NavNode> _allNodesForBuilding = new();
+
+    // --- QR anchor visibility ---
+    // IDs of QR-anchor nodes that should currently be visible on the user map
+    private readonly HashSet<string> _qrVisibleSet = new();
+    private ObservableCollection<string> _qrAnchorNodeIds = new();
+    public IEnumerable<string> QrAnchorNodeIds => _qrAnchorNodeIds;
+
+    // --- ЧС: blocked-node rerouting ---
+    private readonly HashSet<string> _blockedNodeIds = new();
+    private bool _isBlockingMode;
+    private NavNode? _pendingBlockNode;
 
     // --- Пошаговые инструкции ---
     private readonly List<RouteStep> _routeStepsList = new();
@@ -64,7 +74,10 @@ public class MainViewModel : INotifyPropertyChanged
             // Предпочитаем 1-й этаж, иначе первый доступный
             SelectedFloor = value?.Floors.FirstOrDefault(f => f.Number == 1)
                          ?? value?.Floors.FirstOrDefault();
-            RefreshNodesForBuilding();
+            if (value == null) NodesByFloor = new List<FloorNodeGroup>();
+            // Update emergency state for the newly selected building
+            IsEmergencyActive = _emergencyService != null &&
+                                 _emergencyService.IsActiveForBuilding(value?.Id);
         }
     }
 
@@ -116,9 +129,11 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsEmergencyActive
     {
         get => _isEmergencyActive;
-        private set { _isEmergencyActive = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShowFireExtinguishers)); OnPropertyChanged(nameof(EmergencyMessage)); OnPropertyChanged(nameof(IsNormalMode)); }
+        private set { _isEmergencyActive = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShowFireExtinguishers)); OnPropertyChanged(nameof(EmergencyMessage)); OnPropertyChanged(nameof(IsNormalMode)); OnPropertyChanged(nameof(ShowSearchPanel)); OnPropertyChanged(nameof(HasEmergencyRoute)); OnPropertyChanged(nameof(IsEmergencyBannerVisible)); }
     }
     public string EmergencyMessage => _emergencyService?.EmergencyMessage ?? string.Empty;
+    /// <summary>True when the emergency banner should be shown (ЧС active but not in blocking-mode where hint replaces it).</summary>
+    public bool IsEmergencyBannerVisible => _isEmergencyActive && !_isBlockingMode;
     /// <summary>Передаётся в SvgView.ShowFireExtinguishers — огнетушители видны только при ЧС.</summary>
     public bool ShowFireExtinguishers => _isEmergencyActive;
     /// <summary>Инверсия для скрытия поля ДО в обычном режиме.</summary>
@@ -143,20 +158,21 @@ public class MainViewModel : INotifyPropertyChanged
 
     // ── Routing properties ──────────────────────────────────────────────────
 
-    /// <summary>All nodes that belong to the currently selected building.</summary>
-    public ObservableCollection<NavNode> AllNodesForBuilding
-    {
-        get => _allNodesForBuilding;
-        private set { _allNodesForBuilding = value; OnPropertyChanged(); }
-    }
-
     /// <summary>Node where the user is currently located.</summary>
     public NavNode? StartNode
     {
         get => _startNode;
         set
         {
+            // Track QR anchor visibility: show when set as start, hide when cleared
+            if (_startNode?.IsQrAnchor == true && _startNode != value)
+            {
+                _qrVisibleSet.Remove(_startNode.Id);
+                _qrAnchorNodeIds.Remove(_startNode.Id);
+            }
             _startNode = value;
+            if (_startNode?.IsQrAnchor == true && _qrVisibleSet.Add(_startNode.Id))
+                _qrAnchorNodeIds.Add(_startNode.Id);
             OnPropertyChanged();
             OnPropertyChanged(nameof(StartNodeDisplay));
             OnPropertyChanged(nameof(HasAnySelection));
@@ -180,7 +196,9 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Text shown in the Откуда field (node name or placeholder).</summary>
-    public string StartNodeDisplay => _startNode?.DisplayName ?? "Откуда...";
+    public string StartNodeDisplay =>
+        _startNode == null ? "Откуда..." :
+        _startNode.IsQrAnchor ? "QR-код" : _startNode.DisplayName;
 
     /// <summary>Text shown in the Куда field (node name or placeholder).</summary>
     public string EndNodeDisplay => _endNode?.DisplayName ?? "Куда...";
@@ -280,17 +298,55 @@ public class MainViewModel : INotifyPropertyChanged
     public string RouteStatus
     {
         get => _routeStatus;
-        private set { _routeStatus = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasRoute)); }
+        private set { _routeStatus = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasRoute)); OnPropertyChanged(nameof(ShowSearchPanel)); }
     }
 
     /// <summary>True when a route has been successfully calculated.</summary>
     public bool HasRoute => _routeStepsList.Count > 0;
 
-    /// <summary>Ordered list of floors that are part of the current route (for floor-jump buttons).</summary>
-    public ObservableCollection<Floor> RouteFloors { get; } = new();
+    /// <summary>True in emergency mode after a route has been built — shows the "⛔ Маршрут недоступен" button.</summary>
+    public bool HasEmergencyRoute => HasRoute && IsEmergencyActive;
 
-    /// <summary>True when the current route spans more than one floor.</summary>
-    public bool IsMultiFloorRoute => RouteFloors.Count > 1;
+    /// <summary>True while the user is picking a node to mark as blocked.</summary>
+    public bool IsBlockingMode
+    {
+        get => _isBlockingMode;
+        private set { _isBlockingMode = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsEmergencyBannerVisible)); RefreshFloorOverlay(); }
+    }
+
+    /// <summary>IDs of nodes the user has marked as impassable.</summary>
+    public IEnumerable<string> BlockedNodeIds => _blockedNodeIds;
+
+    /// <summary>Node selected during blocking mode, waiting for confirmation.</summary>
+    public NavNode? PendingBlockNode
+    {
+        get => _pendingBlockNode;
+        private set
+        {
+            _pendingBlockNode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PendingBlockNodeName));
+            OnPropertyChanged(nameof(IsBlockPending));
+        }
+    }
+    public string PendingBlockNodeName => _pendingBlockNode?.DisplayName ?? string.Empty;
+    public bool   IsBlockPending       => _pendingBlockNode != null;
+
+    private bool _showNoRoutePopup;
+    public bool ShowNoRoutePopup
+    {
+        get => _showNoRoutePopup;
+        set { _showNoRoutePopup = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>Скрыть панель поиска когда маршрут построен (единый дизайн для всех режимов).</summary>
+    public bool ShowSearchPanel => !HasRoute;
+
+    /// <summary>Список точек-индикаторов шагов для отображения в маршрутной карточке.</summary>
+    public IReadOnlyList<RouteDotVm> RouteStepDots =>
+        Enumerable.Range(0, _routeStepsList.Count)
+                  .Select(i => new RouteDotVm(i == _currentStepIndex))
+                  .ToList();
 
     public RouteStep? CurrentStep =>
         _routeStepsList.Count > 0 ? _routeStepsList[_currentStepIndex] : null;
@@ -298,6 +354,8 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Текст текущего шага (плоское свойство для XAML-биндинга).</summary>
     public string CurrentStepText => CurrentStep?.Text ?? string.Empty;
     public string CurrentStepIcon => CurrentStep?.Icon ?? "🚶";
+    public string CurrentStepFloorLabel =>
+        CurrentStep?.FloorLabel ?? (CurrentStep?.TargetFloor != null ? $"{CurrentStep.TargetFloor.Number} Этаж" : string.Empty);
 
     /// <summary>"Шаг N из M" — пусто для одношагового маршрута.</summary>
     public string StepCounterText =>
@@ -315,7 +373,6 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand BuildRouteCommand       { get; }
     public ICommand ClearRouteCommand       { get; }
     public ICommand GoToAdminCommand        { get; }
-    public ICommand GoToFloorCommand        { get; }
     public ICommand NextStepCommand         { get; }
     public ICommand PreviousStepCommand     { get; }
     public ICommand OpenStartPickerCommand  { get; }
@@ -330,15 +387,23 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand ConfirmEmergencyLocationCommand  { get; }
     public ICommand CancelEmergencyConfirmationCommand { get; }
     public ICommand BuildEmergencyRouteCommand { get; }
+    public ICommand ChangeGroupCommand          { get; }
+    public ICommand ScanQrCommand               { get; }
+    public ICommand MarkRouteBlockedCommand     { get; }
+    public ICommand CancelBlockingModeCommand   { get; }
+    public ICommand ConfirmBlockNodeCommand     { get; }
+    public ICommand CancelBlockNodeConfirmCommand { get; }
+    public ICommand DismissNoRoutePopupCommand  { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
-    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService)
+    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService, DepartmentService departmentService)
     {
-        _graphService     = graphService;
-        _authService      = authService;
-        _emergencyService = emergencyService;
-        _scheduleService  = scheduleService;
+        _graphService       = graphService;
+        _authService        = authService;
+        _emergencyService   = emergencyService;
+        _scheduleService    = scheduleService;
+        _departmentService  = departmentService;
 
         // Subscribe to emergency state changes
         _emergencyService.EmergencyChanged += OnEmergencyChanged;
@@ -363,27 +428,27 @@ public class MainViewModel : INotifyPropertyChanged
         {
             var user = _authService.CurrentUser;
             if (user == null) return;
-            var oldPwd = await Application.Current!.MainPage!.DisplayPromptAsync(
+            var page = Application.Current!.Windows[0].Page!;
+            var oldPwd = await page.DisplayPromptAsync(
                 "🔑 Изменение пароля", "Текущий пароль:");
             if (string.IsNullOrWhiteSpace(oldPwd)) return;
             var verified = await _authService.LoginAsync(user.Username, oldPwd);
             if (verified == null)
             {
-                await Application.Current.MainPage.DisplayAlert("Ошибка", "Неверный текущий пароль.", "ОК"); return;
+                await page.DisplayAlert("Ошибка", "Неверный текущий пароль.", "ОК"); return;
             }
-            var newPwd = await Application.Current.MainPage.DisplayPromptAsync(
+            var newPwd = await page.DisplayPromptAsync(
                 "🔑 Новый пароль", "Введите новый пароль:");
             if (string.IsNullOrWhiteSpace(newPwd)) return;
-            var confirmPwd = await Application.Current.MainPage.DisplayPromptAsync(
+            var confirmPwd = await page.DisplayPromptAsync(
                 "🔑 Подтверждение", "Повторите новый пароль:");
             if (newPwd != confirmPwd)
             {
-                await Application.Current.MainPage.DisplayAlert("Ошибка", "Пароли не совпадают.", "ОК"); return;
+                await page.DisplayAlert("Ошибка", "Пароли не совпадают.", "ОК"); return;
             }
             await _authService.ChangePasswordAsync(user.Id, newPwd);
-            await Application.Current.MainPage.DisplayAlert("Готово", "Пароль успешно изменён.", "ОК");
+            await page.DisplayAlert("Готово", "Пароль успешно изменён.", "ОК");
         });
-        GoToFloorCommand  = new Command<Floor>(f => { if (f != null) SelectedFloor = f; });
         NextStepCommand     = new Command(ExecuteNextStep, () => HasNextStep);
         PreviousStepCommand = new Command(ExecutePreviousStep, () => HasPreviousStep);
 
@@ -419,6 +484,8 @@ public class MainViewModel : INotifyPropertyChanged
             if (_tappedNode == null) return;
             StartNode = _tappedNode;
             IsNodePopupOpen = false;
+            if (_isEmergencyActive)
+                ExecuteBuildEmergencyRoute();
         });
         SetTappedAsEndCommand = new Command(() =>
         {
@@ -445,7 +512,146 @@ public class MainViewModel : INotifyPropertyChanged
         BuildEmergencyRouteCommand = new Command(() => ExecuteBuildEmergencyRoute(),
             () => StartNode != null);
 
+        ChangeGroupCommand = new Command(async () =>
+        {
+            var user = _authService.CurrentUser;
+            if (user == null) return;
+
+            // Collect all groups from all departments
+            var allGroups = _departmentService.Departments
+                .SelectMany(d => d.Groups)
+                .OrderBy(g => g.Name)
+                .ToList();
+
+            var page = Application.Current!.Windows[0].Page!;
+            if (allGroups.Count == 0)
+            {
+                await page.DisplayAlert(
+                    "Группы", "Групп пока нет. Обратитесь к администратору.", "ОК");
+                return;
+            }
+
+            // Find current group name for subtitle
+            var currentGroup = allGroups.FirstOrDefault(g => g.Id == user.GroupId);
+            var subtitle = currentGroup != null
+                ? $"Текущая группа: {currentGroup.Name}"
+                : "Группа не выбрана";
+
+            var groupNames = allGroups.Select(g => g.Name).ToArray();
+            var selected = await page.DisplayActionSheet(
+                $"Сменить группу\n{subtitle}", "Отмена", null, groupNames);
+
+            if (string.IsNullOrEmpty(selected) || selected == "Отмена") return;
+
+            var chosenGroup = allGroups.FirstOrDefault(g => g.Name == selected);
+            if (chosenGroup == null) return;
+
+            user.GroupId = chosenGroup.Id;
+            await _authService.UpdateUserAsync();
+        });
+
+        ScanQrCommand = new Command(async () =>
+        {
+#if ANDROID || IOS
+            // On mobile: open the camera QR scanner modal page
+            var page = IPlatformApplication.Current?.Services.GetService<IndoorNav.Pages.QrScanPage>();
+            if (page != null)
+                await Shell.Current.Navigation.PushModalAsync(page);
+#else
+            // On Windows: manual text entry fallback
+            var content = await Shell.Current.DisplayPromptAsync(
+                "QR-код",
+                "Введите или вставьте содержимое QR-метки:",
+                placeholder: "indoornav://node/...");
+            if (string.IsNullOrWhiteSpace(content)) return;
+
+            var nodeId = DeepLinkService.ParseUri(content.Trim());
+            if (nodeId == null)
+            {
+                await Shell.Current.DisplayAlert("QR", "Нераспознанный формат QR-кода.", "ОК");
+                return;
+            }
+            HandleDeepLinkNode(nodeId);
+#endif
+        });
+
+        MarkRouteBlockedCommand = new Command(() =>
+        {
+            PendingBlockNode = null;
+            IsBlockingMode = true;
+        }, () => HasEmergencyRoute);
+
+        CancelBlockingModeCommand = new Command(() =>
+        {
+            PendingBlockNode = null;
+            IsBlockingMode = false;
+        });
+
+        ConfirmBlockNodeCommand = new Command(() =>
+        {
+            if (_pendingBlockNode == null) return;
+
+            // Find the node immediately before the blocked one on the current route.
+            // That becomes the new start — the user can reach it without crossing
+            // the impassable segment.
+            NavNode? newStart = null;
+            if (_currentFullRoute != null)
+            {
+                int idx = _currentFullRoute.FindIndex(n => n.Id == _pendingBlockNode.Id);
+                if (idx > 0)
+                    newStart = _currentFullRoute[idx - 1];
+            }
+
+            _blockedNodeIds.Add(_pendingBlockNode.Id);
+            PendingBlockNode = null;
+            IsBlockingMode = false;
+            OnPropertyChanged(nameof(BlockedNodeIds));
+
+            if (newStart != null)
+                StartNode = newStart;
+
+            ExecuteBuildEmergencyRoute();
+        });
+
+        CancelBlockNodeConfirmCommand = new Command(() =>
+        {
+            // Return to selection mode so the user can pick a different node
+            PendingBlockNode = null;
+        });
+
+        DismissNoRoutePopupCommand = new Command(() =>
+        {
+            ShowNoRoutePopup = false;
+            // Clear blocked nodes so the user can start fresh in ЧС mode
+            _blockedNodeIds.Clear();
+            IsBlockingMode = false;
+            PendingBlockNode = null;
+            OnPropertyChanged(nameof(BlockedNodeIds));
+        });
+
+        // Subscribe to deep-link and in-app scan results
+        DeepLinkService.NodeRequested += HandleDeepLinkNode;
+
         _ = InitializeAsync();
+    }
+
+    // ── Deep-link / QR scan handler ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Called from <see cref="DeepLinkService"/> whenever a node ID arrives
+    /// (OS deep link or in-app camera scan).  Safe to call from any thread.
+    /// </summary>
+    private void HandleDeepLinkNode(string nodeId)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            var node = _graphService.Graph.Nodes.FirstOrDefault(n => n.Id == nodeId);
+            if (node == null) return;
+
+            StartNode = node;
+            var floor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == node.FloorNumber);
+            if (floor != null) SelectedFloor = floor;
+        });
     }
 
     // ── Private methods ─────────────────────────────────────────────────────
@@ -458,21 +664,13 @@ public class MainViewModel : INotifyPropertyChanged
         {
             await _graphService.LoadAsync();
             await _scheduleService.LoadAsync();
+            await _departmentService.LoadAsync();
+            await _emergencyService.LoadAsync();
 
-            var tasks = BuildingConfig.Select(cfg => Task.Run(() => DiscoverBuildingAsync(cfg.Id, cfg.Name)));
+            var tasks = BuildingConfig.Select(cfg => DiscoverBuildingAsync(cfg.Id, cfg.Name, _graphService));
             var buildings = await Task.WhenAll(tasks);
-
             foreach (var b in buildings)
                 Buildings.Add(b);
-
-            if (Buildings.Count == 0)
-            {
-                var diags = buildings
-                    .Where(b => b.LoadDiagnostic != null)
-                    .Select(b => b.LoadDiagnostic!);
-                LoadError = "Здания не найдены.\n" + string.Join("\n", diags);
-                return;
-            }
 
             SelectedBuilding = Buildings.FirstOrDefault();
         }
@@ -485,22 +683,6 @@ public class MainViewModel : INotifyPropertyChanged
             IsLoading = false;
         }
     }
-    private void RefreshNodesForBuilding()
-    {
-        // Заменяем коллекцию целиком — один PropertyChanged вместо N штук CollectionChanged.
-        if (_selectedBuilding == null)
-        {
-            AllNodesForBuilding = new ObservableCollection<NavNode>();
-            NodesByFloor = new List<FloorNodeGroup>();
-            return;
-        }
-        AllNodesForBuilding = new ObservableCollection<NavNode>(
-            _graphService.Graph.Nodes
-                .Where(n => n.BuildingId == _selectedBuilding.Id && !n.IsWaypoint));
-
-        RebuildPickerList();
-    }
-
     /// <summary>
     /// Rebuilds <see cref="NodesByFloor"/> applying current search text.
     /// Groups are initially collapsed; when a query is active all are expanded and empty floors hidden.
@@ -521,7 +703,9 @@ public class MainViewModel : INotifyPropertyChanged
                 var nodes = _graphService.Graph.Nodes
                     .Where(n => n.BuildingId == _selectedBuilding.Id
                                 && n.FloorNumber == f.Number
-                                && !n.IsWaypoint)
+                                && !n.IsWaypoint
+                                && !n.IsFireExtinguisher
+                                && !n.IsQrAnchor)
                     .OrderBy(n => n.Name);
 
                 var filtered = searching
@@ -586,11 +770,24 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
-        // Пользовательский режим: показываем только значимые узлы (не waypoint)
-        NodesOnCurrentFloor = new ObservableCollection<NavNode>(
-            _graphService.Graph
+        var baseNodes = _graphService.Graph
+            .GetNodesForFloor(_selectedBuilding.Id, _selectedFloor.Number)
+            .Where(n => !n.IsWaypoint);
+
+        // In blocking mode also expose corridor/waypoint nodes that are part of the
+        // current route so the user can tap them as the impassable point.
+        if (_isBlockingMode && _currentFullRoute != null)
+        {
+            var routeIds = new HashSet<string>(_currentFullRoute.Select(n => n.Id));
+            var routeWaypoints = _graphService.Graph
                 .GetNodesForFloor(_selectedBuilding.Id, _selectedFloor.Number)
-                .Where(n => !n.IsWaypoint));
+                .Where(n => n.IsWaypoint && routeIds.Contains(n.Id));
+            NodesOnCurrentFloor = new ObservableCollection<NavNode>(baseNodes.Concat(routeWaypoints));
+        }
+        else
+        {
+            NodesOnCurrentFloor = new ObservableCollection<NavNode>(baseNodes);
+        }
 
         // Пользовательский режим: линии (рёбра) не показываем — только точки аудиторий
         EdgesOnCurrentFloor = new ObservableCollection<NavEdge>();
@@ -601,11 +798,33 @@ public class MainViewModel : INotifyPropertyChanged
         if (_selectedFloor == null || _currentFullRoute == null)
         {
             RouteNodesOnFloor = new ObservableCollection<NavNode>();
+            RouteBreaksOnFloor = Array.Empty<int>();
             return;
         }
-        RouteNodesOnFloor = new ObservableCollection<NavNode>(
-            _currentFullRoute.Where(n =>
-                n.BuildingId == _selectedBuilding?.Id && n.FloorNumber == _selectedFloor.Number));
+
+        var onFloor = _currentFullRoute
+            .Select((n, fullIdx) => (node: n, fullIdx))
+            .Where(t => t.node.BuildingId == _selectedBuilding?.Id && t.node.FloorNumber == _selectedFloor.Number)
+            .ToList();
+
+        RouteNodesOnFloor = new ObservableCollection<NavNode>(onFloor.Select(t => t.node));
+
+        // Compute break indices: index i in the per-floor list is a break if it is not
+        // directly adjacent to index i-1 in the full route (route went through another floor).
+        var breaks = new List<int>();
+        for (int i = 1; i < onFloor.Count; i++)
+        {
+            if (onFloor[i].fullIdx != onFloor[i - 1].fullIdx + 1)
+                breaks.Add(i);
+        }
+        RouteBreaksOnFloor = breaks;
+    }
+
+    private IEnumerable<int> _routeBreaksOnFloor = Array.Empty<int>();
+    public IEnumerable<int> RouteBreaksOnFloor
+    {
+        get => _routeBreaksOnFloor;
+        private set { _routeBreaksOnFloor = value; OnPropertyChanged(); }
     }
 
     private List<NavNode>? _currentFullRoute;
@@ -624,6 +843,7 @@ public class MainViewModel : INotifyPropertyChanged
             _currentFullRoute = null;
             RouteStatus = "Маршрут не найден.";
             OnPropertyChanged(nameof(HasRoute));
+            OnPropertyChanged(nameof(ShowSearchPanel));
         }
         else
         {
@@ -634,12 +854,10 @@ public class MainViewModel : INotifyPropertyChanged
         RefreshRoute();
         ((Command)BuildRouteCommand).ChangeCanExecute();
 
-        // Заполняем перечень этажей маршрута для кнопок быстрого перехода
-        PopulateRouteFloors(_currentFullRoute);
-        OnPropertyChanged(nameof(IsMultiFloorRoute));
-
-        // Автопереключение на начальный этаж маршрута
-        if (_currentFullRoute != null && StartNode != null)
+        // Автопереключение на этаж первого шага маршрута.
+        // BuildRouteSteps уже выбрал нужный этаж (для sameTransitionGroup — это этаж назначения),
+        // поэтому переключаем только если BuildRouteSteps не смог это сделать (TargetFloor был null).
+        if (_currentFullRoute != null && CurrentStep?.TargetFloor == null && StartNode != null)
         {
             var startFloor = _selectedBuilding?.Floors
                 .FirstOrDefault(f => f.Number == StartNode.FloorNumber);
@@ -661,87 +879,121 @@ public class MainViewModel : INotifyPropertyChanged
         }
         segments.Add((cur, seg));
 
-        int distinctFloors = segments.Count;
+        int distinctFloors = segments.Select(s => s.FloorNum).Distinct().Count();
         RouteStatus = distinctFloors > 1
-            ? $"Маршрут найден ({distinctFloors} этажа)"
+            ? $"Маршрут найден ({segments.Count} участков, {distinctFloors} этажей)"
             : $"Маршрут найден ({path.Count(n => !n.IsWaypoint)} точки)";
 
         Floor? GetFloor(int num) =>
             _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == num);
 
-        var destination = "места назначения";
+        // Проверяем: весь маршрут — одна пара узлов одного перехода (sameTransitionGroup)
+        var startNode = path[0];
+        var endNode   = path[^1];
+        bool sameTransitionGroup = startNode.IsTransition && endNode.IsTransition
+            && !string.IsNullOrEmpty(startNode.TransitionGroupId)
+            && startNode.TransitionGroupId == endNode.TransitionGroupId;
 
-        if (segments.Count == 1)
+        if (sameTransitionGroup)
         {
-            var singleNodes = segments[0].Nodes;
-            float sMinX = singleNodes.Min(n => n.X);
-            float sMinY = singleNodes.Min(n => n.Y);
-            float sMaxX = singleNodes.Max(n => n.X);
-            float sMaxY = singleNodes.Max(n => n.Y);
-
+            bool up = endNode.FloorNumber > startNode.FloorNumber;
+            bool elev = startNode.IsElevator || startNode.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase);
             _routeStepsList.Add(new RouteStep
             {
-                Text = $"Идите по {FloorNameInstrumental(segments[0].FloorNum)} до {destination}",
-                Icon = "🚶",
+                Text        = $"{(up ? "Поднимайтесь" : "Спускайтесь")} {(elev ? "на лифте" : "по лестнице")} до {endNode.FloorNumber} этажа",
+                Icon        = elev ? "🛛" : "🪜",
+                TargetFloor = GetFloor(endNode.FloorNumber),
+                FocusNode   = endNode,
+                FloorLabel  = up ? "Подъём" : "Спуск"
+            });
+        }
+        else if (segments.Count == 1)
+        {
+            // Весь маршрут на одном этаже
+            var nodes = segments[0].Nodes;
+            _routeStepsList.Add(new RouteStep
+            {
+                Text        = $"Идите по {FloorNameInstrumental(segments[0].FloorNum)} до места назначения",
+                Icon        = "🚶",
                 TargetFloor = GetFloor(segments[0].FloorNum),
-                FocusRect   = (sMinX, sMinY, sMaxX, sMaxY)
+                FocusRect   = (nodes.Min(n => n.X), nodes.Min(n => n.Y), nodes.Max(n => n.X), nodes.Max(n => n.Y))
             });
         }
         else
         {
-            // Первый сегмент: идти до первого перехода
-            var (firstFloorNum, firstNodes) = segments[0];
-            var firstTransition = firstNodes.LastOrDefault(n => n.IsTransition) ?? firstNodes.Last();
-            bool isElevator = firstTransition.IsElevator
-                           || (!firstTransition.IsTransition && firstTransition.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase));
+            // «Промежуточный» сегмент — состоит ТОЛЬКО из узлов-переходов (лестниц/лифтов)
+            // и не содержит коридорных waypoint-ов, т.е. пользователь не идёт никуда на этом этаже.
+            // Такие сегменты пропускаем; шаг перехода указывает сразу на конечный «реальный» этаж.
+            bool IsPureTrans(List<NavNode> nodes) =>
+                nodes.All(n => n.IsTransition);
 
-            string transitKindAcc = isElevator ? "лифта" : "лестницы"; // до лифта / до лестницы
-            string transitKindVia = isElevator ? "на лифте" : "по лестнице";
+            var skipSet = new HashSet<int>();
+            for (int si = 1; si < segments.Count - 1; si++)
+                if (IsPureTrans(segments[si].Nodes)) skipSet.Add(si);
 
-            // Bounding box всех узлов первого сегмента (включая WP) — для зума шага 1
-            float seg1MinX = firstNodes.Min(n => n.X);
-            float seg1MinY = firstNodes.Min(n => n.Y);
-            float seg1MaxX = firstNodes.Max(n => n.X);
-            float seg1MaxY = firstNodes.Max(n => n.Y);
-
-            _routeStepsList.Add(new RouteStep
+            for (int si = 0; si < segments.Count; si++)
             {
-                Text = $"Идите по {FloorNameInstrumental(firstFloorNum)} до {transitKindAcc}",
-                Icon = "🚶",
-                TargetFloor = GetFloor(firstFloorNum),
-                FocusRect   = (seg1MinX, seg1MinY, seg1MaxX, seg1MaxY)
-            });
+                if (skipSet.Contains(si)) continue;
 
-            // Один шаг перехода: зумировать на узел перехода (остаёмся на том же этаже)
-            var lastFloorNum = segments[^1].FloorNum;
-            string dir = lastFloorNum > firstFloorNum ? "Поднимайтесь" : "Спускайтесь";
-            _routeStepsList.Add(new RouteStep
-            {
-                Text = $"{dir} {transitKindVia} до {FloorNameAccusative(lastFloorNum)}",
-                Icon = isElevator ? "🛛" : "🪜",
-                TargetFloor = GetFloor(firstFloorNum),  // Остаёмся на текущем этаже
-                FocusNode   = firstTransition           // Приближаемся к лестнице/лифту
-            });
+                var (floorNum, nodes) = segments[si];
+                bool isFirst = si == 0;
 
-            // Bounding box всех узлов последнего сегмента (включая WP) — для зума шага 3
-            var lastNodes = segments[^1].Nodes;
-            float segLMinX = lastNodes.Min(n => n.X);
-            float segLMinY = lastNodes.Min(n => n.Y);
-            float segLMaxX = lastNodes.Max(n => n.X);
-            float segLMaxY = lastNodes.Max(n => n.Y);
+                // Ближайший следующий не-пропускаемый сегмент
+                int nextSi = si + 1;
+                while (nextSi < segments.Count && skipSet.Contains(nextSi)) nextSi++;
+                bool hasNext = nextSi < segments.Count;
 
-            // Последний шаг: идти до пункта назначения
-            _routeStepsList.Add(new RouteStep
-            {
-                Text = $"Идите по {FloorNameInstrumental(lastFloorNum)} до {destination}",
-                Icon = "🚶",
-                TargetFloor = GetFloor(lastFloorNum),
-                FocusRect   = (segLMinX, segLMinY, segLMaxX, segLMaxY)
-            });
+                // Узел перехода в конце текущего сегмента
+                NavNode? exitTransition = hasNext
+                    ? (nodes.LastOrDefault(n => n.IsTransition) ?? nodes.Last())
+                    : null;
+
+                // ── Шаг «идти по этажу» ──────────────────────────────────────
+                bool segStartsAtTransition = isFirst && startNode.IsTransition;
+                bool segIsJustTransition   = nodes.All(n => n.IsTransition);
+
+                if (!segStartsAtTransition && !segIsJustTransition)
+                {
+                    string walkTarget = !hasNext
+                        ? "места назначения"
+                        : (exitTransition is { IsElevator: true } ||
+                           exitTransition?.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase) == true
+                            ? "лифта" : "лестницы");
+
+                    _routeStepsList.Add(new RouteStep
+                    {
+                        Text        = $"Идите по {FloorNameInstrumental(floorNum)} до {walkTarget}",
+                        Icon        = "🚶",
+                        TargetFloor = GetFloor(floorNum),
+                        FocusRect   = (nodes.Min(n => n.X), nodes.Min(n => n.Y),
+                                       nodes.Max(n => n.X), nodes.Max(n => n.Y))
+                    });
+                }
+
+                // ── Шаг «переход на целевой этаж» (пропускаем промежуточные) ──
+                if (hasNext && exitTransition != null)
+                {
+                    int targetFloor = segments[nextSi].FloorNum;
+                    bool up  = targetFloor > floorNum;
+                    bool elev = exitTransition.IsElevator
+                             || exitTransition.Name.Contains("лифт", StringComparison.OrdinalIgnoreCase);
+
+                    _routeStepsList.Add(new RouteStep
+                    {
+                        Text        = $"{(up ? "Поднимайтесь" : "Спускайтесь")} {(elev ? "на лифте" : "по лестнице")} до {targetFloor} этажа",
+                        Icon        = elev ? "🛛" : "🪜",
+                        TargetFloor = GetFloor(floorNum),
+                        FocusNode   = exitTransition,
+                        FloorLabel  = up ? "Подъём" : "Спуск"
+                    });
+                }
+            }
         }
 
         // Уведомляем об изменении всех свойств шагов
         OnPropertyChanged(nameof(HasRoute));
+        OnPropertyChanged(nameof(HasEmergencyRoute));
+        ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(CurrentStepText));
         OnPropertyChanged(nameof(CurrentStepIcon));
@@ -750,6 +1002,9 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasNextStep));
         OnPropertyChanged(nameof(HasPreviousStep));
         OnPropertyChanged(nameof(IsMultiStepRoute));
+        OnPropertyChanged(nameof(RouteStepDots));
+        OnPropertyChanged(nameof(ShowSearchPanel));
+        OnPropertyChanged(nameof(CurrentStepFloorLabel));
         ((Command)NextStepCommand).ChangeCanExecute();
         ((Command)PreviousStepCommand).ChangeCanExecute();
 
@@ -759,32 +1014,39 @@ public class MainViewModel : INotifyPropertyChanged
             SelectedFloor = firstFloor;
     }
 
-    // Исключаем узлы-выходы, если они не являются стартом или финишем.
+    // Исключаем узлы-выходы, если они не являются стартом или финишем,
+    // а также все узлы, отмеченные пользователем как недоступные.
     private ISet<string> BuildExcludeSet(NavNode start, NavNode end)
     {
         var exclude = new HashSet<string>(
             _graphService.Graph.Nodes
                 .Where(n => n.IsExit && n.Id != start.Id && n.Id != end.Id)
                 .Select(n => n.Id));
+        // Blocked nodes must never appear in the route again
+        foreach (var id in _blockedNodeIds)
+            exclude.Add(id);
         return exclude;
     }
 
     private static string FloorNameInstrumental(int n) => $"{n} этажу";
 
-    private static string FloorNameAccusative(int n) => $"{n} этажа";
-
     private void ExecuteClearRoute()
     {
+        // Also reset blocking state when the route is cleared
+        _blockedNodeIds.Clear();
+        IsBlockingMode = false;
+        PendingBlockNode = null;
+        OnPropertyChanged(nameof(BlockedNodeIds));
+
         _currentFullRoute = null;
         RouteNodesOnFloor.Clear();
         _routeStepsList.Clear();
         _currentStepIndex = 0;
-        RouteFloors.Clear();
         RouteStatus = string.Empty;
         StartNode = null;
         EndNode = null;
         OnPropertyChanged(nameof(HasRoute));
-        OnPropertyChanged(nameof(IsMultiFloorRoute));
+        OnPropertyChanged(nameof(HasEmergencyRoute));
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(CurrentStepText));
         OnPropertyChanged(nameof(CurrentStepIcon));
@@ -793,8 +1055,12 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasNextStep));
         OnPropertyChanged(nameof(HasPreviousStep));
         OnPropertyChanged(nameof(IsMultiStepRoute));
+        OnPropertyChanged(nameof(RouteStepDots));
+        OnPropertyChanged(nameof(ShowSearchPanel));
+        OnPropertyChanged(nameof(CurrentStepFloorLabel));
         ((Command)NextStepCommand).ChangeCanExecute();
         ((Command)PreviousStepCommand).ChangeCanExecute();
+        ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
     }
 
     private void ExecuteNextStep()
@@ -804,10 +1070,12 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(CurrentStepText));
         OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(CurrentStepFloorLabel));
         OnPropertyChanged(nameof(StepCounterText));
         OnPropertyChanged(nameof(IsLastStep));
         OnPropertyChanged(nameof(HasNextStep));
         OnPropertyChanged(nameof(HasPreviousStep));
+        OnPropertyChanged(nameof(RouteStepDots));
         ((Command)NextStepCommand).ChangeCanExecute();
         ((Command)PreviousStepCommand).ChangeCanExecute();
         // Автопереключение на этаж текущего шага
@@ -822,10 +1090,12 @@ public class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(CurrentStepText));
         OnPropertyChanged(nameof(CurrentStepIcon));
+        OnPropertyChanged(nameof(CurrentStepFloorLabel));
         OnPropertyChanged(nameof(StepCounterText));
         OnPropertyChanged(nameof(IsLastStep));
         OnPropertyChanged(nameof(HasNextStep));
         OnPropertyChanged(nameof(HasPreviousStep));
+        OnPropertyChanged(nameof(RouteStepDots));
         ((Command)NextStepCommand).ChangeCanExecute();
         ((Command)PreviousStepCommand).ChangeCanExecute();
         // Автопереключение на этаж текущего шага
@@ -833,22 +1103,20 @@ public class MainViewModel : INotifyPropertyChanged
         if (floor != null) SelectedFloor = floor;
     }
 
-    private void PopulateRouteFloors(List<NavNode>? path)
-    {
-        RouteFloors.Clear();
-        if (path == null || _selectedBuilding == null) return;
-        var seen = new HashSet<int>();
-        foreach (var node in path)
-            if (seen.Add(node.FloorNumber))
-            {
-                var floor = _selectedBuilding.Floors.FirstOrDefault(f => f.Number == node.FloorNumber);
-                if (floor != null) RouteFloors.Add(floor);
-            }
-    }
-
     /// <summary>Call when a node on the canvas is tapped in user mode.</summary>
     public void OnCanvasNodeTapped(NavNode node)
     {
+        // Blocking-selection mode: only route nodes are valid targets
+        if (_isBlockingMode)
+        {
+            // Ignore nodes that are not part of the current emergency route
+            if (_currentFullRoute == null || !_currentFullRoute.Any(n => n.Id == node.Id))
+                return;
+            PendingBlockNode = node;   // show confirmation overlay
+            return;
+        }
+
+        if (node.IsFireExtinguisher) return;
         TappedNode = node;
         IsNodePopupOpen = true;
     }
@@ -884,20 +1152,33 @@ public class MainViewModel : INotifyPropertyChanged
         });
     }
 
-    private void OnEmergencyChanged(object? sender, bool isActive)
+    private void OnEmergencyChanged(object? sender, EmergencyChangedArgs e)
     {
-        IsEmergencyActive = isActive;
+        // Recompute whether THIS building is now in emergency
+        bool myBuildingAffected = e.BuildingId == null || e.BuildingId == _selectedBuilding?.Id;
+        IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
+
         OnPropertyChanged(nameof(IsAdminUser));
         ((Command)GoToAdminCommand).ChangeCanExecute();
         ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
+        ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
 
-        if (!isActive)
+        if (!e.IsActive)
         {
-            ShowEmergencyConfirmation = false;
+            // Emergency lifted — clear blocking state and hide confirmation
+            _blockedNodeIds.Clear();
+            IsBlockingMode = false;
+            PendingBlockNode = null;
+            OnPropertyChanged(nameof(BlockedNodeIds));
+            if (!_emergencyService.IsEmergencyActive)
+                ShowEmergencyConfirmation = false;
             return;
         }
 
-        // Emergency became active — try to auto-detect student's room from schedule
+        // If this building is not affected, skip confirmation
+        if (!myBuildingAffected) return;
+
+        // Emergency became active for this building — try to auto-detect student's room from schedule
         MainThread.BeginInvokeOnMainThread(() =>
         {
             NavNode? autoRoomNode = null;
@@ -910,21 +1191,25 @@ public class MainViewModel : INotifyPropertyChanged
                     var entry = _scheduleService.GetCurrentEntryForGroup(groupId);
                     if (entry != null)
                     {
-                        autoRoomNode = _graphService.Graph.GetNode(entry.RoomNodeId);
+                        var candidate = _graphService.Graph.GetNode(entry.RoomNodeId);
+                        // Only use this node if it belongs to the affected building
+                        if (candidate != null &&
+                            (e.BuildingId == null || candidate.BuildingId == e.BuildingId))
+                        {
+                            autoRoomNode = candidate;
+                        }
                     }
                 }
             }
 
             if (autoRoomNode != null)
             {
-                // Pre-fill start node and show confirmation card
                 StartNode = autoRoomNode;
                 EmergencyAutoLocationName = autoRoomNode.DisplayName;
                 ShowEmergencyConfirmation = true;
             }
             else
             {
-                // No schedule entry — user picks manually, no confirmation card
                 ShowEmergencyConfirmation = false;
             }
         });
@@ -944,7 +1229,9 @@ public class MainViewModel : INotifyPropertyChanged
                 SelectedBuilding = targetBuilding;
         }
 
-        var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph);
+        // Pass any user-marked blocked nodes so the router avoids them
+        ISet<string>? blocked = _blockedNodeIds.Count > 0 ? _blockedNodeIds : null;
+        var path = _emergencyService.FindNearestExitRoute(StartNode, _graphService.Graph, blocked);
         if (path.Count > 1)
         {
             EndNode = path.Last();
@@ -952,30 +1239,39 @@ public class MainViewModel : INotifyPropertyChanged
         }
         else
         {
-            RouteStatus = "Выход не найден. Обратитесь к сотрудникам.";
+            RouteStatus = "Маршрут до выхода не найден.";
+            // Clear route so the UI returns to search-panel state
+            _currentFullRoute = null;
+            _routeStepsList.Clear();
+            _currentStepIndex = 0;
+            RefreshRoute();
+            OnPropertyChanged(nameof(HasRoute));
+            OnPropertyChanged(nameof(ShowSearchPanel));
+            ShowNoRoutePopup = true;
         }
+
+        OnPropertyChanged(nameof(HasEmergencyRoute));
+        ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
     }
 
 
-    private static async Task<Building> DiscoverBuildingAsync(string id, string name)
+    /// <summary>Строит здание из данных графа — мгновенно, без обращений к файловой системе.</summary>
+    private static async Task<Building> DiscoverBuildingAsync(string id, string name, NavGraphService graphService)
     {
         var building = new Building(id, name);
 
-        // Проверяем существование этажа по WebP-файлу в FloorImages/
-        // (SVG-источники необязательны — могут отсутствовать после клонирования репозитория)
-        static async Task<bool> FloorExistsAsync(string id, string svgRelativePath)
+        static async Task<bool> FloorExistsAsync(string id, int num)
         {
-            // Сначала ищем предгенерированный WebP (всегда есть в репозитории)
-            var cacheKey    = $"{id}_{svgRelativePath}".Replace('/', '_');
-            var webpBundle  = $"FloorImages/{cacheKey}.webp";
+            var svgRelativePath = $"floor{num}.svg";
+            // Try pre-generated WebP first
+            var cacheKey = $"{id}_{svgRelativePath}".Replace('/', '_');
             try
             {
-                using var s = await FileSystem.OpenAppPackageFileAsync(webpBundle).ConfigureAwait(false);
+                using var s = await FileSystem.OpenAppPackageFileAsync($"FloorImages/{cacheKey}.webp").ConfigureAwait(false);
                 return true;
             }
-            catch { /* нет WebP — пробуем SVG */ }
-
-            // Запасной вариант: SVG (для разработчика с полными исходниками)
+            catch { }
+            // Fallback: SVG source
             try
             {
                 using var s = await FileSystem.OpenAppPackageFileAsync($"SvgFloors/{id}/{svgRelativePath}").ConfigureAwait(false);
@@ -984,21 +1280,33 @@ public class MainViewModel : INotifyPropertyChanged
             catch { return false; }
         }
 
-        // Подвал
-        if (await FloorExistsAsync(id, "floor-1.svg").ConfigureAwait(false))
+        // Basement
+        if (await FloorExistsAsync(id, -1).ConfigureAwait(false))
             building.Floors.Add(new Floor(-1, $"{id}/floor-1.svg"));
 
-        // floor1, floor2, …
+        // Floors 1..50
         for (int i = 1; i <= 50; i++)
         {
-            if (await FloorExistsAsync(id, $"floor{i}.svg").ConfigureAwait(false))
+            if (await FloorExistsAsync(id, i).ConfigureAwait(false))
                 building.Floors.Add(new Floor(i, $"{id}/floor{i}.svg"));
             else
-            {
-                if (i == 1)
-                    building.LoadDiagnostic = $"[{id}] floor1 не найден (ни WebP, ни SVG)";
                 break;
-            }
+        }
+
+        // If no floor files found, fall back to graph-derived floors so building stays visible
+        if (building.Floors.Count == 0)
+        {
+            var graphFloors = graphService.Graph.Nodes
+                .Where(n => n.BuildingId == id)
+                .Select(n => n.FloorNumber)
+                .Distinct()
+                .OrderBy(n => n);
+            foreach (var num in graphFloors)
+                building.Floors.Add(new Floor(num, $"{id}/floor{num}.svg"));
+
+            // Always show at least floor 1 so the building appears
+            if (building.Floors.Count == 0)
+                building.Floors.Add(new Floor(1, $"{id}/floor1.svg"));
         }
 
         return building;
@@ -1007,3 +1315,6 @@ public class MainViewModel : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
+
+/// <summary>Элемент-индикатор шага маршрута (точка).</summary>
+public record RouteDotVm(bool IsActive);

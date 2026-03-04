@@ -32,31 +32,20 @@
                         StrokeShape="RoundRectangle 12"
                         Stroke="#E2E8F0" StrokeThickness="1"
                         Padding="6" Margin="0,0,0,24">
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
-                        <!-- Admin pill -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                        <!-- User pill -->
                         <Border Grid.Column="0"
-                                BackgroundColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                BackgroundColor="{Binding IsUser, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
                                 StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
-                            <Label Text="Админ" FontSize="13" FontAttributes="Bold"
-                                   TextColor="{Binding IsAdmin, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                            <Label Text="Пользователь" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{Binding IsUser, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
                                    HorizontalOptions="Center" />
                             <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectAdminRoleCommand}" />
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <!-- Student pill -->
-                        <Border Grid.Column="1"
-                                BackgroundColor="{Binding IsStudent, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
-                                StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
-                            <Label Text="Студент" FontSize="13" FontAttributes="Bold"
-                                   TextColor="{Binding IsStudent, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
-                                   HorizontalOptions="Center" />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectStudentRoleCommand}" />
+                                <TapGestureRecognizer Command="{Binding SelectUserRoleCommand}" />
                             </Border.GestureRecognizers>
                         </Border>
                         <!-- Guest pill -->
-                        <Border Grid.Column="2"
+                        <Border Grid.Column="1"
                                 BackgroundColor="{Binding IsGuest, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
                                 StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="0,10">
                             <Label Text="Гость" FontSize="13" FontAttributes="Bold"
@@ -73,13 +62,13 @@
                 <VerticalStackLayout Spacing="12"
                                      IsVisible="{Binding ShowCredentials}">
 
-                    <!-- Username (student only) -->
+                    <!-- Login -->
                     <Border BackgroundColor="White"
                             StrokeShape="RoundRectangle 10"
                             Stroke="#E2E8F0" StrokeThickness="1"
                             Padding="14,0"
                             IsVisible="{Binding ShowUsernameField}">
-                        <Entry Placeholder="Имя пользователя"
+                        <Entry Placeholder="Логин"
                                Text="{Binding Username, Mode=TwoWay}"
                                PlaceholderColor="#94A3B8"
                                TextColor="#0F172A" FontSize="14"

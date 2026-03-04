@@ -64,12 +64,26 @@ public class AuthService
         {
             _users.Add(new AuthUser
             {
-                Username     = "admin",
-                PasswordHash = Hash("admin"),
+                Username     = "0",
+                PasswordHash = Hash("0"),
                 Role         = UserRole.Admin,
                 DisplayName  = "Администратор"
             });
             await SaveUsersAsync();
+        }
+        else
+        {
+            // Migrate old default credentials (admin/admin) to new defaults (0/0)
+            var oldAdmin = _users.FirstOrDefault(u =>
+                u.Role == UserRole.Admin &&
+                u.Username == "admin" &&
+                u.PasswordHash == Hash("admin"));
+            if (oldAdmin != null)
+            {
+                oldAdmin.Username     = "0";
+                oldAdmin.PasswordHash = Hash("0");
+                await SaveUsersAsync();
+            }
         }
     }
 

@@ -11,6 +11,8 @@ public partial class AdminPage : ContentPage
 
     public AdminPage(AdminViewModel viewModel, MainViewModel mainViewModel)
     {
+        try
+        {
         InitializeComponent();
         BindingContext = viewModel;
         _mainVm = mainViewModel;
@@ -30,6 +32,14 @@ public partial class AdminPage : ContentPage
             AdminCanvas.InvalidateSurface();
         };
         AdminCanvas.BoundaryVertexTapped += (_, args) => Vm.BoundaryVertexTappedCommand.Execute(args);
+        }
+        catch (Exception ex)
+        {
+            System.IO.File.WriteAllText(
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "indoornav_crash.txt"),
+                ex.ToString());
+            throw;
+        }
     }
 
     // ← Выход из режима администратора (кнопка на телефоне)

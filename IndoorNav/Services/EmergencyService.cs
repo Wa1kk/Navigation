@@ -1,31 +1,109 @@
+using System.Text.Json;
 using IndoorNav.Models;
 
 namespace IndoorNav.Services;
 
+/// <summary>Event args for per-building emergency state change.</summary>
+public class EmergencyChangedArgs : EventArgs
+{
+    /// <summary>Affected building ID. <c>null</c> means all buildings were affected.</summary>
+    public string? BuildingId { get; init; }
+    public bool IsActive { get; init; }
+}
+
 /// <summary>
-/// Manages emergency (ЧС) mode state. Admin activates; all clients subscribe via the event.
+/// Manages emergency (ЧС) mode state per-building. Admin activates; all clients subscribe via the event.
+/// State is persisted to disk so it survives app restarts.
 /// </summary>
 public class EmergencyService
 {
-    public event EventHandler<bool>? EmergencyChanged;
+    public event EventHandler<EmergencyChangedArgs>? EmergencyChanged;
 
-    public bool IsEmergencyActive { get; private set; }
+    private readonly HashSet<string> _activeBuildings = new();
+
+    private static string StatePath =>
+        Path.Combine(FileSystem.AppDataDirectory, "emergency_state.json");
+
+    /// <summary>True if ANY building is in emergency mode.</summary>
+    public bool IsEmergencyActive => _activeBuildings.Count > 0;
+
+    public bool IsActiveForBuilding(string? buildingId) =>
+        !string.IsNullOrEmpty(buildingId) && _activeBuildings.Contains(buildingId);
+
     public string EmergencyMessage => IsEmergencyActive
         ? "⚠ РЕЖИМ ЧРЕЗВЫЧАЙНОЙ СИТУАЦИИ — следуйте по маршруту до выхода!"
         : string.Empty;
 
-    public void Activate()
+    // ── Persistence ──────────────────────────────────────────────────────────
+
+    /// <summary>Load persisted emergency state. Call once on app startup.</summary>
+    public async Task LoadAsync()
     {
-        if (IsEmergencyActive) return;
-        IsEmergencyActive = true;
-        EmergencyChanged?.Invoke(this, true);
+        try
+        {
+            if (!File.Exists(StatePath)) return;
+            var json = await File.ReadAllTextAsync(StatePath);
+            var ids  = JsonSerializer.Deserialize<List<string>>(json);
+            if (ids == null || ids.Count == 0) return;
+            foreach (var id in ids)
+                _activeBuildings.Add(id);
+            EmergencyChanged?.Invoke(this, new EmergencyChangedArgs { BuildingId = null, IsActive = true });
+        }
+        catch { /* best-effort */ }
     }
 
-    public void Deactivate()
+    private void Save()
     {
-        if (!IsEmergencyActive) return;
-        IsEmergencyActive = false;
-        EmergencyChanged?.Invoke(this, false);
+        try
+        {
+            var json = JsonSerializer.Serialize(_activeBuildings.ToList());
+            File.WriteAllText(StatePath, json);
+        }
+        catch { /* best-effort */ }
+    }
+
+    // ── Activation ───────────────────────────────────────────────────────────
+
+    /// <summary>Activate emergency for a specific building.</summary>
+    public void Activate(string buildingId)
+    {
+        if (_activeBuildings.Add(buildingId))
+        {
+            Save();
+            EmergencyChanged?.Invoke(this, new EmergencyChangedArgs { BuildingId = buildingId, IsActive = true });
+        }
+    }
+
+    /// <summary>Deactivate emergency for a specific building.</summary>
+    public void Deactivate(string buildingId)
+    {
+        if (_activeBuildings.Remove(buildingId))
+        {
+            Save();
+            EmergencyChanged?.Invoke(this, new EmergencyChangedArgs { BuildingId = buildingId, IsActive = false });
+        }
+    }
+
+    /// <summary>Activate emergency for all given building IDs.</summary>
+    public void ActivateAll(IEnumerable<string> buildingIds)
+    {
+        bool any = false;
+        foreach (var id in buildingIds)
+            if (_activeBuildings.Add(id)) any = true;
+        if (any)
+        {
+            Save();
+            EmergencyChanged?.Invoke(this, new EmergencyChangedArgs { BuildingId = null, IsActive = true });
+        }
+    }
+
+    /// <summary>Deactivate emergency for all buildings.</summary>
+    public void DeactivateAll()
+    {
+        if (_activeBuildings.Count == 0) return;
+        _activeBuildings.Clear();
+        Save();
+        EmergencyChanged?.Invoke(this, new EmergencyChangedArgs { BuildingId = null, IsActive = false });
     }
 
     /// <summary>
@@ -33,14 +111,26 @@ public class EmergencyService
     /// Returns the path as an ordered list of nodes, or empty if no exit found.
     /// </summary>
     public List<NavNode> FindNearestExitRoute(NavNode start, NavGraph graph)
+        => FindNearestExitRoute(start, graph, null);
+
+    /// <summary>
+    /// Finds the nearest exit node from a given start node using Dijkstra,
+    /// optionally bypassing a set of blocked node IDs.
+    /// </summary>
+    public List<NavNode> FindNearestExitRoute(NavNode start, NavGraph graph, ISet<string>? excludeIds)
     {
         // Only consider exits in the same building as the start node.
         // Fall back to all exits if the building has none marked.
+        // Also exclude blocked exits.
         var exits = graph.Nodes
-            .Where(n => (n.IsExit || n.IsEvacuationExit) && n.BuildingId == start.BuildingId)
+            .Where(n => (n.IsExit || n.IsEvacuationExit)
+                        && n.BuildingId == start.BuildingId
+                        && excludeIds?.Contains(n.Id) != true)
             .ToList();
         if (!exits.Any())
-            exits = graph.Nodes.Where(n => n.IsExit || n.IsEvacuationExit).ToList();
+            exits = graph.Nodes
+                .Where(n => (n.IsExit || n.IsEvacuationExit) && excludeIds?.Contains(n.Id) != true)
+                .ToList();
         if (!exits.Any()) return new();
 
         // Dijkstra
@@ -68,6 +158,9 @@ public class EmergencyService
             if (!adj.TryGetValue(uid, out var neighbours)) continue;
             foreach (var (nid, w) in neighbours)
             {
+                // Skip blocked nodes (but always allow the start node through)
+                if (nid != start.Id && excludeIds?.Contains(nid) == true) continue;
+
                 var alt = d + w;
                 if (alt < dist[nid])
                 {

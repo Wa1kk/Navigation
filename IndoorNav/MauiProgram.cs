@@ -3,6 +3,9 @@ using SkiaSharp.Views.Maui.Controls.Hosting;
 using IndoorNav.Services;
 using IndoorNav.ViewModels;
 using IndoorNav.Pages;
+#if ANDROID || IOS
+using ZXing.Net.Maui.Controls;
+#endif
 
 namespace IndoorNav;
 
@@ -14,6 +17,9 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
+#if ANDROID || IOS
+            .UseBarcodeReader()
+#endif
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -26,6 +32,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<EmergencyService>();
         builder.Services.AddSingleton<ScheduleService>();
         builder.Services.AddSingleton<DepartmentService>();
+        builder.Services.AddSingleton<QrService>();
 
         // ViewModels
         builder.Services.AddSingleton<MainViewModel>();
@@ -36,6 +43,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddTransient<AdminPage>();
         builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<QrScanPage>();
 
         // Shell (singleton so it can be retrieved in LoginViewModel)
         builder.Services.AddSingleton<AppShell>();

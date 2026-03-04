@@ -13,6 +13,18 @@ public partial class App : Application
         InitializeComponent();
         _authService = authService;
         _loginPage   = loginPage;
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var msg = e.ExceptionObject?.ToString() ?? "Unknown";
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                try { await Current!.Windows[0].Page!.DisplayAlert("CRASH", msg, "OK"); } catch { }
+            });
+            System.IO.File.WriteAllText(
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "indoornav_crash.txt"),
+                msg);
+        };
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

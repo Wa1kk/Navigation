@@ -12,9 +12,10 @@
              BackgroundColor="#F1F5F9">
 
     <ContentPage.Resources>
-        <conv:BoolToColorConverter  x:Key="BoolToColorConverter" />
-        <conv:NullToBoolConverter   x:Key="NullToBoolConverter" />
-        <conv:InverseBoolConverter  x:Key="InverseBoolConverter" />
+        <conv:BoolToColorConverter      x:Key="BoolToColorConverter" />
+        <conv:NullToBoolConverter       x:Key="NullToBoolConverter" />
+        <conv:InverseBoolConverter      x:Key="InverseBoolConverter" />
+        <conv:StringNotEmptyConverter   x:Key="StringNotEmptyConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
@@ -169,7 +170,13 @@
                             TextColor="{Binding IsFireExtinguisherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                             CornerRadius="8" HeightRequest="38" />
 
-                    <Button Text="🚪 Эвак. выход"
+                    <Button Text="� QR-якорь"
+                            Command="{Binding SetQrAnchorModeCommand}"
+                            BackgroundColor="{Binding IsQrAnchorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#0E7490|#1E293B'}"
+                            TextColor="{Binding IsQrAnchorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="�🚪 Выход"
                             Command="{Binding SetEvacuationExitModeCommand}"
                             BackgroundColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7F1D1D|#1E293B'}"
                             TextColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
@@ -196,19 +203,49 @@
                     <!-- ЧС section -->
                     <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
                     <Label Text="РЕЖИМ ЧС" FontSize="10" CharacterSpacing="1.5"
-                           TextColor="#334155" Margin="8,0,0,6" />
-                    <!-- Activate button — visible when NOT active -->
-                    <Button Text="⚠ АКТИВИРОВАТЬ ЧС"
-                            Command="{Binding ToggleEmergencyCommand}"
+                           TextColor="#334155" Margin="8,0,0,4" />
+
+                    <!-- Per-building toggles -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding BuildingEmergencies}" Spacing="4">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="{x:Null}">
+                                <Border Padding="10,8" BackgroundColor="#0F172A"
+                                        StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding BuildingName}"
+                                               FontSize="12" TextColor="#94A3B8"
+                                               VerticalOptions="Center" />
+                                        <Button Grid.Column="1"
+                                                Text="⚠ Активировать"
+                                                Command="{Binding ToggleCommand}"
+                                                IsVisible="{Binding IsInactive}"
+                                                BackgroundColor="#7F1D1D" TextColor="#FCA5A5"
+                                                FontSize="11" FontAttributes="Bold"
+                                                HeightRequest="34" CornerRadius="8" Padding="8,0" />
+                                        <Button Grid.Column="1"
+                                                Text="🔴 Деактивировать"
+                                                Command="{Binding ToggleCommand}"
+                                                IsVisible="{Binding IsActive}"
+                                                BackgroundColor="#DC2626" TextColor="White"
+                                                FontSize="11" FontAttributes="Bold"
+                                                HeightRequest="34" CornerRadius="8" Padding="8,0" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- All-buildings toggle -->
+                    <Button Text="⚠ ВСЕ ЗДАНИЯ — АКТИВИРОВАТЬ"
+                            Command="{Binding ToggleAllEmergencyCommand}"
                             IsVisible="{Binding IsEmergencyInactive}"
                             BackgroundColor="#7F1D1D" TextColor="#FCA5A5"
-                            FontAttributes="Bold" CornerRadius="8" HeightRequest="42" />
-                    <!-- Cancel button — visible when active -->
-                    <Button Text="🔴 ДЕАКТИВИРОВАТЬ ЧС"
-                            Command="{Binding ToggleEmergencyCommand}"
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="38" Margin="0,2,0,0" />
+                    <Button Text="🔴 ВСЕ ЗДАНИЯ — ДЕАКТИВИРОВАТЬ"
+                            Command="{Binding ToggleAllEmergencyCommand}"
                             IsVisible="{Binding IsEmergencyActive}"
                             BackgroundColor="#DC2626" TextColor="White"
-                            FontAttributes="Bold" CornerRadius="8" HeightRequest="42" />
+                            FontAttributes="Bold" CornerRadius="8" HeightRequest="38" Margin="0,2,0,0" />
 
                     <!-- EDIT section -->
                     <BoxView HeightRequest="1" BackgroundColor="#1E293B" Margin="4,6,4,10" />
@@ -242,6 +279,12 @@
                     <Button Text="✏ Переименовать"
                             Command="{Binding RenameSelectedCommand}"
                             BackgroundColor="#1E293B" TextColor="#94A3B8"
+                            CornerRadius="8" HeightRequest="38" />
+
+                    <Button Text="{Binding SelectedTransitionGroupIdText}"
+                            Command="{Binding EditTransitionGroupIdCommand}"
+                            IsVisible="{Binding SelectedNodeIsTransition}"
+                            BackgroundColor="#1E293B" TextColor="#FCD34D"
                             CornerRadius="8" HeightRequest="38" />
 
                     <Button Text="📐 Граница"
@@ -369,6 +412,13 @@
                                     Command="{Binding ToggleIsRoomCommand}"
                                     BackgroundColor="{Binding SelectedNodeIsRoom, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#1E293B'}"
                                     TextColor="{Binding SelectedNodeIsRoom, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#64748B'}"
+                                    FontSize="12" HeightRequest="32" CornerRadius="6" />
+
+                            <!-- QR-код точки (видно только для QR-якорей) -->
+                            <Button Text="📱 Показать QR-код"
+                                    Command="{Binding ShowQrCodeCommand}"
+                                    IsVisible="{Binding SelectedNodeIsQrAnchor}"
+                                    BackgroundColor="#0E7490" TextColor="#99F6E4"
                                     FontSize="12" HeightRequest="32" CornerRadius="6" />
 
                             <!-- Удаление вершины границы -->
@@ -718,56 +768,36 @@
                                                                             BackgroundColor="#F8FAFC"
                                                                             StrokeShape="RoundRectangle 8"
                                                                             Stroke="#E2E8F0" StrokeThickness="1">
-                                                                        <VerticalStackLayout Spacing="4">
-                                                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="5">
-                                                                                <Label Grid.Column="0"
-                                                                                       Text="{Binding DisplayName}"
+                                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="5">
+                                                                            <VerticalStackLayout Grid.Column="0" Spacing="1" VerticalOptions="Center">
+                                                                                <Label Text="{Binding DisplayName}"
                                                                                        FontSize="13" TextColor="#1E293B"
-                                                                                       FontAttributes="Bold"
-                                                                                       VerticalOptions="Center" />
-                                                                                <Button Grid.Column="1" Text="🔑"
-                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.ChangeStudentPasswordCommand}"
-                                                                                        CommandParameter="{Binding .}"
-                                                                                        BackgroundColor="#FFF7ED" TextColor="#D97706"
-                                                                                        WidthRequest="34" HeightRequest="34"
-                                                                                        CornerRadius="6" Padding="0" FontSize="12"
-                                                                                        VerticalOptions="Center" />
-                                                                                <Button Grid.Column="2" Text="✏"
-                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.EditStudentCommand}"
-                                                                                        CommandParameter="{Binding .}"
-                                                                                        BackgroundColor="#EFF6FF" TextColor="#2563EB"
-                                                                                        WidthRequest="34" HeightRequest="34"
-                                                                                        CornerRadius="6" Padding="0" FontSize="12"
-                                                                                        VerticalOptions="Center" />
-                                                                                <Button Grid.Column="3" Text="🗑"
-                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveStudentCommand}"
-                                                                                        CommandParameter="{Binding .}"
-                                                                                        BackgroundColor="#FEF2F2" TextColor="#DC2626"
-                                                                                        WidthRequest="34" HeightRequest="34"
-                                                                                        CornerRadius="6" Padding="0" FontSize="12"
-                                                                                        VerticalOptions="Center" />
-                                                                            </Grid>
-                                                                            <Button Text="ℹ Подробнее"
-                                                                                    Command="{Binding ToggleDetailsCommand}"
-                                                                                    BackgroundColor="Transparent"
-                                                                                    TextColor="#64748B"
-                                                                                    FontSize="10" HeightRequest="24"
-                                                                                    CornerRadius="4"
-                                                                                    HorizontalOptions="Start" Padding="4,0" />
-                                                                            <Border Padding="8,6" BackgroundColor="#F0F9FF"
-                                                                                    StrokeShape="RoundRectangle 6"
-                                                                                    StrokeThickness="0"
-                                                                                    IsVisible="{Binding ShowDetails}">
-                                                                                <Label FontSize="12" TextColor="#334155">
-                                                                                    <Label.FormattedText>
-                                                                                        <FormattedString>
-                                                                                            <Span Text="Логин: " FontAttributes="Bold" />
-                                                                                            <Span Text="{Binding Login}" />
-                                                                                        </FormattedString>
-                                                                                    </Label.FormattedText>
-                                                                                </Label>
-                                                                            </Border>
-                                                                        </VerticalStackLayout>
+                                                                                       FontAttributes="Bold" />
+                                                                                <Label Text="{Binding Login}"
+                                                                                       FontSize="11" TextColor="#94A3B8" />
+                                                                            </VerticalStackLayout>
+                                                                            <Button Grid.Column="1" Text="🔑"
+                                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.ChangeStudentPasswordCommand}"
+                                                                                    CommandParameter="{Binding .}"
+                                                                                    BackgroundColor="#FFF7ED" TextColor="#D97706"
+                                                                                    WidthRequest="34" HeightRequest="34"
+                                                                                    CornerRadius="6" Padding="0" FontSize="12"
+                                                                                    VerticalOptions="Center" />
+                                                                            <Button Grid.Column="2" Text="✏"
+                                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.EditStudentCommand}"
+                                                                                    CommandParameter="{Binding .}"
+                                                                                    BackgroundColor="#EFF6FF" TextColor="#2563EB"
+                                                                                    WidthRequest="34" HeightRequest="34"
+                                                                                    CornerRadius="6" Padding="0" FontSize="12"
+                                                                                    VerticalOptions="Center" />
+                                                                            <Button Grid.Column="3" Text="🗑"
+                                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveStudentCommand}"
+                                                                                    CommandParameter="{Binding .}"
+                                                                                    BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                                                    WidthRequest="34" HeightRequest="34"
+                                                                                    CornerRadius="6" Padding="0" FontSize="12"
+                                                                                    VerticalOptions="Center" />
+                                                                        </Grid>
                                                                     </Border>
                                                                 </DataTemplate>
                                                             </CollectionView.ItemTemplate>
@@ -799,26 +829,65 @@
                                    Text="{Binding NewStudentPassword, Mode=TwoWay}"
                                    TextColor="#1E293B" BackgroundColor="#F8FAFC" FontSize="14" />
 
-                            <!-- Department picker -->
-                            <Label Text="Факультет:" FontSize="13" TextColor="#475569" Margin="0,4,0,0" />
-                            <Picker ItemsSource="{Binding Departments}"
-                                    SelectedItem="{Binding NewStudentDept, Mode=TwoWay}"
-                                    ItemDisplayBinding="{Binding Name}"
-                                    Title="Выберите факультет"
-                                    TextColor="#1E293B" BackgroundColor="#F8FAFC"
-                                    FontSize="13" />
-
-                            <!-- Group picker (visible when dept selected) -->
-                            <Label Text="Группа:" FontSize="13" TextColor="#475569"
-                                   IsVisible="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}" Margin="0,4,0,0" />
-                            <Picker ItemsSource="{Binding NewStudentDeptGroups}"
-                                    SelectedItem="{Binding NewStudentGroup, Mode=TwoWay}"
-                                    ItemDisplayBinding="{Binding Name}"
-                                    Title="Выберите группу"
-                                    IsEnabled="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}"
-                                    IsVisible="{Binding NewStudentDept, Converter={StaticResource NullToBoolConverter}}"
-                                    TextColor="#1E293B" BackgroundColor="#F8FAFC"
-                                    FontSize="13" />
+                            <!-- Department + Group tree picker -->
+                            <Label Text="ФАКУЛЬТЕТ И ГРУППА" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" Margin="0,4,0,0" />
+                            <Border Padding="12,10" BackgroundColor="#EFF6FF"
+                                    StrokeShape="RoundRectangle 8" Stroke="#BFDBFE" StrokeThickness="1">
+                                <Label FontSize="13">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="🎓 " />
+                                            <Span Text="{Binding NewStudentDeptDisplay}" TextColor="#1E40AF" FontAttributes="Bold" />
+                                            <Span Text=" › " TextColor="#94A3B8" />
+                                            <Span Text="{Binding NewStudentGroupDisplay}" TextColor="#15803D" FontAttributes="Bold" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Border>
+                            <Border Padding="0" BackgroundColor="#F8FAFC"
+                                    StrokeShape="RoundRectangle 10" Stroke="#E2E8F0" StrokeThickness="1">
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding StudentDeptGroups}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="{x:Null}">
+                                            <VerticalStackLayout>
+                                                <!-- Dept header -->
+                                                <Border Padding="12,10" BackgroundColor="#DBEAFE" StrokeThickness="0">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <Label Grid.Column="0" Text="{Binding Name}"
+                                                               FontSize="13" FontAttributes="Bold" TextColor="#1E40AF"
+                                                               VerticalOptions="Center" />
+                                                        <Label Grid.Column="1" Text="{Binding ChevronText}"
+                                                               FontSize="12" TextColor="#60A5FA" VerticalOptions="Center" />
+                                                    </Grid>
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding ToggleCommand}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+                                                <!-- Groups -->
+                                                <VerticalStackLayout IsVisible="{Binding IsExpanded}"
+                                                                     BindableLayout.ItemsSource="{Binding Groups}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate x:DataType="{x:Null}">
+                                                            <Border Padding="22,10"
+                                                                    BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#DBEAFE|Transparent'}"
+                                                                    StrokeShape="RoundRectangle 6" StrokeThickness="0">
+                                                                <Label Text="{Binding Name}" FontSize="13"
+                                                                       TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E40AF|#1E293B'}" />
+                                                                <Border.GestureRecognizers>
+                                                                    <TapGestureRecognizer
+                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.SelectStudentGroupCommand}"
+                                                                        CommandParameter="{Binding .}" />
+                                                                </Border.GestureRecognizers>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </VerticalStackLayout>
+                                                <BoxView HeightRequest="1" BackgroundColor="#E2E8F0" />
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </Border>
 
                             <Button Text="✚  Добавить студента"
                                     Command="{Binding AddStudentCommand}"
@@ -849,15 +918,19 @@
                                 <DataTemplate x:DataType="{x:Null}">
                                     <Border Padding="0" Margin="0,4"
                                             BackgroundColor="White" StrokeShape="RoundRectangle 12"
-                                            Stroke="#E2E8F0" StrokeThickness="1">
+                                            Stroke="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#E2E8F0'}"
+                                            StrokeThickness="2">
                                         <VerticalStackLayout>
                                             <!-- Faculty header: tap to expand/collapse + select -->
-                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" Padding="14,12" ColumnSpacing="6">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                                                  Padding="14,12" ColumnSpacing="6"
+                                                  BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EFF6FF|Transparent'}">
                                                 <Label Grid.Column="0" Text="{Binding ChevronText}"
                                                        FontSize="14" TextColor="#6B7280" VerticalOptions="Center" />
                                                 <Label Grid.Column="1" Text="{Binding Name}"
                                                        FontSize="15" FontAttributes="Bold"
-                                                       TextColor="#0F172A" VerticalOptions="Center" />
+                                                       TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E40AF|#0F172A'}"
+                                                       VerticalOptions="Center" />
                                                 <Button Grid.Column="2" Text="✏"
                                                         Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RenameDepartmentCommand}"
                                                         CommandParameter="{Binding Dept}"
@@ -883,24 +956,33 @@
                                                 </CollectionView.EmptyView>
                                                 <CollectionView.ItemTemplate>
                                                     <DataTemplate x:DataType="{x:Null}">
-                                                        <Grid ColumnDefinitions="*,Auto,Auto" Padding="4,3"
-                                                              ColumnSpacing="4">
-                                                            <Label Grid.Column="0" Text="{Binding Name}"
-                                                                   FontSize="13" TextColor="#334155"
-                                                                   VerticalOptions="Center" />
-                                                            <Button Grid.Column="1" Text="✏"
-                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RenameGroupCommand}"
-                                                                    CommandParameter="{Binding .}"
-                                                                    BackgroundColor="#EFF6FF" TextColor="#2563EB"
-                                                                    WidthRequest="30" HeightRequest="30"
-                                                                    CornerRadius="6" Padding="0" FontSize="12" />
-                                                            <Button Grid.Column="2" Text="✕"
-                                                                    Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveGroupCommand}"
-                                                                    CommandParameter="{Binding .}"
-                                                                    BackgroundColor="#FEF2F2" TextColor="#DC2626"
-                                                                    WidthRequest="30" HeightRequest="30"
-                                                                    CornerRadius="6" Padding="0" FontSize="12" />
-                                                        </Grid>
+                                                        <Border Padding="4,3" Margin="0,2"
+                                                                BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EFF6FF|Transparent'}"
+                                                                StrokeShape="RoundRectangle 8"
+                                                                Stroke="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|Transparent'}"
+                                                                StrokeThickness="1">
+                                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                                                <Label Grid.Column="0" Text="{Binding Name}"
+                                                                       FontSize="13"
+                                                                       TextColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#1E40AF|#334155'}"
+                                                                       VerticalOptions="Center" />
+                                                                <Button Grid.Column="1" Text="✏"
+                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RenameGroupCommand}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        BackgroundColor="#EFF6FF" TextColor="#2563EB"
+                                                                        WidthRequest="30" HeightRequest="30"
+                                                                        CornerRadius="6" Padding="0" FontSize="12" />
+                                                                <Button Grid.Column="2" Text="✕"
+                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveGroupCommand}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                                        WidthRequest="30" HeightRequest="30"
+                                                                        CornerRadius="6" Padding="0" FontSize="12" />
+                                                            </Grid>
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.SelectGroupCommand}" CommandParameter="{Binding .}" />
+                                                            </Border.GestureRecognizers>
+                                                        </Border>
                                                     </DataTemplate>
                                                 </CollectionView.ItemTemplate>
                                             </CollectionView>
@@ -980,8 +1062,29 @@
                                 FontSize="12" HeightRequest="36" CornerRadius="8" />
                     </Grid>
 
+                    <!-- Group search filter -->
+                    <Border Padding="10,0" StrokeShape="RoundRectangle 10"
+                            Stroke="#E2E8F0" StrokeThickness="1" BackgroundColor="White">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+                            <Label Grid.Column="0" Text="🔍" FontSize="14"
+                                   VerticalOptions="Center" TextColor="#94A3B8" />
+                            <Entry Grid.Column="1"
+                                   Text="{Binding ScheduleGroupFilter, Mode=TwoWay}"
+                                   Placeholder="Поиск по группе..."
+                                   PlaceholderColor="#94A3B8"
+                                   FontSize="13" TextColor="#0F172A"
+                                   BackgroundColor="Transparent"
+                                   HeightRequest="40" />
+                            <Button Grid.Column="2" Text="✕"
+                                    Command="{Binding ClearScheduleFilterCommand}"
+                                    IsVisible="{Binding ScheduleGroupFilter, Converter={StaticResource StringNotEmptyConverter}}"
+                                    BackgroundColor="Transparent" TextColor="#94A3B8"
+                                    FontSize="12" WidthRequest="32" HeightRequest="32" Padding="0" />
+                        </Grid>
+                    </Border>
+
                     <!-- ── Flat list (mode 0) ── -->
-                    <CollectionView ItemsSource="{Binding ScheduleEntries}" SelectionMode="None"
+                    <CollectionView ItemsSource="{Binding ScheduleEntriesFiltered}" SelectionMode="None"
                                     IsVisible="{Binding IsScheduleViewAll}">
                         <CollectionView.EmptyView>
                             <Label Text="Расписание пустое. Добавьте занятие ниже."
@@ -1076,43 +1179,65 @@
                                                                     </Grid.GestureRecognizers>
                                                                 </Grid>
                                                             </Border>
-                                                            <!-- Entries -->
+                                                            <!-- Days -->
                                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}"
-                                                                                 BindableLayout.ItemsSource="{Binding Entries}" Padding="8,0">
+                                                                                 BindableLayout.ItemsSource="{Binding Days}" Padding="0,0">
                                                                 <BindableLayout.ItemTemplate>
                                                                     <DataTemplate x:DataType="{x:Null}">
-                                                                        <Border Padding="14,10" Margin="0,3"
-                                                                                BackgroundColor="White" StrokeShape="RoundRectangle 8"
-                                                                                Stroke="#E2E8F0" StrokeThickness="1">
-                                                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                                                                <VerticalStackLayout Grid.Column="0" Spacing="3">
-                                                                                    <Label Text="{Binding GroupName}" FontSize="13" FontAttributes="Bold" TextColor="#059669" />
-                                                                                    <Label FontSize="12" TextColor="#334155">
-                                                                                        <Label.FormattedText>
-                                                                                            <FormattedString>
-                                                                                                <Span Text="📅 " /><Span Text="{Binding DisplayDate}" FontAttributes="Bold"/>
-                                                                                                <Span Text="  " /><Span Text="{Binding TimeSlots[0]}" />
-                                                                                            </FormattedString>
-                                                                                        </Label.FormattedText>
-                                                                                    </Label>
-                                                                                    <Label FontSize="12" TextColor="#64748B">
-                                                                                        <Label.FormattedText>
-                                                                                            <FormattedString>
-                                                                                                <Span Text="👤 " /><Span Text="{Binding PersonCount}" FontAttributes="Bold"/><Span Text=" студентов" />
-                                                                                            </FormattedString>
-                                                                                        </Label.FormattedText>
-                                                                                    </Label>
-                                                                                    <Label Text="{Binding RoomName}" FontSize="12" TextColor="#94A3B8" />
-                                                                                </VerticalStackLayout>
-                                                                                <Button Grid.Column="1" Text="🗑"
-                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveScheduleEntryCommand}"
-                                                                                        CommandParameter="{Binding .}"
-                                                                                        BackgroundColor="#FEF2F2" TextColor="#DC2626"
-                                                                                        WidthRequest="36" HeightRequest="36"
-                                                                                        CornerRadius="8" Padding="0" FontSize="13"
-                                                                                        VerticalOptions="Center" />
-                                                                            </Grid>
-                                                                        </Border>
+                                                                        <VerticalStackLayout>
+                                                                            <!-- Day header -->
+                                                                            <Border Padding="24,6" BackgroundColor="#F0F9FF" StrokeThickness="0">
+                                                                                <Grid ColumnDefinitions="*,Auto">
+                                                                                    <Label Grid.Column="0" Text="{Binding DayLabel}"
+                                                                                           FontSize="12" FontAttributes="Bold" TextColor="#0284C7" VerticalOptions="Center" />
+                                                                                    <Label Grid.Column="1" Text="{Binding ChevronText}"
+                                                                                           FontSize="11" TextColor="#7DD3FC" VerticalOptions="Center" />
+                                                                                    <Grid.GestureRecognizers>
+                                                                                        <TapGestureRecognizer Command="{Binding ToggleCommand}" />
+                                                                                    </Grid.GestureRecognizers>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                            <!-- Entries per day -->
+                                                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}"
+                                                                                                 BindableLayout.ItemsSource="{Binding Entries}" Padding="8,0">
+                                                                                <BindableLayout.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="{x:Null}">
+                                                                                        <Border Padding="14,10" Margin="0,3"
+                                                                                                BackgroundColor="White" StrokeShape="RoundRectangle 8"
+                                                                                                Stroke="#E2E8F0" StrokeThickness="1">
+                                                                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                                                                <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                                                                                    <Label Text="{Binding GroupName}" FontSize="13" FontAttributes="Bold" TextColor="#059669" />
+                                                                                                    <Label FontSize="12" TextColor="#334155">
+                                                                                                        <Label.FormattedText>
+                                                                                                            <FormattedString>
+                                                                                                                <Span Text="📅 " /><Span Text="{Binding DisplayDate}" FontAttributes="Bold"/>
+                                                                                                                <Span Text="  " /><Span Text="{Binding TimeSlots[0]}" />
+                                                                                                            </FormattedString>
+                                                                                                        </Label.FormattedText>
+                                                                                                    </Label>
+                                                                                                    <Label FontSize="12" TextColor="#64748B">
+                                                                                                        <Label.FormattedText>
+                                                                                                            <FormattedString>
+                                                                                                                <Span Text="👤 " /><Span Text="{Binding PersonCount}" FontAttributes="Bold"/><Span Text=" студентов" />
+                                                                                                            </FormattedString>
+                                                                                                        </Label.FormattedText>
+                                                                                                    </Label>
+                                                                                                    <Label Text="{Binding RoomName}" FontSize="12" TextColor="#94A3B8" />
+                                                                                                </VerticalStackLayout>
+                                                                                                <Button Grid.Column="1" Text="🗑"
+                                                                                                        Command="{Binding Source={x:Reference AdminRoot}, Path=BindingContext.RemoveScheduleEntryCommand}"
+                                                                                                        CommandParameter="{Binding .}"
+                                                                                                        BackgroundColor="#FEF2F2" TextColor="#DC2626"
+                                                                                                        WidthRequest="36" HeightRequest="36"
+                                                                                                        CornerRadius="8" Padding="0" FontSize="13"
+                                                                                                        VerticalOptions="Center" />
+                                                                                            </Grid>
+                                                                                        </Border>
+                                                                                    </DataTemplate>
+                                                                                </BindableLayout.ItemTemplate>
+                                                                            </VerticalStackLayout>
+                                                                        </VerticalStackLayout>
                                                                     </DataTemplate>
                                                                 </BindableLayout.ItemTemplate>
                                                             </VerticalStackLayout>
@@ -1428,6 +1553,52 @@
 
         </Grid>
         <!-- end management mode -->
+
+        <!-- ═══════════════════════════════════════
+             QR CODE POPUP OVERLAY
+             ═══════════════════════════════════════ -->
+        <Grid Grid.Row="0" Grid.RowSpan="2"
+              IsVisible="{Binding QrPopupVisible}"
+              BackgroundColor="#80000000">
+            <Border Padding="24"
+                    WidthRequest="300"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    BackgroundColor="#1E293B"
+                    StrokeShape="RoundRectangle 16"
+                    Stroke="#334155">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="{Binding QrPopupNodeName}"
+                           FontSize="16" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" />
+                    <!-- Actual deep-link URL — selectable for manual copy -->
+                    <Border Padding="10,8"
+                            StrokeShape="RoundRectangle 8"
+                            BackgroundColor="#0F172A" Stroke="#334155">
+                        <Label Text="{Binding QrCurrentUrl}"
+                               FontSize="11" TextColor="#38BDF8"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="CharacterWrap" />
+                    </Border>
+                    <Image Source="{Binding QrCodeImageSource}"
+                           WidthRequest="220" HeightRequest="220"
+                           HorizontalOptions="Center" />
+                    <!-- Copy URL button -->
+                    <Button Text="📋 Копировать URL"
+                            Command="{Binding CopyQrUrlCommand}"
+                            BackgroundColor="#0E7490" TextColor="White"
+                            CornerRadius="8" HeightRequest="40" />
+                    <Button Text="⭋ Скачать PNG"
+                            Command="{Binding DownloadQrCodeCommand}"
+                            BackgroundColor="#2563EB" TextColor="White"
+                            CornerRadius="8" HeightRequest="40" />
+                    <Button Text="✕ Закрыть"
+                            Command="{Binding DismissQrPopupCommand}"
+                            BackgroundColor="#334155" TextColor="#94A3B8"
+                            CornerRadius="8" HeightRequest="40" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
 
     </Grid>
 </ContentPage>

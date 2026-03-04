@@ -117,6 +117,11 @@
                            HorizontalTextAlignment="Center"
                            Margin="0,0,0,2" />
                     <!-- Admin button (only for admin users) -->
+                    <Button Text="🔑 Сменить пароль"
+                            Command="{Binding ChangePasswordCommand}"
+                            IsVisible="{Binding IsAdminUser}"
+                            BackgroundColor="#1E293B" TextColor="#94A3B8"
+                            FontSize="13" CornerRadius="8" HeightRequest="38" />
                     <Button Text="⚙ Администратор"
                             Command="{Binding GoToAdminCommand}"
                             IsVisible="{Binding IsAdminUser}"
@@ -183,9 +188,13 @@
                                       Nodes="{Binding NodesOnCurrentFloor}"
                                       Edges="{Binding EdgesOnCurrentFloor}"
                                       RouteNodes="{Binding RouteNodesOnFloor}"
+                                      RouteNodeBreaks="{Binding RouteBreaksOnFloor}"
                                       HighlightBoundaryNode="{Binding EndNode}"
                                       HighlightStartNode="{Binding StartNode}"
                                       ShowFireExtinguishers="{Binding ShowFireExtinguishers}"
+                                      QrAnchorNodeIds="{Binding QrAnchorNodeIds}"
+                                      BlockedNodeIds="{Binding BlockedNodeIds}"
+                                      ShowRouteWaypoints="{Binding IsBlockingMode}"
                                       ShowGraph="True"
                                       HorizontalOptions="Fill" VerticalOptions="Fill" />
 
@@ -217,11 +226,94 @@
                     <Border HorizontalOptions="Fill" VerticalOptions="Start"
                             BackgroundColor="#DC2626" Padding="14,10"
                             StrokeThickness="0"
-                            IsVisible="{Binding IsEmergencyActive}"
+                            IsVisible="{Binding IsEmergencyBannerVisible}"
                             ZIndex="20">
                         <Label Text="{Binding EmergencyMessage}"
                                TextColor="White" FontAttributes="Bold"
                                FontSize="13" HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <!-- Blocking-mode hint banner — replaces the emergency banner in the same slot -->
+                    <Border HorizontalOptions="Fill" VerticalOptions="Start"
+                            BackgroundColor="#DC2626" Padding="14,10"
+                            StrokeThickness="0"
+                            IsVisible="{Binding IsBlockingMode}"
+                            ZIndex="20">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0"
+                                   Text="⛔ Нажмите на точку маршрута, где проход закрыт"
+                                   FontSize="13" TextColor="White" FontAttributes="Bold"
+                                   VerticalOptions="Center" LineBreakMode="WordWrap" />
+                            <Button Grid.Column="1"
+                                    Text="Отмена"
+                                    Command="{Binding CancelBlockingModeCommand}"
+                                    BackgroundColor="#991B1B" TextColor="#FCA5A5"
+                                    FontSize="12" HeightRequest="34" CornerRadius="8" Padding="10,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Confirmation overlay: shown after user taps a route node -->
+                    <Border HorizontalOptions="Center" VerticalOptions="Center"
+                            BackgroundColor="White" Padding="24,20"
+                            StrokeShape="RoundRectangle 16"
+                            Stroke="#DC2626" StrokeThickness="2"
+                            IsVisible="{Binding IsBlockPending}"
+                            ZIndex="50"
+                            MaximumWidthRequest="360">
+                        <VerticalStackLayout Spacing="14">
+                            <Label Text="⛔ Подтверждение"
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="#DC2626" HorizontalOptions="Center" />
+                            <Label FontSize="14" TextColor="#334155"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Проход в точке " />
+                                        <Span Text="{Binding PendingBlockNodeName}" FontAttributes="Bold" TextColor="#7F1D1D" />
+                                        <Span Text=" недоступен?" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Маршрут будет перестроен в обход этой точки."
+                                   FontSize="12" TextColor="#64748B"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <Button Grid.Column="0"
+                                        Text="✕ Выбрать другую"
+                                        Command="{Binding CancelBlockNodeConfirmCommand}"
+                                        BackgroundColor="#F1F5F9" TextColor="#334155"
+                                        FontSize="13" HeightRequest="42" CornerRadius="10" />
+                                <Button Grid.Column="1"
+                                        Text="✓ Да, недоступно"
+                                        Command="{Binding ConfirmBlockNodeCommand}"
+                                        BackgroundColor="#DC2626" TextColor="White"
+                                        FontSize="13" HeightRequest="42" CornerRadius="10" FontAttributes="Bold" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Подтверждение местоположения (автоопределено по расписанию) -->
+                    <!-- No-route popup: all exits blocked in ЧС mode -->
+                    <Border HorizontalOptions="Center" VerticalOptions="Center"
+                            BackgroundColor="White" Padding="28,24"
+                            StrokeShape="RoundRectangle 16"
+                            Stroke="#DC2626" StrokeThickness="2"
+                            IsVisible="{Binding ShowNoRoutePopup}"
+                            ZIndex="60"
+                            MaximumWidthRequest="340">
+                        <VerticalStackLayout Spacing="16">
+                            <Label Text="🚨 Выход недоступен"
+                                   FontSize="17" FontAttributes="Bold"
+                                   TextColor="#DC2626" HorizontalOptions="Center" />
+                            <Label Text="Все возможные маршруты к выходу заблокированы."
+                                   FontSize="14" TextColor="#334155"
+                                   HorizontalTextAlignment="Center" LineBreakMode="WordWrap" />
+                            <Button Text="ОК"
+                                    Command="{Binding DismissNoRoutePopupCommand}"
+                                    BackgroundColor="#DC2626" TextColor="White"
+                                    FontSize="15" FontAttributes="Bold"
+                                    HeightRequest="46" CornerRadius="10" />
+                        </VerticalStackLayout>
                     </Border>
 
                     <!-- Подтверждение местоположения (автоопределено по расписанию) -->
@@ -365,6 +457,9 @@
             <!-- ─── Bottom panel ─── -->
             <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="{OnIdiom Phone='10,8,10,10', Default='0,10,0,0'}">
 
+                <!-- Search input panels: hidden in ЧС-mode once route is built -->
+                <VerticalStackLayout IsVisible="{Binding ShowSearchPanel}" Spacing="8">
+
                 <!-- Route input bar (PHONE – vertical stack) -->
                 <Border Padding="12,12"
                         IsVisible="{OnIdiom Phone=True, Default=False}"
@@ -372,7 +467,7 @@
                         BackgroundColor="White"
                         Stroke="#E2E8F0" StrokeThickness="{OnIdiom Phone=0, Default=1}">
                     <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0" Text="ОТ" FontSize="10" CharacterSpacing="1.5"
                                    TextColor="#94A3B8" VerticalOptions="Center" />
                             <Border Grid.Column="1" Padding="12,12"
@@ -383,6 +478,14 @@
                                     <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
+                            <!-- QR scan button -->
+                            <Button Grid.Column="2"
+                                    Text="📷"
+                                    Command="{Binding ScanQrCommand}"
+                                    BackgroundColor="#0E7490" TextColor="White"
+                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
+                                    Padding="0" FontSize="16"
+                                    ToolTipProperties.Text="Отсканировать QR-код" />
                         </Grid>
                         <!-- ДО — скрыто в режиме ЧС -->
                         <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
@@ -436,17 +539,27 @@
                         <!-- Откуда field -->
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                             <Label Text="ОТ" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
-                            <Border Padding="10,8"
-                                    StrokeShape="RoundRectangle 8"
-                                    Stroke="#E2E8F0" StrokeThickness="1"
-                                    BackgroundColor="#F8FAFC">
-                                <Label Text="{Binding StartNodeDisplay}"
-                                       FontSize="13" TextColor="#334155"
-                                       LineBreakMode="TailTruncation" />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                <Border Grid.Column="0" Padding="10,8"
+                                        StrokeShape="RoundRectangle 8"
+                                        Stroke="#E2E8F0" StrokeThickness="1"
+                                        BackgroundColor="#F8FAFC">
+                                    <Label Text="{Binding StartNodeDisplay}"
+                                           FontSize="13" TextColor="#334155"
+                                           LineBreakMode="TailTruncation" />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                                <!-- QR-ссылка (только на десктопе) -->
+                                <Button Grid.Column="1"
+                                        Text="📷"
+                                        Command="{Binding ScanQrCommand}"
+                                        BackgroundColor="#0E7490" TextColor="White"
+                                        CornerRadius="8" WidthRequest="36" HeightRequest="36"
+                                        Padding="0" FontSize="15"
+                                        ToolTipProperties.Text="Ввести QR-ссылку" />
+                            </Grid>
                         </VerticalStackLayout>
 
                         <!-- Куда field — скрыто в режиме ЧС -->
@@ -478,34 +591,38 @@
                             </Border>
                         </VerticalStackLayout>
 
-                        <!-- Build + Clear buttons -->
-                        <Grid Grid.Column="2" ColumnDefinitions="*,Auto" ColumnSpacing="8" VerticalOptions="End">
-                            <!-- Обычная кнопка маршрута -->
-                            <Button Grid.Column="0"
-                                    Text="Построить маршрут"
-                                    Command="{Binding BuildRouteCommand}"
-                                    IsVisible="{Binding IsNormalMode}"
-                                    BackgroundColor="#2563EB" TextColor="White"
-                                    FontSize="13" Padding="18,9" CornerRadius="8" />
-                            <!-- Кнопка эвакуации в режиме ЧС -->
-                            <Button Grid.Column="0"
-                                    Text="🚨 До выхода"
-                                    Command="{Binding BuildEmergencyRouteCommand}"
-                                    IsVisible="{Binding IsEmergencyActive}"
-                                    BackgroundColor="#DC2626" TextColor="White"
-                                    FontAttributes="Bold"
-                                    FontSize="13" Padding="18,9" CornerRadius="8" />
-                            <Button Grid.Column="1"
-                                    Text="✕"
-                                    Command="{Binding ClearRouteCommand}"
-                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
-                                    TextColor="White"
-                                    FontSize="14" WidthRequest="38" HeightRequest="38"
-                                    CornerRadius="8" Padding="0" />
-                        </Grid>
+                        <!-- Build + Clear buttons + blocked-route button -->
+                        <VerticalStackLayout Grid.Column="2" VerticalOptions="End" Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <!-- Обычная кнопка маршрута -->
+                                <Button Grid.Column="0"
+                                        Text="Построить маршрут"
+                                        Command="{Binding BuildRouteCommand}"
+                                        IsVisible="{Binding IsNormalMode}"
+                                        BackgroundColor="#2563EB" TextColor="White"
+                                        FontSize="13" Padding="18,9" CornerRadius="8" />
+                                <!-- Кнопка эвакуации в режиме ЧС -->
+                                <Button Grid.Column="0"
+                                        Text="🚨 До выхода"
+                                        Command="{Binding BuildEmergencyRouteCommand}"
+                                        IsVisible="{Binding IsEmergencyActive}"
+                                        BackgroundColor="#DC2626" TextColor="White"
+                                        FontAttributes="Bold"
+                                        FontSize="13" Padding="18,9" CornerRadius="8" />
+                                <Button Grid.Column="1"
+                                        Text="✕"
+                                        Command="{Binding ClearRouteCommand}"
+                                        BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                        TextColor="White"
+                                        FontSize="14" WidthRequest="38" HeightRequest="38"
+                                        CornerRadius="8" Padding="0" />
+                            </Grid>
+                        </VerticalStackLayout>
 
                     </Grid>
                 </Border>
+
+                </VerticalStackLayout>
 
                 <!-- Route step card -->
                 <Border Padding="0"
@@ -514,17 +631,52 @@
                         Stroke="#E2E8F0" StrokeThickness="1"
                         IsVisible="{Binding HasRoute}">
                     <Grid IsClippedToBounds="True" Padding="16,14">
-                    <Grid x:Name="StepContent" RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
 
-                        <!-- Step counter: "Шаг 1 из 3" -->
-                        <Label Grid.Row="0"
-                               Text="{Binding StepCounterText}"
-                               FontSize="11" TextColor="#94A3B8"
-                               IsVisible="{Binding IsMultiStepRoute}"
-                               HorizontalOptions="Center" />
+                        <!-- Строка: кнопка назад (стрелка) слева + этаж + точки справа -->
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto" VerticalOptions="Center" ColumnSpacing="8">
+                            <!-- Кнопка назад в виде стрелки слева: всегда видима при HasRoute -->
+                            <Border Grid.Column="0"
+                                    BackgroundColor="#F1F5F9"
+                                    StrokeShape="RoundRectangle 15"
+                                    StrokeThickness="0"
+                                    WidthRequest="30" HeightRequest="30"
+                                    HorizontalOptions="Start" VerticalOptions="Center">
+                                <Label Text="‹"
+                                       FontSize="20" FontAttributes="Bold"
+                                       TextColor="#475569"
+                                       HorizontalOptions="Center" VerticalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       Margin="0,0,0,2" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnPrevStepClicked" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <!-- Этаж текущего шага -->
+                            <Label Grid.Column="1"
+                                   Text="{Binding CurrentStepFloorLabel}"
+                                   FontSize="13" FontAttributes="Bold"
+                                   TextColor="#475569" VerticalOptions="Center" />
+                            <!-- Точки-индикаторы справа -->
+                            <HorizontalStackLayout Grid.Column="3"
+                                                   HorizontalOptions="End"
+                                                   VerticalOptions="Center"
+                                                   Spacing="6"
+                                                   IsVisible="{Binding IsMultiStepRoute}"
+                                                   BindableLayout.ItemsSource="{Binding RouteStepDots}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:RouteDotVm">
+                                        <BoxView WidthRequest="8" HeightRequest="8"
+                                                 CornerRadius="4"
+                                                 Color="{Binding IsActive, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#CBD5E1'}" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </Grid>
 
-                        <!-- Icon + instruction text -->
-                        <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <!-- Icon + instruction text (animated on step change) -->
+                        <Grid x:Name="StepTextContent" Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="12">
                             <Label Grid.Column="0"
                                    Text="{Binding CurrentStepIcon}"
                                    FontSize="26" VerticalOptions="Center" />
@@ -536,31 +688,27 @@
                                    VerticalOptions="Center" />
                         </Grid>
 
-                        <!-- Кнопки навигации: Назад | Далее / Завершить -->
-                        <Grid Grid.Row="2" ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Button Text="Назад"
-                                    Grid.Column="0"
-                                    Clicked="OnPrevStepClicked"
-                                    IsVisible="{Binding HasPreviousStep}"
-                                    BackgroundColor="#475569" TextColor="White"
-                                    FontSize="14" HeightRequest="44" CornerRadius="8"
-                                    MinimumWidthRequest="90" />
-                            <Button Text="Далее"
-                                    Grid.Column="1"
+                        <!-- Кнопки навигации: Далее / Завершить + компактная кнопка "⛔ Недоступно" -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Button Grid.Column="0" Text="Далее"
                                     Clicked="OnNextStepClicked"
                                     IsVisible="{Binding HasNextStep}"
                                     BackgroundColor="#2563EB" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8" />
-                            <Button Text="Завершить"
-                                    Grid.Column="1"
+                            <Button Grid.Column="0" Text="Завершить"
                                     Command="{Binding ClearRouteCommand}"
                                     IsVisible="{Binding IsLastStep}"
                                     BackgroundColor="#16A34A" TextColor="White"
                                     FontSize="14" HeightRequest="44" CornerRadius="8" />
+                            <!-- ⛔ Недоступно: компактная, рядом с кнопкой навигации, только при HasEmergencyRoute -->
+                            <Button Grid.Column="1"
+                                    Text="⛔"
+                                    Command="{Binding MarkRouteBlockedCommand}"
+                                    IsVisible="{Binding HasEmergencyRoute}"
+                                    BackgroundColor="#7F1D1D" TextColor="#FCA5A5"
+                                    FontSize="14" WidthRequest="44" HeightRequest="44"
+                                    CornerRadius="8" Padding="0"
+                                    ToolTipProperties.Text="Отметить проход недоступным" />
                         </Grid>
 
                     </Grid>

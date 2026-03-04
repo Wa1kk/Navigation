@@ -10,7 +10,7 @@ namespace IndoorNav.ViewModels;
 public enum AdminMainTab  { Map, Management }
 public enum ManagementTab { Users, Departments, Schedule }
 
-public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddEvacuationExit, AddOther, AddFireExtinguisher, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddEvacuationExit, AddOther, AddFireExtinguisher, AddQrAnchor, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
 
 
 public class AdminViewModel : INotifyPropertyChanged
@@ -22,6 +22,15 @@ public class AdminViewModel : INotifyPropertyChanged
     private readonly AuthService _authService;
     private readonly DepartmentService _departmentService;
     private readonly ScheduleService _scheduleService;
+    private readonly QrService _qrService;
+
+    // QR popup state
+    private byte[]?       _qrCurrentPngBytes;
+    private string        _qrCurrentNodeId   = string.Empty;
+    private string        _qrCurrentUrl      = string.Empty;
+    private bool          _qrPopupVisible;
+    private ImageSource?  _qrCodeImageSource;
+    private string        _qrPopupNodeName   = string.Empty;
 
     // ── Main tabs ──────────────────────────────────────────────────────────────
     private AdminMainTab _activeTab = AdminMainTab.Map;
@@ -132,6 +141,9 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedCategoryHidden));
             OnPropertyChanged(nameof(SelectedNodeIsRoom));
             OnPropertyChanged(nameof(SelectedNodeIsRoomText));
+            OnPropertyChanged(nameof(SelectedNodeIsTransition));
+            OnPropertyChanged(nameof(SelectedTransitionGroupIdText));
+            OnPropertyChanged(nameof(SelectedNodeIsQrAnchor));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
             RefreshSelectedNodeEdges();
@@ -157,6 +169,7 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsEvacuationExitMode));
             OnPropertyChanged(nameof(IsOtherMode));
             OnPropertyChanged(nameof(IsFireExtinguisherMode));
+            OnPropertyChanged(nameof(IsQrAnchorMode));
             OnPropertyChanged(nameof(IsBoundaryMode));
             UpdateStatus();
         }
@@ -170,6 +183,34 @@ public class AdminViewModel : INotifyPropertyChanged
     public bool IsEvacuationExitMode  => CurrentAction == AdminAction.AddEvacuationExit;
     public bool IsOtherMode           => CurrentAction == AdminAction.AddOther;
     public bool IsFireExtinguisherMode => CurrentAction == AdminAction.AddFireExtinguisher;
+    public bool IsQrAnchorMode         => CurrentAction == AdminAction.AddQrAnchor;
+
+    public bool SelectedNodeIsQrAnchor => SelectedNode?.IsQrAnchor == true;
+
+    public bool QrPopupVisible
+    {
+        get => _qrPopupVisible;
+        set { _qrPopupVisible = value; OnPropertyChanged(); }
+    }
+
+    public ImageSource? QrCodeImageSource
+    {
+        get => _qrCodeImageSource;
+        set { _qrCodeImageSource = value; OnPropertyChanged(); }
+    }
+
+    public string QrPopupNodeName
+    {
+        get => _qrPopupNodeName;
+        set { _qrPopupNodeName = value; OnPropertyChanged(); }
+    }
+
+    public string QrCurrentUrl
+    {
+        get => _qrCurrentUrl;
+        set { _qrCurrentUrl = value; OnPropertyChanged(); }
+    }
+
     public bool IsConnectMode    => CurrentAction == AdminAction.ConnectNode;
     public bool IsDisconnectMode => CurrentAction == AdminAction.DisconnectNode;
     public bool IsCorridorMode   => CurrentAction == AdminAction.DrawCorridor;
@@ -178,6 +219,8 @@ public class AdminViewModel : INotifyPropertyChanged
 
     public bool IsEmergencyActive   => _emergencyService.IsEmergencyActive;
     public bool IsEmergencyInactive => !_emergencyService.IsEmergencyActive;
+
+    public ObservableCollection<BuildingEmergencyVm> BuildingEmergencies { get; } = new();
 
     public string StatusText
     {
@@ -192,7 +235,13 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<(NavNode, SKPoint)> NodeMovedCommand { get; }
     public Command<(int polyIdx, int vtxIdx, SKPoint svgPos)> BoundaryVertexMovedCommand { get; }
     public Command<(int polyIdx, int vtxIdx)> BoundaryVertexTappedCommand { get; }
-    public Command RenameSelectedCommand         { get; }
+    public Command RenameSelectedCommand             { get; }
+    public Command EditTransitionGroupIdCommand     { get; }
+    public Command SetQrAnchorModeCommand           { get; }
+    public Command ShowQrCodeCommand                { get; }
+    public Command DismissQrPopupCommand            { get; }
+    public Command DownloadQrCodeCommand            { get; }
+    public Command CopyQrUrlCommand                 { get; }
     public Command DeleteSelectedCommand         { get; }
     public Command DeleteBoundaryVertexCommand   { get; }
     public Command EditInnerLabelCommand         { get; }
@@ -215,7 +264,8 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetExitModeCommand             { get; }
     public Command SetEvacuationExitModeCommand    { get; }
     public Command SetFireExtinguisherModeCommand { get; }
-    public Command ToggleEmergencyCommand         { get; }
+    public Command<string> ToggleEmergencyCommand   { get; }
+    public Command ToggleAllEmergencyCommand       { get; }
     public Command AddStudentCommand              { get; }
     public Command<StudentRowVm> RemoveStudentCommand { get; }
     public Command<StudentRowVm> EditStudentCommand   { get; }
@@ -254,16 +304,23 @@ public class AdminViewModel : INotifyPropertyChanged
             NewStudentGroup = null;
             OnPropertyChanged();
             OnPropertyChanged(nameof(NewStudentDeptGroups));
+            OnPropertyChanged(nameof(NewStudentDeptDisplay));
+            OnPropertyChanged(nameof(NewStudentGroupDisplay));
         }
     }
     private StudyGroup? _newStudentGroup;
     public StudyGroup? NewStudentGroup
     {
         get => _newStudentGroup;
-        set { _newStudentGroup = value; OnPropertyChanged(); AddStudentCommand?.ChangeCanExecute(); }
+        set { _newStudentGroup = value; OnPropertyChanged(); OnPropertyChanged(nameof(NewStudentGroupDisplay)); AddStudentCommand?.ChangeCanExecute(); }
     }
     // Returns the actual ObservableCollection so the picker reflects live group changes
     public ObservableCollection<StudyGroup>? NewStudentDeptGroups => _newStudentDept?.Groups;
+    public string NewStudentDeptDisplay  => _newStudentDept?.Name  ?? "Не выбран";
+    public string NewStudentGroupDisplay => _newStudentGroup?.Name ?? "Не выбрана";
+
+    // Tree-list picker for dept/group (student form) — same pattern as ScheduleDeptGroups
+    public ObservableCollection<SchedDeptGroup> StudentDeptGroups { get; } = new();
 
     // ── Departments ──
     public ObservableCollection<Department> Departments { get; } = new();
@@ -280,11 +337,33 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedDeptGroups));
             OnPropertyChanged(nameof(HasSelectedDept));
             AddGroupCommand?.ChangeCanExecute();
+            foreach (var v in DeptViewItems)
+                v.IsSelected = v.Dept.Id == value?.Id;
+            // Clear group highlight when department changes
+            _selectedGroup = null;
+            foreach (var d in Departments) foreach (var g in d.Groups) g.IsSelected = false;
+            OnPropertyChanged(nameof(SelectedGroup));
         }
     }
     public bool HasSelectedDept => _selectedDept != null;
     public ObservableCollection<StudyGroup> SelectedDeptGroups =>
         new(_selectedDept?.Groups ?? []);
+
+    private StudyGroup? _selectedGroup;
+    public StudyGroup? SelectedGroup
+    {
+        get => _selectedGroup;
+        set
+        {
+            if (_selectedGroup == value) { _selectedGroup = null; foreach (var d in Departments) foreach (var g in d.Groups) g.IsSelected = false; OnPropertyChanged(); return; }
+            _selectedGroup = value;
+            foreach (var d in Departments)
+                foreach (var g in d.Groups)
+                    g.IsSelected = g == value;
+            OnPropertyChanged();
+        }
+    }
+    public Command<StudyGroup> SelectGroupCommand { get; }
 
     private string _newDeptName = string.Empty;
     public string NewDeptName
@@ -310,7 +389,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public ObservableCollection<ScheduleEntry> ScheduleEntries { get; } = new();
 
     /// <summary>Russian day names indexed by System.DayOfWeek (0=Sun..6=Sat).</summary>
-    public static List<string> DayNames { get; } = new()
+    public List<string> DayNames { get; } = new()
         { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
 
     private int _newEntryDayOfWeek = 5; // default Friday
@@ -361,6 +440,14 @@ public class AdminViewModel : INotifyPropertyChanged
     // Entry display trees
     public ObservableCollection<EntryBuildingGroup> ScheduleEntriesViewByRoom  { get; } = new();
     public ObservableCollection<EntryFacultyGroup>  ScheduleEntriesViewByGroup { get; } = new();
+    public ObservableCollection<ScheduleEntry>      ScheduleEntriesFiltered    { get; } = new();
+
+    private string _scheduleGroupFilter = string.Empty;
+    public string ScheduleGroupFilter
+    {
+        get => _scheduleGroupFilter;
+        set { _scheduleGroupFilter = value; OnPropertyChanged(); RebuildScheduleEntriesView(); }
+    }
 
     private int _scheduleViewMode = 0;
     public int ScheduleViewMode
@@ -377,8 +464,11 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command ClearAllScheduleEntriesCommand             { get; }
     public Command<SchedRoomItem> SelectScheduleRoomCommand  { get; }
     public Command<SchedGroupItem> SelectScheduleGroupCommand { get; }
+    public Command<SchedGroupItem> SelectStudentGroupCommand   { get; }
     public Command<string>     SwitchScheduleViewCommand      { get; }
+    public Command             ClearScheduleFilterCommand     { get; }
     public Command<StudentRowVm> ChangeStudentPasswordCommand  { get; }
+    public Command ChangeAdminPasswordCommand     { get; }
     public Command ResetNodeStyleCommand          { get; }
     public Command ResetGraphCommand             { get; }
     public Command CopyNodeCommand               { get; }
@@ -442,6 +532,14 @@ public class AdminViewModel : INotifyPropertyChanged
     }
     public string SelectedNodeIsRoomText => SelectedNodeIsRoom ? "🏠 Аудитория: Да" : "🏠 Аудитория: Нет";
 
+    public bool SelectedNodeIsTransition =>
+        SelectedNode?.IsTransition == true;
+
+    public string SelectedTransitionGroupIdText =>
+        string.IsNullOrEmpty(SelectedNode?.TransitionGroupId)
+            ? "🔑 ID группы: —"
+            : $"🔑 ID группы: {SelectedNode.TransitionGroupId}";
+
     private int _selectedBoundaryVertexIndex = -1;
     public int SelectedBoundaryVertexIndex
     {
@@ -482,24 +580,34 @@ public class AdminViewModel : INotifyPropertyChanged
     private NavNode? _corridorLastNode;
     private int      _corridorStepCount;
 
-    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, DepartmentService departmentService, ScheduleService scheduleService, MainViewModel mainViewModel)
+    public AdminViewModel(NavGraphService graphService, EmergencyService emergencyService, AuthService authService, DepartmentService departmentService, ScheduleService scheduleService, QrService qrService, MainViewModel mainViewModel)
     {
         _graphService      = graphService;
         _emergencyService  = emergencyService;
         _authService       = authService;
         _departmentService = departmentService;
         _scheduleService   = scheduleService;
+        _qrService         = qrService;
 
         foreach (var b in mainViewModel.Buildings)
             Buildings.Add(b);
-
-        // Если здания ещё не загрузились — подпишемся на их появление
+        RebuildBuildingEmergencies();
         mainViewModel.Buildings.CollectionChanged += (_, e) =>
         {
             if (e.NewItems == null) return;
             foreach (Building b in e.NewItems)
                 if (!Buildings.Any(x => x.Id == b.Id))
                     Buildings.Add(b);
+            RebuildBuildingEmergencies();
+        };
+
+        _emergencyService.EmergencyChanged += (_, e) =>
+        {
+            foreach (var vm in BuildingEmergencies)
+                if (e.BuildingId == null || vm.BuildingId == e.BuildingId)
+                    vm.IsActive = _emergencyService.IsActiveForBuilding(vm.BuildingId);
+            OnPropertyChanged(nameof(IsEmergencyActive));
+            OnPropertyChanged(nameof(IsEmergencyInactive));
         };
 
         CanvasTappedCommand   = new Command<SKPoint>(OnCanvasTapped);
@@ -529,6 +637,7 @@ public class AdminViewModel : INotifyPropertyChanged
             }
         });
         RenameSelectedCommand = new Command(async () => await RenameSelectedAsync(), () => SelectedNode != null);
+        EditTransitionGroupIdCommand = new Command(async () => await EditTransitionGroupIdAsync(), () => SelectedNode?.IsTransition == true);
         DeleteSelectedCommand = new Command(DeleteSelected, () => SelectedNode != null);
         DeleteBoundaryVertexCommand = new Command(() =>
         {
@@ -654,12 +763,34 @@ public class AdminViewModel : INotifyPropertyChanged
             CurrentAction = AdminAction.AddFireExtinguisher;
             StatusText    = "Режим огнетушителя: нажмите на план — будет добавлена точка огнетушителя (зелёная).";
         });
-        ToggleEmergencyCommand = new Command(() =>
+        SetQrAnchorModeCommand = new Command(() =>
+        {
+            CurrentAction = AdminAction.AddQrAnchor;
+            StatusText    = "Режим QR-якоря: нажмите на план — будет добавлена точка входа с QR-кодом.";
+        });
+        ShowQrCodeCommand     = new Command(async () => await ShowQrCodeAsync(),  () => SelectedNode?.IsQrAnchor == true);
+        DismissQrPopupCommand = new Command(() => { QrPopupVisible = false; });
+        DownloadQrCodeCommand = new Command(async () => await DownloadQrCodeAsync(), () => _qrCurrentPngBytes?.Length > 0);
+        CopyQrUrlCommand = new Command(async () =>
+        {
+            if (string.IsNullOrWhiteSpace(_qrCurrentUrl)) return;
+            await Clipboard.SetTextAsync(_qrCurrentUrl);
+        }, () => !string.IsNullOrWhiteSpace(_qrCurrentUrl));
+        ToggleEmergencyCommand = new Command<string>(buildingId =>
+        {
+            if (_emergencyService.IsActiveForBuilding(buildingId))
+                _emergencyService.Deactivate(buildingId);
+            else
+                _emergencyService.Activate(buildingId);
+            OnPropertyChanged(nameof(IsEmergencyActive));
+            OnPropertyChanged(nameof(IsEmergencyInactive));
+        });
+        ToggleAllEmergencyCommand = new Command(() =>
         {
             if (_emergencyService.IsEmergencyActive)
-                _emergencyService.Deactivate();
+                _emergencyService.DeactivateAll();
             else
-                _emergencyService.Activate();
+                _emergencyService.ActivateAll(Buildings.Select(b => b.Id));
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
         });
@@ -667,7 +798,7 @@ public class AdminViewModel : INotifyPropertyChanged
         // Tab switching
         SwitchToMapCommand        = new Command(() => ActiveTab = AdminMainTab.Map);
         SwitchToManagementCommand = new Command(() => ActiveTab = AdminMainTab.Management);
-        SwitchToUsersTabCommand        = new Command(() => ActiveManagementTab = ManagementTab.Users);
+        SwitchToUsersTabCommand        = new Command(() => { ActiveManagementTab = ManagementTab.Users; RebuildStudentDeptGroups(); });
         SwitchToDepartmentsTabCommand  = new Command(() => ActiveManagementTab = ManagementTab.Departments);
         SwitchToScheduleTabCommand     = new Command(() =>
         {
@@ -698,7 +829,21 @@ public class AdminViewModel : INotifyPropertyChanged
             NewEntrySelectedGroup = item.Group;
         });
 
+        SelectStudentGroupCommand = new Command<SchedGroupItem>(item =>
+        {
+            foreach (var d in StudentDeptGroups)
+                foreach (var g in d.Groups)
+                    g.IsSelected = g == item;
+            // Set dept first (its setter clears the group), then set group
+            _newStudentDept = Departments.FirstOrDefault(d => d.Groups.Any(g => g.Id == item.Group.Id));
+            OnPropertyChanged(nameof(NewStudentDept));
+            OnPropertyChanged(nameof(NewStudentDeptDisplay));
+            OnPropertyChanged(nameof(NewStudentDeptGroups));
+            NewStudentGroup = item.Group;
+        });
+
         SwitchScheduleViewCommand = new Command<string>(m => ScheduleViewMode = int.TryParse(m, out var i) ? i : 0);
+        ClearScheduleFilterCommand = new Command(() => ScheduleGroupFilter = string.Empty);
 
         ChangeStudentPasswordCommand = new Command<StudentRowVm>(async row =>
         {
@@ -719,9 +864,40 @@ public class AdminViewModel : INotifyPropertyChanged
             await _authService.ChangePasswordAsync(row.User.Id, pwd);
         });
 
+        ChangeAdminPasswordCommand = new Command(async () =>
+        {
+            var admin = _authService.CurrentUser;
+            if (admin == null) return;
+            var oldPwd = await Shell.Current.DisplayPromptAsync(
+                "🔑 Смена пароля администратора",
+                "Текущий пароль:",
+                maxLength: 100, keyboard: Keyboard.Default);
+            if (string.IsNullOrWhiteSpace(oldPwd)) return;
+            var confirmed = await _authService.LoginAsync(admin.Username, oldPwd);
+            if (confirmed == null)
+            {
+                await Shell.Current.DisplayAlert("Ошибка", "Неверный текущий пароль.", "ОК"); return;
+            }
+            var newPwd = await Shell.Current.DisplayPromptAsync(
+                "🔑 Новый пароль",
+                "Введите новый пароль:",
+                maxLength: 100, keyboard: Keyboard.Default);
+            if (string.IsNullOrWhiteSpace(newPwd)) return;
+            var confirmPwd = await Shell.Current.DisplayPromptAsync(
+                "🔑 Подтверждение",
+                "Повторите новый пароль:",
+                maxLength: 100, keyboard: Keyboard.Default);
+            if (newPwd != confirmPwd)
+            {
+                await Shell.Current.DisplayAlert("Ошибка", "Пароли не совпадают.", "ОК"); return;
+            }
+            await _authService.ChangePasswordAsync(admin.Id, newPwd);
+            await Shell.Current.DisplayAlert("Готово", "Пароль администратора успешно изменён.", "ОК");
+        });
+
         ClearAllScheduleEntriesCommand = new Command(async () =>
         {
-            bool confirmed = await Application.Current!.MainPage!.DisplayAlert(
+            bool confirmed = await Shell.Current.DisplayAlert(
                 "Удалить все занятия",
                 "Вы уверены? Все записи расписания будут удалены без возможности восстановления.",
                 "Удалить всё", "Отмена");
@@ -759,10 +935,11 @@ public class AdminViewModel : INotifyPropertyChanged
             foreach (var d in ScheduleDeptGroups)
                 foreach (var g in d.Groups)
                     g.IsSelected = false;
-            NewEntryDayOfWeek = 5;
-            NewEntryStart = "08:00";
-            NewEntryEnd   = "09:30";
             OnPropertyChanged(nameof(NewEntryPersonCountAuto));
+            // Явно переуведомляем день/время, чтобы Picker не сбрасывался после перерисовки
+            OnPropertyChanged(nameof(NewEntryDayOfWeek));
+            OnPropertyChanged(nameof(NewEntryStart));
+            OnPropertyChanged(nameof(NewEntryEnd));
         }, () => _newEntrySelectedRoom != null && _newEntrySelectedGroup != null);
 
         RemoveScheduleEntryCommand = new Command<ScheduleEntry>(async entry =>
@@ -796,6 +973,9 @@ public class AdminViewModel : INotifyPropertyChanged
             NewStudentName = NewStudentLogin = NewStudentPassword = string.Empty;
             NewStudentGroup = null;
             NewStudentDept  = null;
+            foreach (var d in StudentDeptGroups)
+                foreach (var g in d.Groups)
+                    g.IsSelected = false;
         }, () => !string.IsNullOrWhiteSpace(NewStudentLogin) &&
                  !string.IsNullOrWhiteSpace(NewStudentPassword) &&
                  !string.IsNullOrWhiteSpace(NewStudentName) &&
@@ -868,6 +1048,7 @@ public class AdminViewModel : INotifyPropertyChanged
             var dept = await _departmentService.AddDepartmentAsync(NewDeptName);
             Departments.Add(dept);
             DeptViewItems.Add(MakeDeptViewVm(dept));
+            RebuildStudentDeptGroups();
             NewDeptName = string.Empty;
         }, () => !string.IsNullOrWhiteSpace(NewDeptName));
 
@@ -876,14 +1057,24 @@ public class AdminViewModel : INotifyPropertyChanged
             if (dept == null) return;
             bool ok = await Shell.Current.DisplayAlert(
                 "Удалить факультет",
-                $"Удалить \u00ab{dept.Name}\u00bb и все её группы?",
+                $"Удалить факультет «{dept.Name}»?\nВсе группы в нём ({dept.Groups.Count} шт.) также будут удалены безвозвратно.",
                 "Удалить", "Отмена");
             if (!ok) return;
+            // Удаляем все записи расписания для групп этого факультета
+            var deptGroupIds = dept.Groups.Select(g => g.Id).ToHashSet();
+            var entriesToRemove = ScheduleEntries.Where(e => deptGroupIds.Contains(e.GroupId)).ToList();
+            foreach (var e in entriesToRemove)
+            {
+                await _scheduleService.RemoveEntryAsync(e.Id);
+                ScheduleEntries.Remove(e);
+            }
+            if (entriesToRemove.Count > 0) RebuildScheduleEntriesView();
             await _departmentService.RemoveDepartmentAsync(dept.Id);
             Departments.Remove(dept);
             var vItem = DeptViewItems.FirstOrDefault(v => v.Dept.Id == dept.Id);
             if (vItem != null) DeptViewItems.Remove(vItem);
             if (SelectedDept?.Id == dept.Id) SelectedDept = null;
+            RefreshStudentRows();
         });
 
         RenameDepartmentCommand = new Command<Department>(async dept =>
@@ -895,6 +1086,7 @@ public class AdminViewModel : INotifyPropertyChanged
             if (string.IsNullOrWhiteSpace(newName)) return;
             await _departmentService.RenameDepartmentAsync(dept.Id, newName);
             dept.Name = newName.Trim(); // INotifyPropertyChanged updates the label automatically
+            RefreshStudentRows();
         });
 
         AddGroupCommand = new Command(async () =>
@@ -904,6 +1096,7 @@ public class AdminViewModel : INotifyPropertyChanged
             await _departmentService.AddGroupAsync(SelectedDept.Id, NewGroupName);
             if (NewStudentDept?.Id == SelectedDept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
+            RefreshStudentRows();
             NewGroupName = string.Empty;
         }, () => SelectedDept != null && !string.IsNullOrWhiteSpace(NewGroupName));
 
@@ -913,10 +1106,31 @@ public class AdminViewModel : INotifyPropertyChanged
             // Use group.DepartmentId — independent of which dept is "selected" in the UI
             var dept = Departments.FirstOrDefault(d => d.Id == group.DepartmentId);
             if (dept == null) return;
+            bool ok = await Shell.Current.DisplayAlert(
+                "Удалить группу",
+                $"Удалить группу «{group.Name}»?",
+                "Удалить", "Отмена");
+            if (!ok) return;
+            // Удаляем все записи расписания для этой группы
+            var groupEntries = ScheduleEntries.Where(e => e.GroupId == group.Id).ToList();
+            foreach (var e in groupEntries)
+            {
+                await _scheduleService.RemoveEntryAsync(e.Id);
+                ScheduleEntries.Remove(e);
+            }
+            if (groupEntries.Count > 0) RebuildScheduleEntriesView();
+            if (_selectedGroup == group) SelectedGroup = null;
             await _departmentService.RemoveGroupAsync(dept.Id, group.Id);
             dept.Groups.Remove(group);
             if (NewStudentDept?.Id == dept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
+            RefreshStudentRows();
+        });
+
+        SelectGroupCommand = new Command<StudyGroup>(group =>
+        {
+            if (group == null) return;
+            SelectedGroup = group;
         });
 
         RenameGroupCommand = new Command<StudyGroup>(async group =>
@@ -932,6 +1146,7 @@ public class AdminViewModel : INotifyPropertyChanged
             group.Name = newName.Trim(); // INotifyPropertyChanged updates the label automatically
             if (NewStudentDept?.Id == dept.Id)
                 OnPropertyChanged(nameof(NewStudentDeptGroups));
+            RefreshStudentRows();
         });
         SetNodeColorCommand = new Command<string>(hex =>
         {
@@ -1031,8 +1246,8 @@ public class AdminViewModel : INotifyPropertyChanged
             StatusText = $"Граница [{SelectedNode.Name}] добавлена ({newPoly.Count} углов). Всего полигонов: {polyCount}.";
             OnPropertyChanged(nameof(BoundaryPreview));
             RefreshOverlay();
-            ClearBoundaryCommand.ChangeCanExecute();
-            RemoveLastBoundaryCommand.ChangeCanExecute();
+            ClearBoundaryCommand?.ChangeCanExecute();
+            RemoveLastBoundaryCommand?.ChangeCanExecute();
         });
 
         ClearBoundaryCommand = new Command(async () =>
@@ -1047,8 +1262,8 @@ public class AdminViewModel : INotifyPropertyChanged
             await _graphService.SaveAsync();
             StatusText = $"Границы [{SelectedNode.Name}] удалены."; 
             RefreshOverlay();
-            ClearBoundaryCommand.ChangeCanExecute();
-            RemoveLastBoundaryCommand.ChangeCanExecute();
+            ClearBoundaryCommand?.ChangeCanExecute();
+            RemoveLastBoundaryCommand?.ChangeCanExecute();
         }, () => SelectedNode?.Boundaries?.Count > 0);
 
         RemoveLastBoundaryCommand = new Command(async () =>
@@ -1060,8 +1275,8 @@ public class AdminViewModel : INotifyPropertyChanged
             await _graphService.SaveAsync();
             StatusText = $"Последняя граница [{SelectedNode.Name}] удалена. Осталось: {SelectedNode.Boundaries.Count}.";
             RefreshOverlay();
-            ClearBoundaryCommand.ChangeCanExecute();
-            RemoveLastBoundaryCommand.ChangeCanExecute();
+            ClearBoundaryCommand?.ChangeCanExecute();
+            RemoveLastBoundaryCommand?.ChangeCanExecute();
         }, () => SelectedNode?.Boundaries?.Count > 0);
 
         SelectedBuilding = Buildings.FirstOrDefault();  // SelectedFloor auto-set to floor 1 via setter
@@ -1096,6 +1311,7 @@ public class AdminViewModel : INotifyPropertyChanged
          || CurrentAction == AdminAction.AddExit
          || CurrentAction == AdminAction.AddOther
          || CurrentAction == AdminAction.AddFireExtinguisher
+         || CurrentAction == AdminAction.AddQrAnchor
          || CurrentAction == AdminAction.AddEvacuationExit)
         {
             bool isElevatorAction        = CurrentAction == AdminAction.AddElevator;
@@ -1104,14 +1320,57 @@ public class AdminViewModel : INotifyPropertyChanged
             bool isEvacuationExitAction  = CurrentAction == AdminAction.AddEvacuationExit;
             bool isOtherAction           = CurrentAction == AdminAction.AddOther;
             bool isFireExtinguisherAction = CurrentAction == AdminAction.AddFireExtinguisher;
+            bool isQrAnchorAction        = CurrentAction == AdminAction.AddQrAnchor;
             bool forceTransit            = CurrentAction == AdminAction.AddTransition || isElevatorAction || isStaircaseAction;
 
-            string title, promptMsg, placeholder;
+            // QR anchors get an auto-generated name from their ID — no prompt.
+            if (isQrAnchorAction)
+            {
+                var qrNode = new NavNode
+                {
+                    BuildingId      = SelectedBuilding.Id,
+                    FloorNumber     = SelectedFloor.Number,
+                    X               = svgPos.X,
+                    Y               = svgPos.Y,
+                    IsQrAnchor      = true,
+                    IsLabelHidden   = true,
+                    NodeColorHex    = "00BCD4",   // cyan/teal
+                    NodeRadiusScale = 1f,
+                    InnerLabel      = "\ud83d\udcf1",
+                };
+                qrNode.Name = $"QR-{qrNode.Id[..8]}";
+                _graphService.AddNode(qrNode);
+                RefreshOverlay();
+                CurrentAction = AdminAction.None;
+                StatusText    = $"Добавлен QR-якорь: {qrNode.Name}";
+                return;
+            }
+
+            // Fire extinguishers get an auto-generated name — no prompt needed.
             if (isFireExtinguisherAction)
             {
-                title = "Огнетушитель"; promptMsg = "Название/номер огнетушителя:"; placeholder = "Например: Огнетушитель 1, ОП-5";
+                string autoName = "Огнетушитель";
+                var feNode = new NavNode
+                {
+                    Name               = autoName,
+                    BuildingId         = SelectedBuilding.Id,
+                    FloorNumber        = SelectedFloor.Number,
+                    X                  = svgPos.X,
+                    Y                  = svgPos.Y,
+                    IsFireExtinguisher = true,
+                    NodeColorHex       = "4CAF50",
+                    NodeRadiusScale    = 0.8f,
+                    InnerLabel         = "🧯",
+                };
+                _graphService.AddNode(feNode);
+                RefreshOverlay();
+                CurrentAction = AdminAction.None;
+                StatusText    = $"Добавлен: {autoName} (огнетушитель)";
+                return;
             }
-            else if (isEvacuationExitAction)
+
+            string title, promptMsg, placeholder;
+            if (isEvacuationExitAction)
             {
                 title = "Эвак. выход"; promptMsg = "Название эвак. выхода:"; placeholder = "Например: Эвак. выход 1, Западный выход";
             }
@@ -1145,6 +1404,19 @@ public class AdminViewModel : INotifyPropertyChanged
 
             if (string.IsNullOrWhiteSpace(name)) return;
 
+            // For elevator/staircase, ask for a group ID to link same-transition nodes across floors
+            string transitionGroupId = string.Empty;
+            if (isElevatorAction || isStaircaseAction || CurrentAction == AdminAction.AddTransition)
+            {
+                string groupTitle = isElevatorAction ? "Лифт" : "Лестница";
+                var groupId = await Shell.Current.DisplayPromptAsync(
+                    $"ID {groupTitle}",
+                    $"Укажите ID группы перехода (\u043eдинаковый для всех этажей):",
+                    placeholder: $"Например: staircase-a, lift-1",
+                    maxLength: 40);
+                transitionGroupId = groupId?.Trim() ?? string.Empty;
+            }
+
             bool isTransit = forceTransit
                           || name.Contains("лифт",     StringComparison.OrdinalIgnoreCase)
                           || name.Contains("лестниц", StringComparison.OrdinalIgnoreCase);
@@ -1169,9 +1441,10 @@ public class AdminViewModel : INotifyPropertyChanged
                 IsHidden           = isHidden,
                 IsRoom             = CurrentAction == AdminAction.AddNode,
                 IsFireExtinguisher = isFireExtinguisherAction,
+                TransitionGroupId  = transitionGroupId,
                 NodeColorHex       = isEvacuationExitAction ? "DC2626" : isFireExtinguisherAction ? "4CAF50" : null,
                 NodeRadiusScale    = (isFireExtinguisherAction || isEvacuationExitAction) ? 0.8f : 1f,
-                InnerLabel         = isEvacuationExitAction ? "🚪" : isFireExtinguisherAction ? "🧯" : null,
+                InnerLabel         = isEvacuationExitAction ? "🚪" : isFireExtinguisherAction ? "🧯" : string.Empty,
             };
 
             _graphService.AddNode(node);
@@ -1195,17 +1468,20 @@ public class AdminViewModel : INotifyPropertyChanged
 
         var node = new NavNode
         {
-            Name         = nodeName,
-            BuildingId   = SelectedBuilding!.Id,
-            FloorNumber  = SelectedFloor!.Number,
-            X            = svgPos.X,
-            Y            = svgPos.Y,
-            IsTransition = isTransit,
+            Name            = nodeName,
+            BuildingId      = SelectedBuilding!.Id,
+            FloorNumber     = SelectedFloor!.Number,
+            X               = svgPos.X,
+            Y               = svgPos.Y,
+            IsTransition    = isTransit,
             // ВСЕ точки коридора — вспомогательные waypoints:
             // пользователь их не видит и не может выбрать.
             // Аудитории — через кнопку "+ Добавить узел".
             // Лестницы/лифты — через "🚶 Лестница / Лифт".
-            IsWaypoint   = true
+            IsWaypoint      = true,
+            NodeRadiusScale = 0.7f,
+            NodeColorHex    = "795548",
+            IsLabelHidden   = true
         };
 
         _graphService.AddNode(node);
@@ -1287,6 +1563,8 @@ public class AdminViewModel : INotifyPropertyChanged
                 StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
                 DeleteSelectedCommand.ChangeCanExecute();
                 RenameSelectedCommand.ChangeCanExecute();
+                EditTransitionGroupIdCommand.ChangeCanExecute();
+                ShowQrCodeCommand.ChangeCanExecute();
                 SetBoundaryModeCommand.ChangeCanExecute();
                 ClearBoundaryCommand.ChangeCanExecute();
                 RemoveLastBoundaryCommand.ChangeCanExecute();
@@ -1299,6 +1577,57 @@ public class AdminViewModel : INotifyPropertyChanged
         arg.node.X = arg.svgPos.X;
         arg.node.Y = arg.svgPos.Y;
         StatusText = $"{arg.node.Name}: ({arg.svgPos.X:F0}, {arg.svgPos.Y:F0})";
+    }
+
+    private async Task ShowQrCodeAsync()
+    {
+        if (SelectedNode?.IsQrAnchor != true) return;
+        var content           = _qrService.GetNodeQrContent(SelectedNode.Id);
+        _qrCurrentPngBytes    = _qrService.GeneratePng(content);
+        _qrCurrentNodeId      = SelectedNode.Id;
+        _qrCurrentUrl         = content;
+        QrPopupNodeName       = SelectedNode.Name;
+        QrCurrentUrl          = content;
+        QrCodeImageSource     = ImageSource.FromStream(() => new MemoryStream(_qrCurrentPngBytes));
+        QrPopupVisible        = true;
+        ((Command)DownloadQrCodeCommand).ChangeCanExecute();
+        ((Command)CopyQrUrlCommand).ChangeCanExecute();
+        await Task.CompletedTask;
+    }
+
+    private Task DownloadQrCodeAsync()
+    {
+        if (_qrCurrentPngBytes == null || _qrCurrentPngBytes.Length == 0) return Task.CompletedTask;
+        try
+        {
+            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var safe    = string.Concat(QrPopupNodeName.Split(Path.GetInvalidFileNameChars()));
+            if (string.IsNullOrWhiteSpace(safe))
+                safe = _qrCurrentNodeId[..Math.Min(8, _qrCurrentNodeId.Length)];
+            var path    = Path.Combine(desktop, $"QR_{safe}.png");
+            File.WriteAllBytes(path, _qrCurrentPngBytes);
+            StatusText = $"QR сохранён: {path}";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Ошибка сохранения QR: {ex.Message}";
+        }
+        return Task.CompletedTask;
+    }
+
+    private async Task EditTransitionGroupIdAsync()
+    {
+        if (SelectedNode == null) return;
+        var newId = await Shell.Current.DisplayPromptAsync(
+            "ID группы перехода",
+            "Укажите ID группы (одинаковый для всех этажей одной лестницы/лифта):",
+            initialValue: SelectedNode.TransitionGroupId,
+            placeholder: "Например: staircase-a, lift-1",
+            maxLength: 40);
+        if (newId == null) return;  // отмена
+        SelectedNode.TransitionGroupId = newId.Trim();
+        OnPropertyChanged(nameof(SelectedTransitionGroupIdText));
+        StatusText = $"ID группы обновлён: {(string.IsNullOrEmpty(SelectedNode.TransitionGroupId) ? "(пусто)" : SelectedNode.TransitionGroupId)}";
     }
 
     private async Task RenameSelectedAsync()
@@ -1327,6 +1656,8 @@ public class AdminViewModel : INotifyPropertyChanged
         RefreshOverlay();
         DeleteSelectedCommand.ChangeCanExecute();
         RenameSelectedCommand.ChangeCanExecute();
+        EditTransitionGroupIdCommand.ChangeCanExecute();
+        ShowQrCodeCommand.ChangeCanExecute();
     }
 
     // ---- Helpers ----
@@ -1371,6 +1702,7 @@ public class AdminViewModel : INotifyPropertyChanged
             AdminAction.AddNode              => "Нажмите на карту — будет добавлена аудитория (только подпись, без точки)",
             AdminAction.AddOther             => "Нажмите на карту — будет добавлена точка категории Прочее",
             AdminAction.AddFireExtinguisher  => "Нажмите на карту — будет добавлена точка огнетушителя (зелёная, меньший размер)",
+            AdminAction.AddQrAnchor          => "Нажмите на карту — будет добавлен точка QR-якорь",
             AdminAction.ConnectNode          => "Нажмите первый, затем второй узел для соединения",
             AdminAction.DisconnectNode       => "Нажмите первый, затем второй узел для разъединения",
             AdminAction.DrawCorridor         => _corridorLastNode == null
@@ -1396,6 +1728,7 @@ public class AdminViewModel : INotifyPropertyChanged
         foreach (var s in _authService.GetStudents())
             Students.Add(MakeStudentRow(s));
         RebuildStudentTree();
+        RebuildStudentDeptGroups();
     }
 
     private StudentRowVm MakeStudentRow(AuthUser user)
@@ -1429,6 +1762,25 @@ public class AdminViewModel : INotifyPropertyChanged
     private DeptViewVm MakeDeptViewVm(Department dept) =>
         new DeptViewVm(dept, () => SelectedDept = dept);
 
+    private void RebuildBuildingEmergencies()
+    {
+        BuildingEmergencies.Clear();
+        foreach (var b in Buildings)
+        {
+            var id = b.Id;
+            BuildingEmergencies.Add(new BuildingEmergencyVm(
+                id, b.Name,
+                _emergencyService.IsActiveForBuilding(id),
+                () =>
+                {
+                    if (_emergencyService.IsActiveForBuilding(id))
+                        _emergencyService.Deactivate(id);
+                    else
+                        _emergencyService.Activate(id);
+                }));
+        }
+    }
+
     private async Task LoadScheduleAsync()
     {
         await _scheduleService.LoadAsync();
@@ -1449,9 +1801,7 @@ public class AdminViewModel : INotifyPropertyChanged
                     var rooms = _graphService.Graph.Nodes
                         .Where(n => n.BuildingId == building.Id
                                  && n.FloorNumber == f.Number
-                                 && !n.IsWaypoint
-                                 && !n.IsTransition
-                                 && !n.IsExit
+                                 && n.IsRoom
                                  && !string.IsNullOrWhiteSpace(n.Name))
                         .OrderBy(n => n.Name)
                         .ToList();
@@ -1471,14 +1821,45 @@ public class AdminViewModel : INotifyPropertyChanged
             ScheduleDeptGroups.Add(new SchedDeptGroup(dept, _authService));
     }
 
+    private void RebuildStudentDeptGroups()
+    {
+        StudentDeptGroups.Clear();
+        foreach (var dept in Departments)
+            StudentDeptGroups.Add(new SchedDeptGroup(dept, _authService));
+    }
+
+    /// <summary>Re-resolves FacultyName/GroupName for every StudentRowVm then rebuilds the tree and picker.</summary>
+    private void RefreshStudentRows()
+    {
+        foreach (var row in Students)
+        {
+            var group = _departmentService.FindGroup(row.User.GroupId);
+            var dept  = group != null ? _departmentService.FindDepartmentByGroup(row.User.GroupId) : null;
+            row.FacultyName = dept?.Name ?? "—";
+            row.GroupName   = group?.Name ?? "—";
+        }
+        RebuildStudentTree();
+        RebuildStudentDeptGroups();
+    }
+
     private void RebuildScheduleEntriesView()
     {
+        // Apply group name filter
+        var filter = _scheduleGroupFilter.Trim();
+        var source = string.IsNullOrEmpty(filter)
+            ? ScheduleEntries
+            : new ObservableCollection<ScheduleEntry>(
+                ScheduleEntries.Where(e => e.GroupName.Contains(filter, StringComparison.OrdinalIgnoreCase)));
+
+        ScheduleEntriesFiltered.Clear();
+        foreach (var e in source) ScheduleEntriesFiltered.Add(e);
+
         // ─── By Room: Building → Floor → Entries
         ScheduleEntriesViewByRoom.Clear();
         var nodeMap     = _graphService.Graph.Nodes.ToDictionary(n => n.Id);
         var buildingMap = Buildings.ToDictionary(b => b.Id, b => b.Name);
 
-        var byBuilding = ScheduleEntries
+        var byBuilding = source
             .GroupBy(e => nodeMap.TryGetValue(e.RoomNodeId, out var n) ? n.BuildingId : string.Empty)
             .Where(g => !string.IsNullOrEmpty(g.Key));
 
@@ -1488,7 +1869,16 @@ public class AdminViewModel : INotifyPropertyChanged
             var byFloor = bGrp
                 .GroupBy(e => nodeMap.TryGetValue(e.RoomNodeId, out var n) ? n.FloorNumber : 0)
                 .OrderBy(g => g.Key)
-                .Select(fg => new EntryFloorGroup($"\u042d\u0442\u0430\u0436 {fg.Key}", fg.ToList()))
+                .Select(fg =>
+                {
+                    var ruDays = new[] { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
+                    var days = fg
+                        .GroupBy(e => e.DayOfWeek)
+                        .OrderBy(dg => (dg.Key + 6) % 7)
+                        .Select(dg => new EntryDayGroup(ruDays[Math.Clamp(dg.Key, 0, 6)], dg.ToList()))
+                        .ToList();
+                    return new EntryFloorGroup($"Этаж {fg.Key}", days);
+                })
                 .ToList();
             ScheduleEntriesViewByRoom.Add(new EntryBuildingGroup(buildingName, byFloor));
         }
@@ -1500,8 +1890,8 @@ public class AdminViewModel : INotifyPropertyChanged
             foreach (var g in dept.Groups)
                 groupToFaculty[g.Id] = dept.Name;
 
-        var byFaculty = ScheduleEntries
-            .GroupBy(e => groupToFaculty.TryGetValue(e.GroupId, out var f) ? f : "\u0411\u0435\u0437 \u0444\u0430\u043a\u0443\u043b\u044c\u0442\u0435\u0442\u0430");
+        var byFaculty = source
+            .GroupBy(e => groupToFaculty.TryGetValue(e.GroupId, out var f) ? f : "Без факультета");
 
         foreach (var fGrp in byFaculty.OrderBy(g => g.Key))
         {
@@ -1666,6 +2056,13 @@ public sealed class DeptViewVm : INotifyPropertyChanged
     }
     public string ChevronText => IsExpanded ? "\u25be" : "\u25b8";
 
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set { _isSelected = value; Notify(); }
+    }
+
     private readonly Action _selectAction;
     public Command ToggleCommand { get; }
 
@@ -1761,21 +2158,38 @@ public sealed class SchedDeptGroup : INotifyPropertyChanged
 
 // ── Entry display trees ────────────────────────────────────────────────────────
 
-public sealed class EntryFloorGroup : INotifyPropertyChanged
+public sealed class EntryDayGroup : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    public string FloorLabel { get; }
+    public string DayLabel { get; }
     public List<ScheduleEntry> Entries { get; }
     private bool _expanded;
     public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
     public string ChevronText => IsExpanded ? "▾" : "▸";
     public Command ToggleCommand { get; }
-    public EntryFloorGroup(string label, List<ScheduleEntry> entries)
+    public EntryDayGroup(string dayLabel, List<ScheduleEntry> entries)
     {
-        FloorLabel = label; Entries = entries;
+        DayLabel = dayLabel; Entries = entries;
         ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
     }
-    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    void Notify([System.Runtime.CompilerServices.CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+public sealed class EntryFloorGroup : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public string FloorLabel { get; }
+    public List<EntryDayGroup> Days { get; }
+    private bool _expanded;
+    public bool IsExpanded { get => _expanded; set { _expanded = value; Notify(); Notify(nameof(ChevronText)); } }
+    public string ChevronText => IsExpanded ? "▾" : "▸";
+    public Command ToggleCommand { get; }
+    public EntryFloorGroup(string label, List<EntryDayGroup> days)
+    {
+        FloorLabel = label; Days = days;
+        ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
+    }
+    void Notify([System.Runtime.CompilerServices.CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 }
 
 public sealed class EntryBuildingGroup : INotifyPropertyChanged
@@ -1810,6 +2224,35 @@ public sealed class EntryGroupEntries : INotifyPropertyChanged
         ToggleCommand = new Command(() => IsExpanded = !IsExpanded);
     }
     void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+}
+
+// ── По-зданию ЧС VM ──────────────────────────────────────────────────────────────
+
+public sealed class BuildingEmergencyVm : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+    void Notify([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    public string BuildingId   { get; }
+    public string BuildingName { get; }
+
+    private bool _isActive;
+    public bool IsActive
+    {
+        get => _isActive;
+        set { _isActive = value; Notify(); Notify(nameof(IsInactive)); }
+    }
+    public bool IsInactive => !_isActive;
+
+    public Command ToggleCommand { get; }
+
+    public BuildingEmergencyVm(string id, string name, bool isActive, Action toggle)
+    {
+        BuildingId    = id;
+        BuildingName  = name;
+        _isActive     = isActive;
+        ToggleCommand = new Command(toggle);
+    }
 }
 
 public sealed class EntryFacultyGroup : INotifyPropertyChanged

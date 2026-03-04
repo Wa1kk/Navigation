@@ -13,7 +13,7 @@ public class LoginViewModel : INotifyPropertyChanged
 
     private readonly AuthService _auth;
 
-    private string _selectedRole = "Admin";   // "Admin" | "Student" | "Guest"
+    private string _selectedRole = "User";   // "User" | "Guest"
     private string _username     = string.Empty;
     private string _password     = string.Empty;
     private string _errorMessage = string.Empty;
@@ -24,9 +24,12 @@ public class LoginViewModel : INotifyPropertyChanged
         _auth = auth;
 
         LoginCommand           = new Command(ExecuteLogin,     () => !IsBusy);
-        SelectAdminRoleCommand = new Command(() => SelectedRole = "Admin");
-        SelectStudentRoleCommand = new Command(() => SelectedRole = "Student");
+        SelectUserRoleCommand  = new Command(() => SelectedRole = "User");
         SelectGuestRoleCommand = new Command(() => SelectedRole = "Guest");
+
+        // Legacy aliases (kept so any XAML references still compile)
+        SelectAdminRoleCommand   = SelectUserRoleCommand;
+        SelectStudentRoleCommand = SelectUserRoleCommand;
     }
 
     // ── Properties ──────────────────────────────────────────────────────────────
@@ -40,6 +43,7 @@ public class LoginViewModel : INotifyPropertyChanged
             _selectedRole = value;
             ErrorMessage  = string.Empty;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsUser));
             OnPropertyChanged(nameof(IsAdmin));
             OnPropertyChanged(nameof(IsStudent));
             OnPropertyChanged(nameof(IsGuest));
@@ -48,13 +52,16 @@ public class LoginViewModel : INotifyPropertyChanged
         }
     }
 
-    public bool IsAdmin   => _selectedRole == "Admin";
-    public bool IsStudent => _selectedRole == "Student";
+    public bool IsUser    => _selectedRole == "User";
     public bool IsGuest   => _selectedRole == "Guest";
 
-    // Admin needs only password; Student needs both; Guest needs neither
-    public bool ShowCredentials  => !IsGuest;
-    public bool ShowUsernameField => IsStudent;
+    // Legacy aliases used in XAML bindings
+    public bool IsAdmin   => IsUser;
+    public bool IsStudent => IsUser;
+
+    // Show username + password for User; nothing for Guest
+    public bool ShowCredentials   => IsUser;
+    public bool ShowUsernameField => IsUser;
 
     public string Username
     {
@@ -88,10 +95,12 @@ public class LoginViewModel : INotifyPropertyChanged
 
     // ── Commands ────────────────────────────────────────────────────────────────
 
-    public ICommand LoginCommand            { get; }
-    public ICommand SelectAdminRoleCommand  { get; }
-    public ICommand SelectStudentRoleCommand{ get; }
-    public ICommand SelectGuestRoleCommand  { get; }
+    public ICommand LoginCommand             { get; }
+    public ICommand SelectUserRoleCommand    { get; }
+    public ICommand SelectGuestRoleCommand   { get; }
+    // Legacy aliases
+    public ICommand SelectAdminRoleCommand   { get; }
+    public ICommand SelectStudentRoleCommand { get; }
 
     // ── Login logic ─────────────────────────────────────────────────────────────
 
@@ -113,14 +122,14 @@ public class LoginViewModel : INotifyPropertyChanged
                 return;
             }
 
-            var username = IsAdmin ? "admin" : _username.Trim();
+            var username = _username.Trim();
             var password = _password;
 
-            if (IsStudent && string.IsNullOrWhiteSpace(_username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    ErrorMessage = "Введите имя пользователя";
+                    ErrorMessage = "Введите логин";
                     IsBusy = false;
                 });
                 return;
@@ -141,7 +150,7 @@ public class LoginViewModel : INotifyPropertyChanged
                 IsBusy = false;
                 if (user == null)
                 {
-                    ErrorMessage = "Неверные учётные данные";
+                    ErrorMessage = "Неверный логин или пароль";
                     Password = string.Empty;
                     return;
                 }

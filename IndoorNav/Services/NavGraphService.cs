@@ -21,24 +21,11 @@ public class NavGraphService
     {
         try
         {
-            // Всегда загружаем бандл — актуальные данные всегда из последней сборки
-            try
+            if (File.Exists(FilePath))
             {
-                using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
-                using var reader = new StreamReader(stream);
-                var json = await reader.ReadToEndAsync();
-                _graph = JsonSerializer.Deserialize<NavGraph>(json, JsonOpts) ?? new NavGraph();
+                var localJson = await File.ReadAllTextAsync(FilePath);
+                _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
                 MigrateWaypoints();
-            }
-            catch
-            {
-                // Бандл недоступен (не должно бывать) — падаем на локальный файл
-                if (File.Exists(FilePath))
-                {
-                    var localJson = await File.ReadAllTextAsync(FilePath);
-                    _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
-                    MigrateWaypoints();
-                }
             }
         }
         catch (Exception ex)

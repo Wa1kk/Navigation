@@ -7,6 +7,8 @@ namespace IndoorNav.Models;
 public class StudyGroup : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
+    private void Notify([System.Runtime.CompilerServices.CallerMemberName] string? p = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(p));
 
     public string Id           { get; set; } = Guid.NewGuid().ToString();
     public string DepartmentId { get; set; } = string.Empty;
@@ -15,7 +17,14 @@ public class StudyGroup : INotifyPropertyChanged
     public string Name
     {
         get => _name;
-        set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); }
+        set { _name = value; Notify(); }
+    }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set { _isSelected = value; Notify(); }
     }
 }
 
