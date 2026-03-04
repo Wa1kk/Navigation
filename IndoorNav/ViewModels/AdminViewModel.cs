@@ -1566,7 +1566,8 @@ public class AdminViewModel : INotifyPropertyChanged
 
             default:
                 SelectedNode = node;
-                StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
+                var typeInfo = node.IsTransition ? " [Переход]" : (node.IsRoom ? " [Аудитория]" : "");
+                StatusText   = $"Выбран: {node.Name}{typeInfo} · Координаты: ({(int)node.X}, {(int)node.Y}) · Этаж: {node.FloorNumber} · {node.BuildingId}";
                 DeleteSelectedCommand.ChangeCanExecute();
                 RenameSelectedCommand.ChangeCanExecute();
                 EditCoordinatesCommand.ChangeCanExecute();
@@ -1661,8 +1662,8 @@ public class AdminViewModel : INotifyPropertyChanged
         // Пытаемся получить новые координаты через DisplayPromptAsync
         var coordInput = await Shell.Current.DisplayPromptAsync(
             "Изменить координаты",
-            "Введите координаты в формате: X Y\n(например: 150.5 200.3)",
-            initialValue: $"{SelectedNode.X:F1} {SelectedNode.Y:F1}",
+            "Введите целые координаты в формате: X Y\n(например: 150 200)",
+            initialValue: $"{(int)SelectedNode.X} {(int)SelectedNode.Y}",
             maxLength: 50);
         
         if (string.IsNullOrWhiteSpace(coordInput)) return;
@@ -1675,17 +1676,17 @@ public class AdminViewModel : INotifyPropertyChanged
             return;
         }
         
-        if (!float.TryParse(parts[0], System.Globalization.CultureInfo.InvariantCulture, out var x) ||
-            !float.TryParse(parts[1], System.Globalization.CultureInfo.InvariantCulture, out var y))
+        if (!int.TryParse(parts[0], out var x) ||
+            !int.TryParse(parts[1], out var y))
         {
-            StatusText = "Ошибка: координаты должны быть числами";
+            StatusText = "Ошибка: координаты должны быть целыми числами";
             return;
         }
         
         // Обновляем координаты узла
         SelectedNode.X = x;
         SelectedNode.Y = y;
-        StatusText = $"Координаты обновлены: ({x:F1}, {y:F1})";
+        StatusText = $"Координаты обновлены: ({x}, {y})";
         RefreshOverlay();
         // Восстанавливаем выбор после RefreshOverlay
         SelectedNode = CurrentNodes.FirstOrDefault(n => n.Id == SelectedNode?.Id) ?? SelectedNode;
