@@ -1125,6 +1125,8 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         if (node.IsFireExtinguisher) return;
+        // В режиме ЧС выходы нельзя выбрать как точку отправки — popup не открываем
+        if (_isEmergencyActive && (node.IsExit || node.IsEvacuationExit)) return;
         TappedNode = node;
         IsNodePopupOpen = true;
     }
