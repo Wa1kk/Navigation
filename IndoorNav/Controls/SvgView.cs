@@ -905,7 +905,7 @@ public class SvgView : SKCanvasView
         using var fillFireExt  = new SKPaint { Color = new SKColor(76, 175, 80),   IsAntialias = true };
         using var fillEvacExit = new SKPaint { Color = new SKColor(220, 38, 38),   IsAntialias = true };
         using var fillQr       = new SKPaint { Color = new SKColor(0, 188, 212),   IsAntialias = true };  // cyan/teal for QR anchors
-        using var fillWaypoint = new SKPaint { Color = new SKColor(158, 158, 158),  IsAntialias = true };  // gray for corridor waypoints
+        using var fillWaypoint = new SKPaint { Color = new SKColor(210, 105, 30),  IsAntialias = true };  // brown for corridor waypoints
         using var stroke    = new SKPaint { Color = SKColors.White, StrokeWidth = 2.5f / sc, IsStroke = true, IsAntialias = true };
         using var shadowP   = new SKPaint { Color = new SKColor(0, 0, 0, 60), IsAntialias = true,
                                             MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, 4f / sc) };
