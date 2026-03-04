@@ -146,6 +146,10 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeIsQrAnchor));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
+            RenameSelectedCommand?.ChangeCanExecute();
+            EditCoordinatesCommand?.ChangeCanExecute();
+            DeleteSelectedCommand?.ChangeCanExecute();
+            EditTransitionGroupIdCommand?.ChangeCanExecute();
             RefreshSelectedNodeEdges();
         }
     }
@@ -236,6 +240,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<(int polyIdx, int vtxIdx, SKPoint svgPos)> BoundaryVertexMovedCommand { get; }
     public Command<(int polyIdx, int vtxIdx)> BoundaryVertexTappedCommand { get; }
     public Command RenameSelectedCommand             { get; }
+    public Command EditCoordinatesCommand            { get; }
     public Command EditTransitionGroupIdCommand     { get; }
     public Command SetQrAnchorModeCommand           { get; }
     public Command ShowQrCodeCommand                { get; }
@@ -637,6 +642,7 @@ public class AdminViewModel : INotifyPropertyChanged
             }
         });
         RenameSelectedCommand = new Command(async () => await RenameSelectedAsync(), () => SelectedNode != null);
+        EditCoordinatesCommand = new Command(async () => await EditCoordinatesAsync(), () => SelectedNode != null);
         EditTransitionGroupIdCommand = new Command(async () => await EditTransitionGroupIdAsync(), () => SelectedNode?.IsTransition == true);
         DeleteSelectedCommand = new Command(DeleteSelected, () => SelectedNode != null);
         DeleteBoundaryVertexCommand = new Command(() =>
@@ -1563,6 +1569,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
                 DeleteSelectedCommand.ChangeCanExecute();
                 RenameSelectedCommand.ChangeCanExecute();
+                EditCoordinatesCommand.ChangeCanExecute();
                 EditTransitionGroupIdCommand.ChangeCanExecute();
                 ShowQrCodeCommand.ChangeCanExecute();
                 SetBoundaryModeCommand.ChangeCanExecute();
@@ -1647,6 +1654,43 @@ public class AdminViewModel : INotifyPropertyChanged
         SelectedNode = CurrentNodes.FirstOrDefault(n => n.Id == SelectedNode?.Id) ?? SelectedNode;
     }
 
+    private async Task EditCoordinatesAsync()
+    {
+        if (SelectedNode == null) return;
+        
+        // Пытаемся получить новые координаты через DisplayPromptAsync
+        var coordInput = await Shell.Current.DisplayPromptAsync(
+            "Изменить координаты",
+            "Введите координаты в формате: X Y\n(например: 150.5 200.3)",
+            initialValue: $"{SelectedNode.X:F1} {SelectedNode.Y:F1}",
+            maxLength: 50);
+        
+        if (string.IsNullOrWhiteSpace(coordInput)) return;
+        
+        // Парсим строку в формате "X Y"
+        var parts = coordInput.Trim().Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+        {
+            StatusText = "Ошибка: введите координаты в формате \"X Y\"";
+            return;
+        }
+        
+        if (!float.TryParse(parts[0], System.Globalization.CultureInfo.InvariantCulture, out var x) ||
+            !float.TryParse(parts[1], System.Globalization.CultureInfo.InvariantCulture, out var y))
+        {
+            StatusText = "Ошибка: координаты должны быть числами";
+            return;
+        }
+        
+        // Обновляем координаты узла
+        SelectedNode.X = x;
+        SelectedNode.Y = y;
+        StatusText = $"Координаты обновлены: ({x:F1}, {y:F1})";
+        RefreshOverlay();
+        // Восстанавливаем выбор после RefreshOverlay
+        SelectedNode = CurrentNodes.FirstOrDefault(n => n.Id == SelectedNode?.Id) ?? SelectedNode;
+    }
+
     private void DeleteSelected()
     {
         if (SelectedNode == null) return;
@@ -1656,6 +1700,7 @@ public class AdminViewModel : INotifyPropertyChanged
         RefreshOverlay();
         DeleteSelectedCommand.ChangeCanExecute();
         RenameSelectedCommand.ChangeCanExecute();
+        EditCoordinatesCommand.ChangeCanExecute();
         EditTransitionGroupIdCommand.ChangeCanExecute();
         ShowQrCodeCommand.ChangeCanExecute();
     }

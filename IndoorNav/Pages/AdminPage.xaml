@@ -280,6 +280,11 @@
                             BackgroundColor="#1E293B" TextColor="#94A3B8"
                             CornerRadius="8" HeightRequest="38" />
 
+                    <Button Text="📍 Координаты"
+                            Command="{Binding EditCoordinatesCommand}"
+                            BackgroundColor="#1E293B" TextColor="#94A3B8"
+                            CornerRadius="8" HeightRequest="38" />
+
                     <Button Text="{Binding SelectedTransitionGroupIdText}"
                             Command="{Binding EditTransitionGroupIdCommand}"
                             IsVisible="{Binding SelectedNodeIsTransition}"
