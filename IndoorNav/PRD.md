@@ -1,3 +1,5 @@
+[← README](../README.md)
+
 # PRD — IndoorNav
 
 **Версия:** 1.0  
