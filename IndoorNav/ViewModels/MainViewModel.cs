@@ -1020,7 +1020,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         var exclude = new HashSet<string>(
             _graphService.Graph.Nodes
-                .Where(n => n.IsExit && n.Id != start.Id && n.Id != end.Id)
+                .Where(n => (n.IsExit || n.IsEvacuationExit) && n.Id != start.Id && n.Id != end.Id)
                 .Select(n => n.Id));
         // Blocked nodes must never appear in the route again
         foreach (var id in _blockedNodeIds)

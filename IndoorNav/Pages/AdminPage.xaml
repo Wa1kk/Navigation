@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:IndoorNav.Controls"
@@ -176,7 +176,7 @@
                             TextColor="{Binding IsQrAnchorMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                             CornerRadius="8" HeightRequest="38" />
 
-                    <Button Text="�🚪 Выход"
+                    <Button Text="🚪 Запасной выход"
                             Command="{Binding SetEvacuationExitModeCommand}"
                             BackgroundColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7F1D1D|#1E293B'}"
                             TextColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
