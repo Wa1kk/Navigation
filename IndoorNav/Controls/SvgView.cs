@@ -976,6 +976,8 @@ public class SvgView : SKCanvasView
             // Подпись под точкой
             // Если узел в маршруте — его метку уже нарисует DrawRoute, пропускаем
             if (routeNodeIds != null && routeNodeIds.Contains(node.Id)) continue;
+            // Подпись waypoint-точек коридора не отображается никогда (даже в режиме админа)
+            if (node.IsWaypoint) continue;
             if (!(!IsAdminMode && (node.IsLabelHidden || node.IsFireExtinguisher)))
             {
                 float lblOpacity = (IsAdminMode && node.IsLabelHidden) ? 0.35f : 1f;
@@ -1128,6 +1130,21 @@ public class SvgView : SKCanvasView
             // Промежуточные waypoint-точки коридора не показываем (кроме режима блокировки)
             if (!IsAdminMode && isIntermediate && node.IsWaypoint && !ShowRouteWaypoints) continue;
 
+            // В режиме блокировки промежуточные waypoint-точки рисуем в их собственном стиле (без маршрутных цветов и без подписи)
+            if (isIntermediate && node.IsWaypoint)
+            {
+                float wr = 15f / sc * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
+                SKPaint wfill;
+                if (!string.IsNullOrEmpty(node.NodeColorHex) && SKColor.TryParse("#" + node.NodeColorHex, out var wc))
+                    wfill = new SKPaint { Color = wc, IsAntialias = true };
+                else
+                    wfill = new SKPaint { Color = new SKColor(33, 150, 243), IsAntialias = true };
+                canvas.DrawCircle(pt, wr, wfill);
+                canvas.DrawCircle(pt, wr, rstroke);
+                wfill.Dispose();
+                continue;
+            }
+
             float cr = 14f / sc;   // единый размер для всех видимых узлов
             var fill = isStart ? sfill
                      : isEnd   ? efill
@@ -1142,8 +1159,8 @@ public class SvgView : SKCanvasView
             if (letter != null)
                 canvas.DrawText(letter, pt.X, pt.Y + 4f / sc, SKTextAlign.Center, stepFont, stepTxt);
 
-            // Подпись с именем узла (для всех видимых узлов в пользовательском режиме)
-            if (!IsAdminMode && !string.IsNullOrWhiteSpace(node.Name) && !node.IsFireExtinguisher)
+            // Подпись с именем узла (waypoints — без подписи всегда)
+            if (!IsAdminMode && !node.IsWaypoint && !string.IsNullOrWhiteSpace(node.Name) && !node.IsFireExtinguisher)
             {
                 var lbl  = node.Name;
                 var lblW = lblFont.MeasureText(lbl, lblPaint);
