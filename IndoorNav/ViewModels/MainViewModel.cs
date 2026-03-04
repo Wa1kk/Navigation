@@ -682,22 +682,21 @@ public class MainViewModel : INotifyPropertyChanged
             foreach (var b in buildings)
                 Buildings.Add(b);
 
+            // Читаем сохранённые ЗДАНИЕ/ЭТАЖ ДО любых изменений (setters перезапишут значения)
+            var savedBuildingId = Preferences.Default.Get("LastBuildingId", string.Empty);
+            var savedFloorNum   = Preferences.Default.Get("LastFloorNum", 1);
+
             SelectedBuilding = Buildings.FirstOrDefault();
-            // Восстанавливаем последнее здание/этаж, если расписание не задало здание
+            // Если есть активная пара — переключаемся на её здание, иначе восстанавливаем последнее здание
             var scheduleNode = TryAutoSelectBuildingFromSchedule();
-            if (scheduleNode == null)
+            if (scheduleNode == null && !string.IsNullOrEmpty(savedBuildingId))
             {
-                var lastBuildingId = Preferences.Default.Get("LastBuildingId", string.Empty);
-                if (!string.IsNullOrEmpty(lastBuildingId))
-                {
-                    var lastBuilding = Buildings.FirstOrDefault(b => b.Id == lastBuildingId);
-                    if (lastBuilding != null && lastBuilding != _selectedBuilding)
-                        SelectedBuilding = lastBuilding;
-                }
+                var lastBuilding = Buildings.FirstOrDefault(b => b.Id == savedBuildingId);
+                if (lastBuilding != null && lastBuilding != _selectedBuilding)
+                    SelectedBuilding = lastBuilding;
             }
-            // Восстанавливаем последний этаж для выбранного здания
-            var lastFloorNum = Preferences.Default.Get("LastFloorNum", 1);
-            var lastFloor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == lastFloorNum);
+            // Восстанавливаем последний этаж (используем значение, прочитанное до любых перезаписей)
+            var lastFloor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == savedFloorNum);
             if (lastFloor != null)
                 SelectedFloor = lastFloor;
         }
@@ -1186,16 +1185,18 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
 
+            // Читаем сохранённый этаж ДО любых изменений (TryAutoSelectBuilding может перезаписать значение)
+            var savedFloorNumOnLogin = Preferences.Default.Get("LastFloorNum", 1);
+
             // При входе переключаемся на здание текущей пары по расписанию
             var scheduleNode = TryAutoSelectBuildingFromSchedule();
 
-            // Восстанавливаем последний этаж (TryAutoSelectBuilding мог его сбросить на 1)
+            // Восстанавливаем последний этаж (используем значение, прочитанное до перезаписи)
             if (!_isEmergencyActive)
             {
-                var lastFloorNum = Preferences.Default.Get("LastFloorNum", 1);
-                var lastFloor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == lastFloorNum);
-                if (lastFloor != null)
-                    SelectedFloor = lastFloor;
+                var restoredFloor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == savedFloorNumOnLogin);
+                if (restoredFloor != null)
+                    SelectedFloor = restoredFloor;
             }
 
             // Если уже активен режим ЧС для (возможно нового) здания — показываем подтверждение
