@@ -1566,8 +1566,7 @@ public class AdminViewModel : INotifyPropertyChanged
 
             default:
                 SelectedNode = node;
-                var typeInfo = node.IsTransition ? " [Переход]" : (node.IsRoom ? " [Аудитория]" : "");
-                StatusText   = $"Выбран: {node.Name}{typeInfo} · Координаты: ({(int)node.X}, {(int)node.Y}) · Этаж: {node.FloorNumber} · {node.BuildingId}";
+                StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
                 DeleteSelectedCommand.ChangeCanExecute();
                 RenameSelectedCommand.ChangeCanExecute();
                 EditCoordinatesCommand.ChangeCanExecute();
@@ -1662,7 +1661,7 @@ public class AdminViewModel : INotifyPropertyChanged
         // Пытаемся получить новые координаты через DisplayPromptAsync
         var coordInput = await Shell.Current.DisplayPromptAsync(
             "Изменить координаты",
-            "Введите целые координаты в формате: X Y\n(например: 150 200)",
+            "Введите координаты в формате: X Y\n(например: 150 200)",
             initialValue: $"{(int)SelectedNode.X} {(int)SelectedNode.Y}",
             maxLength: 50);
         
