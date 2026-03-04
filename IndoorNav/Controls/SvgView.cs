@@ -869,6 +869,41 @@ public class SvgView : SKCanvasView
                 if (from == null || to == null) continue;
                 // координаты — напрямую в SVG-пространстве, холст трансформирует сам
                 canvas.DrawLine(from.X, from.Y, to.X, to.Y, edgePaint);
+
+                // В режиме администратора: показываем названия коридоров
+                if (IsAdminMode && !string.IsNullOrWhiteSpace(edge.Name))
+                {
+                    // Вычисляем середину коридора
+                    float midX = (from.X + to.X) / 2f;
+                    float midY = (from.Y + to.Y) / 2f;
+
+                    // Рисуем полупрозрачный фон для текста
+                    using var bgP = new SKPaint
+                    {
+                        Color = new SKColor(50, 50, 50, 200),
+                        IsAntialias = true
+                    };
+                    
+                    using var textFont = new SKFont(SKTypeface.Default, 10f / sc);
+                    using var textP = new SKPaint
+                    {
+                        Color = new SKColor(255, 255, 255, 220),
+                        IsAntialias = true
+                    };
+
+                    var textBounds = new SKRect();
+                    textP.MeasureText(edge.Name, ref textBounds);
+                    
+                    float padding = 4f / sc;
+                    var bgRect = new SKRect(
+                        midX - textBounds.Width / 2f - padding,
+                        midY - textBounds.Height - padding,
+                        midX + textBounds.Width / 2f + padding,
+                        midY + padding);
+                    
+                    canvas.DrawRoundRect(bgRect, 3f / sc, 3f / sc, bgP);
+                    canvas.DrawText(edge.Name, midX, midY, SKTextAlign.Center, textFont, textP);
+                }
             }
         }
 
