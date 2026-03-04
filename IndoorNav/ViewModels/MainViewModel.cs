@@ -1117,6 +1117,8 @@ public class MainViewModel : INotifyPropertyChanged
         // Blocking-selection mode: only route nodes are valid targets
         if (_isBlockingMode)
         {
+            // Ignore exits — they cannot be marked as blocked
+            if (node.IsExit || node.IsEvacuationExit) return;
             // Ignore nodes that are not part of the current emergency route
             if (_currentFullRoute == null || !_currentFullRoute.Any(n => n.Id == node.Id))
                 return;
