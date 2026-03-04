@@ -1114,20 +1114,19 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Call when a node on the canvas is tapped in user mode.</summary>
     public void OnCanvasNodeTapped(NavNode node)
     {
-        // Blocking-selection mode: only route nodes are valid targets
+        // Blocking-selection mode: выходы (IsExit/IsEvacuationExit) можно выбирать всегда,
+        // остальные узлы — только если входят в текущий маршрут ЧС
         if (_isBlockingMode)
         {
-            // Ignore exits — they cannot be marked as blocked
-            if (node.IsExit || node.IsEvacuationExit) return;
-            // Ignore nodes that are not part of the current emergency route
-            if (_currentFullRoute == null || !_currentFullRoute.Any(n => n.Id == node.Id))
+            bool isExit = node.IsExit || node.IsEvacuationExit;
+            if (!isExit && (_currentFullRoute == null || !_currentFullRoute.Any(n => n.Id == node.Id)))
                 return;
             PendingBlockNode = node;   // show confirmation overlay
             return;
         }
 
         if (node.IsFireExtinguisher) return;
-        // В режиме ЧС выходы нельзя выбрать как точку отправки — popup не открываем
+        // В обычном режиме ЧС выходы нельзя выбрать как точку отправки — popup не открываем
         if (_isEmergencyActive && (node.IsExit || node.IsEvacuationExit)) return;
         TappedNode = node;
         IsNodePopupOpen = true;
