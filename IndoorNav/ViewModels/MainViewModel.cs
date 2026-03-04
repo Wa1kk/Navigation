@@ -1180,7 +1180,15 @@ public class MainViewModel : INotifyPropertyChanged
 
             // При входе переключаемся на здание текущей пары по расписанию
             var scheduleNode = TryAutoSelectBuildingFromSchedule();
-            // Этаж всегда 1 — SelectedBuilding setter уже его выставил
+            
+            // Всегда выставляем первый этаж при входе
+            if (_selectedBuilding != null)
+            {
+                var firstFloor = _selectedBuilding.Floors.FirstOrDefault(f => f.Number == 1)
+                               ?? _selectedBuilding.Floors.FirstOrDefault();
+                if (firstFloor != null && firstFloor != _selectedFloor)
+                    SelectedFloor = firstFloor;
+            }
 
             // Если уже активен режим ЧС для (возможно нового) здания — показываем подтверждение
             if (scheduleNode != null && _isEmergencyActive)
