@@ -1051,9 +1051,7 @@ public class MainViewModel : INotifyPropertyChanged
         _routeStepsList.Clear();
         _currentStepIndex = 0;
         RouteStatus = string.Empty;
-        // В режиме ЧС сохраняем точку отправки — пользователь уже указал своё местоположение
-        if (!_isEmergencyActive)
-            StartNode = null;
+        StartNode = null;
         EndNode = null;
         OnPropertyChanged(nameof(HasRoute));
         OnPropertyChanged(nameof(HasEmergencyRoute));
