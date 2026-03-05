@@ -11,16 +11,22 @@ public class ScheduleService
 
     private List<ScheduleEntry> _entries = new();
 
-        private static string GetProjectRootPath()
-        {
-            var basePath = AppContext.BaseDirectory;
-            var dir = new DirectoryInfo(basePath);
-            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
-                dir = dir.Parent;
-            return dir?.FullName ?? basePath;
-        }
+    private static string GetProjectRootPath()
+    {
+        var basePath = AppContext.BaseDirectory;
+        var dir = new DirectoryInfo(basePath);
+        while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
+            dir = dir.Parent;
+        return dir?.FullName ?? basePath;
+    }
 
-        private string FilePath => Path.Combine(GetProjectRootPath(), "Resources", "Raw", FileName);
+    private string FilePath => Path.Combine(GetProjectRootPath(), "Resources", "Raw", FileName);
+
+    public IReadOnlyList<ScheduleEntry> Entries => _entries;
+
+    public async Task LoadAsync()
+    {
+        if (!File.Exists(FilePath)) return;
         try
         {
             var json = await File.ReadAllTextAsync(FilePath);

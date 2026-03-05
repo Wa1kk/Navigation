@@ -30,16 +30,35 @@ public class AuthService
     /// <summary>Fired whenever the current user changes (login, logout, guest).</summary>
     public event EventHandler? UserChanged;
 
-        private static string GetProjectRootPath()
-        {
-            var basePath = AppContext.BaseDirectory;
-            var dir = new DirectoryInfo(basePath);
-            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
-                dir = dir.Parent;
-            return dir?.FullName ?? basePath;
-        }
+    private static string GetProjectRootPath()
+    {
+        var basePath = AppContext.BaseDirectory;
+        var dir = new DirectoryInfo(basePath);
+        while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
+            dir = dir.Parent;
+        return dir?.FullName ?? basePath;
+    }
 
-        private string FilePath => Path.Combine(GetProjectRootPath(), "Resources", "Raw", UsersFileName);
+    private string FilePath => Path.Combine(GetProjectRootPath(), "Resources", "Raw", UsersFileName);
+
+    // ── Initialisation ───────────────────────────────────────────────────────────
+
+    public async Task InitAsync()
+    {
+        await _initLock.WaitAsync();
+        try
+        {
+            if (_initialized) return;
+            await LoadUsersAsync();
+            RestoreSession();
+            _initialized = true;
+        }
+        finally { _initLock.Release(); }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        if (File.Exists(FilePath))
         {
             try
             {
