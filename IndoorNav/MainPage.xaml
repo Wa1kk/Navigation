@@ -397,10 +397,6 @@
                                 <Label Text="{Binding TappedNodeName}"
                                        FontSize="15" FontAttributes="Bold" TextColor="#0F172A"
                                        HorizontalOptions="Center" />
-                                <Label Text="{Binding TappedNodeTypeLabel}"
-                                       FontSize="12" TextColor="#0F172A"
-                                       HorizontalOptions="Center"
-                                       IsVisible="{Binding TappedNodeTypeLabel, Converter={StaticResource StringNotEmptyConverter}}" />
                                 <Label Text="{Binding TappedNodeCategory}"
                                        FontSize="12" TextColor="#2563EB"
                                        HorizontalOptions="Center"

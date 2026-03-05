@@ -85,7 +85,7 @@
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "FF9800",
-      "IsRoom": true,
+      "IsRoom": false,
       "IsWaypoint": false,
       "InnerLabel": "",
       "SearchTags": "",
