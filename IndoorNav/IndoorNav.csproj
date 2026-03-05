@@ -70,10 +70,10 @@
 	</ItemGroup>
 
 	<!-- Camera QR scanning — Android and iOS only -->
-	<ItemGroup Condition="$(TargetFramework.StartsWith('net9.0-android')) Or $(TargetFramework.StartsWith('net9.0-ios'))">
+	<!-- ZXing.Net.Maui does not provide camera scanning support, using text fallback -->
+	<!-- ItemGroup Condition="$(TargetFramework.StartsWith('net9.0-android')) Or $(TargetFramework.StartsWith('net9.0-ios'))">
 		<PackageReference Include="ZXing.Net.Maui" Version="0.4.0" />
-	</ItemGroup>
-
+	</ItemGroup -->
 
 
 </Project>
