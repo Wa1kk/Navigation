@@ -21,10 +21,17 @@ public class EmergencyService
 
     private readonly HashSet<string> _activeBuildings = new();
 
-    private static string StatePath =>
-        Path.Combine(FileSystem.AppDataDirectory, "emergency_state.json");
+        private static string GetProjectRootPath()
+        {
+            var basePath = AppContext.BaseDirectory;
+            var dir = new DirectoryInfo(basePath);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
+                dir = dir.Parent;
+            return dir?.FullName ?? basePath;
+        }
 
-    /// <summary>True if ANY building is in emergency mode.</summary>
+        private static string StatePath =>
+            Path.Combine(GetProjectRootPath(), "Resources", "Raw", "emergency_state.json");
     public bool IsEmergencyActive => _activeBuildings.Count > 0;
 
     public bool IsActiveForBuilding(string? buildingId) =>
