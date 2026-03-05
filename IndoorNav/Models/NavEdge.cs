@@ -10,7 +10,4 @@ public class NavEdge
 
     /// <summary>Межэтажное ребро (между transition-узлами).</summary>
     public bool IsCrossFloor { get; set; }
-
-    /// <summary>Название коридора (произвольное имя для отображения в режиме администратора).</summary>
-    public string? Name { get; set; }
 }

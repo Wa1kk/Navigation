@@ -5,8 +5,26 @@ namespace IndoorNav.Services;
 
 public class NavGraphService
 {
+    /// <summary>
+    /// Получает путь к папке проекта, поднимаясь вверх по дереву директорий
+    /// пока не находит IndoorNav.csproj из AppContext.BaseDirectory.
+    /// </summary>
+    private static string GetProjectRootPath()
+    {
+        var basePath = AppContext.BaseDirectory;
+        var dir = new DirectoryInfo(basePath);
+        
+        // Поднимаемся вверх пока не найдем папку с IndoorNav.csproj
+        while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
+        {
+            dir = dir.Parent;
+        }
+        
+        return dir?.FullName ?? basePath;
+    }
+
     private static readonly string FilePath =
-        Path.Combine(FileSystem.AppDataDirectory, "navgraph.json");
+        Path.Combine(GetProjectRootPath(), "Resources", "Raw", "navgraph.json");
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {

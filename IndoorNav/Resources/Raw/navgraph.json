@@ -2,7 +2,7 @@
     "Nodes":  [
                   {
                       "Id":  "49c8b595-a8f3-4957-9519-4a2acdea35ee",
-                      "Name":  "Вход",
+                      "Name":  "пїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  5815,
@@ -18,7 +18,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Вход",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            5504,
@@ -40,7 +40,7 @@
                   },
                   {
                       "Id":  "c9b186ac-5eda-4a88-aa59-47dcb33bbee3",
-                      "Name":  "Точка кипения",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  8820,
@@ -56,7 +56,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Точка кипения",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            8396,
@@ -86,7 +86,7 @@
                   },
                   {
                       "Id":  "aa65cdf9-8917-4d4e-ab82-cb120feb6eeb",
-                      "Name":  "Гардероб",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  5717,
@@ -102,7 +102,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Гардероб",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            5194,
@@ -124,7 +124,7 @@
                   },
                   {
                       "Id":  "bca1b6e2-086f-42ee-9724-aabd6b69e4e1",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  7505,
@@ -140,7 +140,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            7367,
@@ -162,7 +162,7 @@
                   },
                   {
                       "Id":  "5feb57be-8861-4da1-8bbc-1e7d956a9953",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  2501,
@@ -178,7 +178,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            2332,
@@ -200,7 +200,7 @@
                   },
                   {
                       "Id":  "f0e84a67-5add-47d1-be95-7fb1e4a19148",
-                      "Name":  "Туалет",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  7913,
@@ -214,9 +214,9 @@
                       "LabelScale":  1,
                       "NodeColorHex":  null,
                       "IsWaypoint":  false,
-                      "InnerLabel":  "М",
-                      "SearchTags":  "М",
-                      "DisplayName":  "Туалет М",
+                      "InnerLabel":  "пїЅ",
+                      "SearchTags":  "пїЅ",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ",
                       "Boundary":  [
                                        [
                                            7669,
@@ -238,7 +238,7 @@
                   },
                   {
                       "Id":  "8c7dc053-8b0b-4764-8900-95e71b1ccf45",
-                      "Name":  "Деканат",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  1,
                       "X":  2768,
@@ -254,7 +254,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Деканат",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            2354,
@@ -318,7 +318,7 @@
                   },
                   {
                       "Id":  "1035fa02-8f6b-4778-a967-b5a291360fb6",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  2491,
@@ -334,7 +334,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            2333,
@@ -356,7 +356,7 @@
                   },
                   {
                       "Id":  "c86284aa-09e0-4bac-8caf-aca380c6d42a",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  7508,
@@ -372,7 +372,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            7371,
@@ -394,7 +394,7 @@
                   },
                   {
                       "Id":  "935ad992-f0e7-49da-b2ab-89d08bedb5a7",
-                      "Name":  "Туалет",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  7919,
@@ -408,9 +408,9 @@
                       "LabelScale":  1,
                       "NodeColorHex":  "9C27B0",
                       "IsWaypoint":  false,
-                      "InnerLabel":  "Ж",
-                      "SearchTags":  "(Ж)",
-                      "DisplayName":  "Туалет (Ж)",
+                      "InnerLabel":  "пїЅ",
+                      "SearchTags":  "(пїЅ)",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅ)",
                       "Boundary":  [
                                        [
                                            7672,
@@ -432,7 +432,7 @@
                   },
                   {
                       "Id":  "c77aa176-03b4-4357-b5ab-438c5fa1ed86",
-                      "Name":  "а-217",
+                      "Name":  "пїЅ-217",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  7895,
@@ -448,7 +448,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "а-217",
+                      "DisplayName":  "пїЅ-217",
                       "Boundary":  [
                                        [
                                            7558,
@@ -470,7 +470,7 @@
                   },
                   {
                       "Id":  "de6419a5-1554-4a81-a5f6-56db01c2760f",
-                      "Name":  "а-214",
+                      "Name":  "пїЅ-214",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  6475,
@@ -486,7 +486,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "а-214",
+                      "DisplayName":  "пїЅ-214",
                       "Boundary":  [
                                        [
                                            6262,
@@ -508,7 +508,7 @@
                   },
                   {
                       "Id":  "cecfa3a8-4765-4702-b2ad-5d1516651d1e",
-                      "Name":  "а-205",
+                      "Name":  "пїЅ-205",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  2490,
@@ -524,7 +524,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "а-205",
+                      "DisplayName":  "пїЅ-205",
                       "Boundary":  [
                                        [
                                            2333,
@@ -546,7 +546,7 @@
                   },
                   {
                       "Id":  "5dafbf3e-eef1-456c-a982-f402d9656f9f",
-                      "Name":  "Кафедра",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  2,
                       "X":  1411,
@@ -562,7 +562,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Кафедра",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            1234,
@@ -584,7 +584,7 @@
                   },
                   {
                       "Id":  "4b669857-ddc1-4d92-b069-02a04bcf9a1b",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  3,
                       "X":  2491,
@@ -600,7 +600,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            2330,
@@ -622,7 +622,7 @@
                   },
                   {
                       "Id":  "89aa3ab2-d0b3-44f8-a948-8f3fa0d5170d",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  3,
                       "X":  7502,
@@ -638,7 +638,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            7370,
@@ -660,7 +660,7 @@
                   },
                   {
                       "Id":  "82ab3ee7-6941-4bc6-aaca-b068be46e311",
-                      "Name":  "Курилка",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  3,
                       "X":  7901,
@@ -674,9 +674,9 @@
                       "LabelScale":  1,
                       "NodeColorHex":  null,
                       "IsWaypoint":  false,
-                      "InnerLabel":  "М",
-                      "SearchTags":  "(М)",
-                      "DisplayName":  "Курилка (М)",
+                      "InnerLabel":  "пїЅ",
+                      "SearchTags":  "(пїЅ)",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅ)",
                       "Boundary":  [
                                        [
                                            7674,
@@ -1328,7 +1328,7 @@
                   },
                   {
                       "Id":  "9dbeb29c-37cf-4c42-acc7-3bf9ccc602d9",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  -1,
                       "X":  2491,
@@ -1344,7 +1344,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            2331,
@@ -1366,7 +1366,7 @@
                   },
                   {
                       "Id":  "68fe1db4-0b89-4bdb-ad51-b91221195baa",
-                      "Name":  "Лестница",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  -1,
                       "X":  7502,
@@ -1382,7 +1382,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Лестница",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            7369,
@@ -1404,7 +1404,7 @@
                   },
                   {
                       "Id":  "9ce41e6a-d2d3-494c-a67e-a7864e9f861c",
-                      "Name":  "Столовая",
+                      "Name":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "BuildingId":  "BuildingB",
                       "FloorNumber":  -1,
                       "X":  1841,
@@ -1420,7 +1420,7 @@
                       "IsWaypoint":  false,
                       "InnerLabel":  "",
                       "SearchTags":  "",
-                      "DisplayName":  "Столовая",
+                      "DisplayName":  "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
                       "Boundary":  [
                                        [
                                            1285,

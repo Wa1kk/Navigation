@@ -17,7 +17,7 @@ public class ScheduleEntry
     public List<TimeSlot> TimeSlots { get; set; } = new();
 
     private static readonly string[] _ruDayNames =
-        { "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
+        { "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье" };
 
     public string DisplayDate => _ruDayNames[Math.Clamp(DayOfWeek, 0, 6)];
 }
