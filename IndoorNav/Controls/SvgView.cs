@@ -1476,8 +1476,10 @@ public class SvgView : SKCanvasView
                     else
                     {
                         var hit = HitNode(e.Location);
-                        if (hit != null) NodeTapped?.Invoke(this, hit);
-                        else if (IsAdminMode) CanvasTapped?.Invoke(this, ToSvg(e.Location));
+                        // Запрещаем обычным пользователям нажимать на QR-точки
+                        if (hit != null && (!hit.IsQrAnchor || IsAdminMode))
+                            NodeTapped?.Invoke(this, hit);
+                        else if (hit == null && IsAdminMode) CanvasTapped?.Invoke(this, ToSvg(e.Location));
                     }
                 }
                 _activePointers.Remove(e.Id);
@@ -1524,6 +1526,38 @@ public class SvgView : SKCanvasView
             _matrix = _matrix.PostConcat(SKMatrix.CreateScale(factor, factor, pivot.X, pivot.Y));
             InvalidateSurface();
         }
+    }
+
+    /// <summary>Зумирует карту на указанный узел с небольшим коэффициентом увеличения</summary>
+    public void ZoomToNode(NavNode node, float zoomFactor = 2.5f)
+    {
+        if (node == null || _canvasW <= 0 || _canvasH <= 0) return;
+
+        // Центр canvas в пиксельных координатах
+        SKPoint canvasCenter = new(_canvasW / 2f, _canvasH / 2f);
+
+        // SVG координаты узла
+        SKPoint nodePos = new(node.X, node.Y);
+
+        // Получаем текущий масштаб и вычисляем нужный
+        float currentScale = MatrixScale();
+        float targetScale = currentScale * zoomFactor;
+
+        // Зажимаем до пределов
+        if (targetScale > MaxZoom) targetScale = MaxZoom;
+        if (targetScale < MinZoom) targetScale = MinZoom;
+
+        // Вычисляем коэффициент зума
+        float zoomCoeff = targetScale / currentScale;
+
+        // Трансформация: центрируем на узле и масштабируем
+        _matrix = SKMatrix.CreateScaleTranslation(
+            targetScale, targetScale,
+            canvasCenter.X - nodePos.X * targetScale,
+            canvasCenter.Y - nodePos.Y * targetScale
+        );
+
+        InvalidateSurface();
     }
 
     private static float Distance(SKPoint a, SKPoint b)

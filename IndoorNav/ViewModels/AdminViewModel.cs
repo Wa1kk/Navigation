@@ -4,6 +4,10 @@ using System.Runtime.CompilerServices;
 using IndoorNav.Models;
 using IndoorNav.Services;
 using SkiaSharp;
+#if WINDOWS
+using Windows.Storage.Pickers;
+using WinRT.Interop;
+#endif
 
 namespace IndoorNav.ViewModels;
 
@@ -1602,16 +1606,70 @@ public class AdminViewModel : INotifyPropertyChanged
         await Task.CompletedTask;
     }
 
-    private Task DownloadQrCodeAsync()
+    private async Task DownloadQrCodeAsync()
     {
-        if (_qrCurrentPngBytes == null || _qrCurrentPngBytes.Length == 0) return Task.CompletedTask;
+        if (_qrCurrentPngBytes == null || _qrCurrentPngBytes.Length == 0) return;
+        
         try
         {
-            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            var safe    = string.Concat(QrPopupNodeName.Split(Path.GetInvalidFileNameChars()));
+            string? selectedFolder = null;
+
+#if WINDOWS
+            // На Windows используем стандартный диалог выбора папки
+            var folderPicker = new FolderPicker();
+            folderPicker.SuggestedStartLocation = PickerLocationId.Desktop;
+            folderPicker.FileTypeFilter.Add("*");
+
+            // Инициализируем picker с окном приложения
+            try
+            {
+                var mauiWindow = Application.Current?.Windows[0] as Microsoft.Maui.Controls.Window;
+                var hwnd = GetWindowHandle(mauiWindow);
+                if (hwnd != 0)
+                {
+                    InitializeWithWindow.Initialize(folderPicker, hwnd);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Продолжаем даже если инициализация не сработает
+                System.Diagnostics.Debug.WriteLine($"HWND init failed: {ex.Message}");
+            }
+
+            var folder = await folderPicker.PickSingleFolderAsync();
+            if (folder != null)
+                selectedFolder = folder.Path;
+#else
+            // На других платформах показываем диалог с предустановками
+            var folders = new Dictionary<string, string>
+            {
+                { "Рабочий стол", Environment.GetFolderPath(Environment.SpecialFolder.Desktop) },
+                { "Документы", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) },
+                { "Загрузки", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads") },
+                { "Пользовательская папка", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) }
+            };
+
+            var action = await Shell.Current.DisplayActionSheet(
+                "Выберите папку для сохранения QR кода",
+                "Отмена",
+                null,
+                folders.Keys.ToArray());
+
+            if (!string.IsNullOrEmpty(action) && action != "Отмена")
+                selectedFolder = folders[action];
+#endif
+
+            if (string.IsNullOrEmpty(selectedFolder))
+            {
+                StatusText = "Сохранение отменено";
+                return;
+            }
+
+            var safe = string.Concat(QrPopupNodeName.Split(Path.GetInvalidFileNameChars()));
             if (string.IsNullOrWhiteSpace(safe))
                 safe = _qrCurrentNodeId[..Math.Min(8, _qrCurrentNodeId.Length)];
-            var path    = Path.Combine(desktop, $"QR_{safe}.png");
+            
+            var path = Path.Combine(selectedFolder, $"QR_{safe}.png");
             File.WriteAllBytes(path, _qrCurrentPngBytes);
             StatusText = $"QR сохранён: {path}";
         }
@@ -1619,8 +1677,25 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             StatusText = $"Ошибка сохранения QR: {ex.Message}";
         }
-        return Task.CompletedTask;
     }
+
+#if WINDOWS
+    private static nint GetWindowHandle(Microsoft.Maui.Controls.Window? mauiWindow)
+    {
+        if (mauiWindow?.Handler?.PlatformView is Microsoft.UI.Xaml.Window xamlWindow)
+        {
+            try
+            {
+                return WindowNative.GetWindowHandle(xamlWindow);
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        return 0;
+    }
+#endif
 
     private async Task EditTransitionGroupIdAsync()
     {

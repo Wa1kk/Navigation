@@ -18,7 +18,17 @@ public partial class MainPage : ContentPage
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MainViewModel.HasRoute) && _vm.HasRoute)
+        if (e.PropertyName == nameof(MainViewModel.StartNode) && _vm.StartNode?.IsQrAnchor == true)
+        {
+            // При сканировании QR зумируем к узлу
+            Dispatcher.Dispatch(() =>
+            {
+                var node = _vm.StartNode;
+                if (node != null)
+                    MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToNode(node, 2.5f));
+            });
+        }
+        else if (e.PropertyName == nameof(MainViewModel.HasRoute) && _vm.HasRoute)
         {
             // Откладываем на следующую итерацию главного потока — к этому моменту
             // BuildRouteSteps уже вызовет SelectedFloor (StartFloorLoad), и ApplyOrQueueZoom
