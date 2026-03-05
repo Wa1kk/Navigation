@@ -1317,6 +1317,10 @@ public class MainViewModel : INotifyPropertyChanged
         if (await FloorExistsAsync(id, -1).ConfigureAwait(false))
             building.Floors.Add(new Floor(-1, $"{id}/floor-1.svg"));
 
+        // Ground floor (0) - some buildings may have an explicit 0 level
+        if (await FloorExistsAsync(id, 0).ConfigureAwait(false))
+            building.Floors.Add(new Floor(0, $"{id}/floor0.svg"));
+
         // Floors 1..50
         for (int i = 1; i <= 50; i++)
         {
