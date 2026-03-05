@@ -1,0 +1,32 @@
+[
+  {
+    "Id": "82ae4887-4677-4649-9d4a-161dea205e52",
+    "Name": "\u0424\u0430\u043A\u0443\u043B\u044C\u0442\u0435\u0442 \u0446\u0438\u0444\u0440\u043E\u0432\u044B\u0445 \u0442\u0435\u0445\u043D\u043E\u043B\u043E\u0433\u0438\u0439",
+    "Groups": [
+      {
+        "Id": "23607994-a19b-4c81-b11e-fb66e59bb578",
+        "DepartmentId": "82ae4887-4677-4649-9d4a-161dea205e52",
+        "Name": "\u041F\u041E-21\u0431",
+        "IsSelected": false
+      },
+      {
+        "Id": "beccbfa9-6ea3-4101-b647-c5ab6225a8ab",
+        "DepartmentId": "82ae4887-4677-4649-9d4a-161dea205e52",
+        "Name": "\u041F\u041E-22\u0431",
+        "IsSelected": false
+      }
+    ]
+  },
+  {
+    "Id": "342fb609-2750-4bc4-9996-5cd8cb9e2efb",
+    "Name": "\u042E\u0440\u0438\u0434\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0444\u0430\u043A\u0443\u043B\u044C\u0442\u0435\u0442",
+    "Groups": [
+      {
+        "Id": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+        "DepartmentId": "342fb609-2750-4bc4-9996-5cd8cb9e2efb",
+        "Name": "\u042E\u0420-21",
+        "IsSelected": false
+      }
+    ]
+  }
+]

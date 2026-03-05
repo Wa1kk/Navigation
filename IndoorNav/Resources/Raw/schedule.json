@@ -1,0 +1,146 @@
+[
+  {
+    "Id": "75ed8196-e773-496a-a389-87b9306e231a",
+    "RoomNodeId": "c77aa176-03b4-4357-b5ab-438c5fa1ed86",
+    "RoomName": "\u0430-217",
+    "GroupName": "\u041F\u041E-21\u0431",
+    "GroupId": "23607994-a19b-4c81-b11e-fb66e59bb578",
+    "PersonCount": 2,
+    "DayOfWeek": 3,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0421\u0440\u0435\u0434\u0430"
+  },
+  {
+    "Id": "56d98c5b-c6f5-44b3-a75a-8730bcf4008b",
+    "RoomNodeId": "de6419a5-1554-4a81-a5f6-56db01c2760f",
+    "RoomName": "\u0430-214",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 3,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0421\u0440\u0435\u0434\u0430"
+  },
+  {
+    "Id": "f166dae8-73e9-41d7-984b-2a5c48624dcb",
+    "RoomNodeId": "cecfa3a8-4765-4702-b2ad-5d1516651d1e",
+    "RoomName": "\u0430-205",
+    "GroupName": "\u041F\u041E-22\u0431",
+    "GroupId": "beccbfa9-6ea3-4101-b647-c5ab6225a8ab",
+    "PersonCount": 1,
+    "DayOfWeek": 3,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0421\u0440\u0435\u0434\u0430"
+  },
+  {
+    "Id": "22d0f807-05cb-4523-b346-00f862056315",
+    "RoomNodeId": "d58e392e-14a7-4ede-ad96-56b4c106cbdb",
+    "RoomName": "\u0430-44",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 4,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0427\u0435\u0442\u0432\u0435\u0440\u0433"
+  },
+  {
+    "Id": "fc366053-caa2-4e47-80ea-b71a55f6a5f9",
+    "RoomNodeId": "c7c64f75-8edd-4434-b5f8-a55ffe53be19",
+    "RoomName": "\u0430-211",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 6,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0421\u0443\u0431\u0431\u043E\u0442\u0430"
+  },
+  {
+    "Id": "7b5b6331-04a3-4b45-a373-63e26f149060",
+    "RoomNodeId": "91710095-b24d-41c3-a480-48b53a5cbe86",
+    "RoomName": "\u0430-206",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 0,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0412\u043E\u0441\u043A\u0440\u0435\u0441\u0435\u043D\u044C\u0435"
+  },
+  {
+    "Id": "1bdb13c7-9189-482c-8dbf-75ce2a70bb37",
+    "RoomNodeId": "3d658a0c-2167-4c4a-a02d-c028aa1dfbe7",
+    "RoomName": "\u0430-32",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 1,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u041F\u043E\u043D\u0435\u0434\u0435\u043B\u044C\u043D\u0438\u043A"
+  },
+  {
+    "Id": "c50fb459-14a9-40a4-bb5e-75932e5bce71",
+    "RoomNodeId": "c0016e6d-b7cb-42a4-abbd-3e68c9c68134",
+    "RoomName": "\u0430-217",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 2,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u0412\u0442\u043E\u0440\u043D\u0438\u043A"
+  },
+  {
+    "Id": "8db39995-ed19-42a6-b68c-5b632915db29",
+    "RoomNodeId": "b9012f44-570d-4169-ab00-8f7e68113525",
+    "RoomName": "\u0430-36",
+    "GroupName": "\u042E\u0420-21",
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "PersonCount": 1,
+    "DayOfWeek": 5,
+    "TimeSlots": [
+      {
+        "StartTime": "01:00",
+        "EndTime": "22:30"
+      }
+    ],
+    "DisplayDate": "\u041F\u044F\u0442\u043D\u0438\u0446\u0430"
+  }
+]

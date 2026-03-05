@@ -1,10 +1,42 @@
 [
   {
-    "Id": "cc26d458-ba54-4bd2-ae11-cec23f9216c6",
+    "Id": "a5747e01-740d-4ce4-a670-5d62ceba386d",
     "Username": "0",
     "PasswordHash": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
     "Role": 0,
     "GroupId": "",
     "DisplayName": "\u0410\u0434\u043C\u0438\u043D\u0438\u0441\u0442\u0440\u0430\u0442\u043E\u0440"
+  },
+  {
+    "Id": "06189afb-0284-4fda-9f51-b6eff4f72da4",
+    "Username": "1",
+    "PasswordHash": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+    "Role": 1,
+    "GroupId": "23607994-a19b-4c81-b11e-fb66e59bb578",
+    "DisplayName": "\u0412\u0430\u0434\u0438\u043C"
+  },
+  {
+    "Id": "b8270706-f80f-40b3-9a19-82237a6a08bd",
+    "Username": "2",
+    "PasswordHash": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+    "Role": 1,
+    "GroupId": "23607994-a19b-4c81-b11e-fb66e59bb578",
+    "DisplayName": "\u0410\u043D\u0434\u0440\u0435\u0439"
+  },
+  {
+    "Id": "8f1d0ef1-290b-4f5a-854a-d7f53c467ed8",
+    "Username": "3",
+    "PasswordHash": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+    "Role": 1,
+    "GroupId": "9e343146-aa6b-4c2e-91cf-f4a06ecbcf82",
+    "DisplayName": "\u041A\u0441\u0435\u043D\u0438\u044F"
+  },
+  {
+    "Id": "fef3662c-1f63-4837-b6ee-63900dba3764",
+    "Username": "4",
+    "PasswordHash": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+    "Role": 1,
+    "GroupId": "beccbfa9-6ea3-4101-b647-c5ab6225a8ab",
+    "DisplayName": "\u0418\u043B\u044C\u044F"
   }
 ]
