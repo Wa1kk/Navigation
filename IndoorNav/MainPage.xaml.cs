@@ -14,6 +14,7 @@ public partial class MainPage : ContentPage
         BindingContext = vm;
         MainCanvas.NodeTapped += OnNodeTapped;
         _vm.PropertyChanged += OnVmPropertyChanged;
+        SetSidebarExpanded(_vm.IsSidebarExpanded);
     }
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -34,6 +35,68 @@ public partial class MainPage : ContentPage
             // BuildRouteSteps уже вызовет SelectedFloor (StartFloorLoad), и ApplyOrQueueZoom
             // правильно поставит зум в очередь вместо немедленного применения на старом этаже.
             Dispatcher.Dispatch(ApplyStepZoom);
+        }
+
+        if (e.PropertyName == nameof(MainViewModel.IsBuildingPickerOpen))
+        {
+            if (_vm.IsBuildingPickerOpen)
+                _ = ShowBuildingPickerAsync();
+            else
+                _ = HideBuildingPickerAsync();
+        }
+
+        if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
+        {
+            SetSidebarExpanded(_vm.IsSidebarExpanded);
+        }
+    }
+
+    // ── Building picker animation ────────────────────────────────────────────
+
+    private async Task ShowBuildingPickerAsync()
+    {
+        // Показываем backdrop + sheet одновременно — без layout thrashing
+        BuildingPickerBackdrop.Opacity = 0;
+        BuildingPickerBackdrop.IsVisible = true;
+        BuildingPickerSheet.TranslationY = 600;
+        BuildingPickerSheet.IsVisible = true;
+
+        // Параллельные анимации: fade backdrop + slide-up sheet
+        await Task.WhenAll(
+            BuildingPickerBackdrop.FadeTo(1, 220, Easing.Linear),
+            BuildingPickerSheet.TranslateTo(0, 0, 300, Easing.CubicOut)
+        );
+    }
+
+    private async Task HideBuildingPickerAsync()
+    {
+        // Параллельно скрываем оба элемента
+        await Task.WhenAll(
+            BuildingPickerBackdrop.FadeTo(0, 180, Easing.Linear),
+            BuildingPickerSheet.TranslateTo(0, 600, 220, Easing.CubicIn)
+        );
+        BuildingPickerSheet.IsVisible = false;
+        BuildingPickerBackdrop.IsVisible = false;
+        BuildingPickerSheet.TranslationY = 0;
+    }
+
+    // ── Sidebar toggle (Desktop only) ───────────────────────────────────────
+
+    private void SetSidebarExpanded(bool expanded)
+    {
+        if (DeviceInfo.Current.Idiom == DeviceIdiom.Phone) return;
+
+        if (expanded)
+        {
+            SidebarPanel.IsVisible = true;
+            MainGrid.ColumnDefinitions[0].Width = new GridLength(218);
+            SidebarHandle.IsVisible = false;
+        }
+        else
+        {
+            SidebarPanel.IsVisible = false;
+            MainGrid.ColumnDefinitions[0].Width = new GridLength(0);
+            SidebarHandle.IsVisible = true;
         }
     }
 

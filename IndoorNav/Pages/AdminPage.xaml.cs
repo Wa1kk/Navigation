@@ -46,6 +46,34 @@ public partial class AdminPage : ContentPage
     private async void OnExitAdminClicked(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("..");
 
+    // Выбор файла иконки для вершины графа
+    private async void OnPickNodeIconClicked(object sender, EventArgs e)
+    {
+        if (Vm.SelectedNode == null) return;
+        try
+        {
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Выберите иконку (PNG, JPG, WEBP)",
+                FileTypes   = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI,   new[] { ".png", ".jpg", ".jpeg", ".webp", ".bmp" } },
+                    { DevicePlatform.Android, new[] { "image/*" } },
+                    { DevicePlatform.iOS,     new[] { "public.image" } },
+                }),
+            });
+            if (result == null) return;
+            // Очищаем кеш растровых иконок, чтобы новый файл (даже с тем же путём) перезагрузился
+            AdminCanvas.ClearIconCache();
+            Vm.SelectedNodeIconPath = result.FullPath;
+            AdminCanvas.InvalidateSurface();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть файл:\n{ex.Message}", "ОК");
+        }
+    }
+
     // Кнопка связи выбранной точки — предложить удалить с подтверждением
     private async void OnEdgeButtonClicked(object sender, EventArgs e)
     {

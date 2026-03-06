@@ -3,6 +3,10 @@ using SkiaSharp.Views.Maui.Controls.Hosting;
 using IndoorNav.Services;
 using IndoorNav.ViewModels;
 using IndoorNav.Pages;
+using IndoorNav.Controls;
+#if ANDROID || IOS
+using ZXing.Net.Maui.Controls;
+#endif
 
 namespace IndoorNav;
 
@@ -14,6 +18,15 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
+#if ANDROID || IOS
+            .UseBarcodeReader()
+#endif
+            .ConfigureMauiHandlers(handlers =>
+            {
+#if WINDOWS
+                handlers.AddHandler<BlurOverlay, BlurOverlayHandler>();
+#endif
+            })
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

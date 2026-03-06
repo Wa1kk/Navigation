@@ -148,6 +148,8 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeIsTransition));
             OnPropertyChanged(nameof(SelectedTransitionGroupIdText));
             OnPropertyChanged(nameof(SelectedNodeIsQrAnchor));
+            OnPropertyChanged(nameof(SelectedNodeIconPath));
+            OnPropertyChanged(nameof(SelectedNodeHasIcon));
             SelectedBoundaryVertexIndex = -1;
             CopyNodeCommand?.ChangeCanExecute();
             RenameSelectedCommand?.ChangeCanExecute();
@@ -279,6 +281,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<StudentRowVm> RemoveStudentCommand { get; }
     public Command<StudentRowVm> EditStudentCommand   { get; }
     public Command<string> SetNodeColorCommand    { get; }
+    public Command ClearNodeIconCommand          { get; }
 
     // ── Students ──
     public ObservableCollection<StudentRowVm> Students { get; } = new();
@@ -540,6 +543,27 @@ public class AdminViewModel : INotifyPropertyChanged
         set { if (SelectedNode != null) { SelectedNode.IsRoom = value; OnPropertyChanged(); OnPropertyChanged(nameof(SelectedNodeIsRoomText)); } }
     }
     public string SelectedNodeIsRoomText => SelectedNodeIsRoom ? "🏠 Аудитория: Да" : "🏠 Аудитория: Нет";
+
+    public string? SelectedNodeIconPath
+    {
+        get => SelectedNode?.IconPath;
+        set
+        {
+            if (SelectedNode != null)
+            {
+                SelectedNode.IconPath = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedNodeHasIcon));
+                OnPropertyChanged(nameof(SelectedNodeIconFileName));
+                RefreshOverlay();
+            }
+        }
+    }
+    public bool SelectedNodeHasIcon   => !string.IsNullOrEmpty(SelectedNode?.IconPath);
+    public string SelectedNodeIconFileName =>
+        string.IsNullOrEmpty(SelectedNode?.IconPath)
+            ? "нет"
+            : System.IO.Path.GetFileName(SelectedNode.IconPath);
 
     public bool SelectedNodeIsTransition =>
         SelectedNode?.IsTransition == true;
@@ -1175,13 +1199,26 @@ public class AdminViewModel : INotifyPropertyChanged
             SelectedNode.NodeColorHex    = null;
             SelectedNode.IsHidden        = false;
             SelectedNode.IsLabelHidden   = false;
+            SelectedNode.IconPath        = null;
             OnPropertyChanged(nameof(SelectedHidden));
             OnPropertyChanged(nameof(SelectedLabelHidden));
             OnPropertyChanged(nameof(SelectedNodeScale));
             OnPropertyChanged(nameof(SelectedLabelScale));
             OnPropertyChanged(nameof(SelectedNodeColor));
+            OnPropertyChanged(nameof(SelectedNodeIconPath));
+            OnPropertyChanged(nameof(SelectedNodeHasIcon));
+            OnPropertyChanged(nameof(SelectedNodeIconFileName));
             RefreshOverlay();
             StatusText = $"Стиль [{SelectedNode.Name}] сброшен.";
+        });
+        ClearNodeIconCommand = new Command(() =>
+        {
+            if (SelectedNode == null) return;
+            SelectedNode.IconPath = null;
+            OnPropertyChanged(nameof(SelectedNodeIconPath));
+            OnPropertyChanged(nameof(SelectedNodeHasIcon));
+            OnPropertyChanged(nameof(SelectedNodeIconFileName));
+            RefreshOverlay();
         });
         ResetGraphCommand = new Command(async () =>
         {
@@ -1220,6 +1257,7 @@ public class AdminViewModel : INotifyPropertyChanged
                 NodeRadiusScale = _copiedNode.NodeRadiusScale,
                 LabelScale      = _copiedNode.LabelScale,
                 NodeColorHex    = _copiedNode.NodeColorHex,
+                IconPath        = _copiedNode.IconPath,
             };
             _graphService.AddNode(copy);
             SelectedNode = copy;

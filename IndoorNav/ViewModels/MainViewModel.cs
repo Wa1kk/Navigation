@@ -52,13 +52,19 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly List<RouteStep> _routeStepsList = new();
     private int _currentStepIndex;
 
-    // Конфигурация зданий: Id → отображаемое название.
+    // Конфигурация зданий: Id → название → адрес.
     // Чтобы добавить новое здание — просто допишите строку сюда.
-    private static readonly (string Id, string Name)[] BuildingConfig =
+    private static readonly (string Id, string Name, string Address)[] BuildingConfig =
     [
-        ("BuildingA", "Верхний корпус"),
-        ("BuildingB", "Нижний корпус"),
+        ("BuildingA", "Верхний корпус", "ул. Челюскинцев 19к1"),
+        ("BuildingB", "Нижний корпус",  "ул. Челюскинцев 19к2"),
     ];
+
+    // --- Building/floor picker & sidebar state ---
+    private bool _isBuildingPickerOpen;
+    private bool _isSidebarExpanded = true;
+    private ObservableCollection<FloorSelectorVm>    _floorSelectorItems    = new();
+    private ObservableCollection<BuildingPickerItemVm> _buildingPickerItems = new();
 
     public ObservableCollection<Building> Buildings { get; } = new();
 
@@ -71,6 +77,7 @@ public class MainViewModel : INotifyPropertyChanged
             _selectedBuilding = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(Floors));
+            OnPropertyChanged(nameof(SelectedBuildingAddress));
             // Предпочитаем 1-й этаж, иначе первый доступный
             SelectedFloor = value?.Floors.FirstOrDefault(f => f.Number == 1)
                          ?? value?.Floors.FirstOrDefault();
@@ -81,6 +88,7 @@ public class MainViewModel : INotifyPropertyChanged
             // Сохраняем последнее здание
             if (value != null)
                 Preferences.Default.Set("LastBuildingId", value.Id);
+            RebuildBuildingItems();
         }
     }
 
@@ -106,7 +114,44 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             RefreshFloorOverlay();
             RefreshRoute();
+            UpdateFloorSelectorItems();
         }
+    }
+
+    // ── Building/floor picker & sidebar ──────────────────────────────────────
+
+    /// <summary>Адрес выбранного здания для отображения в пилюле карты.</summary>
+    public string SelectedBuildingAddress => _selectedBuilding?.Address ?? string.Empty;
+
+    /// <summary>Открыт ли попап выбора корпуса.</summary>
+    public bool IsBuildingPickerOpen
+    {
+        get => _isBuildingPickerOpen;
+        set { _isBuildingPickerOpen = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>Развёрнута ли боковая панель (Desktop).</summary>
+    public bool IsSidebarExpanded
+    {
+        get => _isSidebarExpanded;
+        set { _isSidebarExpanded = value; OnPropertyChanged(); OnPropertyChanged(nameof(SidebarToggleIcon)); }
+    }
+
+    /// <summary>Иконка кнопки переключения боковой панели.</summary>
+    public string SidebarToggleIcon => _isSidebarExpanded ? "\u2039" : "\u2630";
+
+    /// <summary>Элементы селектора этажей на карте (убывающий порядок).</summary>
+    public ObservableCollection<FloorSelectorVm> FloorSelectorItems
+    {
+        get => _floorSelectorItems;
+        private set { _floorSelectorItems = value; OnPropertyChanged(); }
+    }
+
+    /// <summary>Элементы списка выбора корпуса.</summary>
+    public ObservableCollection<BuildingPickerItemVm> BuildingPickerItems
+    {
+        get => _buildingPickerItems;
+        private set { _buildingPickerItems = value; OnPropertyChanged(); }
     }
 
     public bool IsLoading
@@ -396,7 +441,12 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand CancelBlockingModeCommand   { get; }
     public ICommand ConfirmBlockNodeCommand     { get; }
     public ICommand CancelBlockNodeConfirmCommand { get; }
-    public ICommand DismissNoRoutePopupCommand  { get; }
+    public ICommand DismissNoRoutePopupCommand    { get; }
+    public ICommand OpenBuildingPickerCommand    { get; }
+    public ICommand CloseBuildingPickerCommand   { get; }
+    public ICommand SelectBuildingPickerCommand  { get; }
+    public ICommand SelectFloorCommand           { get; }
+    public ICommand ToggleSidebarCommand         { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
@@ -636,6 +686,25 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(BlockedNodeIds));
         });
 
+        OpenBuildingPickerCommand = new Command(() =>
+        {
+            RebuildBuildingItems();
+            IsBuildingPickerOpen = true;
+        });
+        CloseBuildingPickerCommand  = new Command(() => IsBuildingPickerOpen = false);
+        SelectBuildingPickerCommand = new Command<BuildingPickerItemVm>(vm =>
+        {
+            if (vm == null) return;
+            SelectedBuilding = vm.Building;
+            IsBuildingPickerOpen = false;
+        });
+        SelectFloorCommand   = new Command<FloorSelectorVm>(vm =>
+        {
+            if (vm == null) return;
+            SelectedFloor = vm.Floor;
+        });
+        ToggleSidebarCommand = new Command(() => IsSidebarExpanded = !IsSidebarExpanded);
+
         // Subscribe to deep-link and in-app scan results
         DeepLinkService.NodeRequested += HandleDeepLinkNode;
 
@@ -674,10 +743,11 @@ public class MainViewModel : INotifyPropertyChanged
             await _departmentService.LoadAsync();
             await _emergencyService.LoadAsync();
 
-            var tasks = BuildingConfig.Select(cfg => DiscoverBuildingAsync(cfg.Id, cfg.Name, _graphService));
+            var tasks = BuildingConfig.Select(cfg => DiscoverBuildingAsync(cfg.Id, cfg.Name, cfg.Address, _graphService));
             var buildings = await Task.WhenAll(tasks);
             foreach (var b in buildings)
                 Buildings.Add(b);
+            RebuildBuildingItems();
 
             // Читаем сохранённое ЗДАНИЕ ДО любых изменений (setter перезапишет значение)
             var savedBuildingId = Preferences.Default.Get("LastBuildingId", string.Empty);
@@ -1289,9 +1359,9 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     /// <summary>Строит здание из данных графа — мгновенно, без обращений к файловой системе.</summary>
-    private static async Task<Building> DiscoverBuildingAsync(string id, string name, NavGraphService graphService)
+    private static async Task<Building> DiscoverBuildingAsync(string id, string name, string address, NavGraphService graphService)
     {
-        var building = new Building(id, name);
+        var building = new Building(id, name, address);
 
         static async Task<bool> FloorExistsAsync(string id, int num)
         {
@@ -1347,6 +1417,45 @@ public class MainViewModel : INotifyPropertyChanged
         }
 
         return building;
+    }
+
+    // ── Floor selector & building picker helpers ────────────────────────────────
+
+    /// <summary>Перестраивает список этажей для селектора справа на карте (porядок сверху = старший этаж).</summary>
+    private void UpdateFloorSelectorItems()
+    {
+        if (_selectedBuilding == null)
+        {
+            FloorSelectorItems = new ObservableCollection<FloorSelectorVm>();
+            return;
+        }
+
+        var floors = _selectedBuilding.Floors.OrderByDescending(f => f.Number).ToList();
+
+        // Всегда перестраиваем, чтобы TapCommand и Floor ссылались на текущий корпус
+        var items = floors.Select(f =>
+        {
+            var item = new FloorSelectorVm(f) { IsSelected = f == _selectedFloor };
+            item.TapCommand = new Command(() => SelectedFloor = item.Floor);
+            return item;
+        });
+        FloorSelectorItems = new ObservableCollection<FloorSelectorVm>(items);
+    }
+
+    /// <summary>Перестраивает список корпусов для попапа выбора.</summary>
+    private void RebuildBuildingItems()
+    {
+        BuildingPickerItems = new ObservableCollection<BuildingPickerItemVm>(
+            Buildings.Select(b =>
+            {
+                var item = new BuildingPickerItemVm(b) { IsSelected = b == _selectedBuilding };
+                item.TapCommand = new Command(() =>
+                {
+                    SelectedBuilding = item.Building;
+                    IsBuildingPickerOpen = false;
+                });
+                return item;
+            }));
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>

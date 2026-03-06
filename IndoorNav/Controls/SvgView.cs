@@ -155,69 +155,50 @@ public class SvgView : SKCanvasView
         get => (bool)GetValue(IsAdminModeProperty);
         set => SetValue(IsAdminModeProperty, value);
     }
-    public bool ShowGraph
-    {
-        get => (bool)GetValue(ShowGraphProperty);
-        set => SetValue(ShowGraphProperty, value);
-    }
-    public bool ShowFireExtinguishers
-    {
-        get => (bool)GetValue(ShowFireExtinguishersProperty);
-        set => SetValue(ShowFireExtinguishersProperty, value);
-    }
-    public bool IsDragMode
-    {
-        get => (bool)GetValue(IsDragModeProperty);
-        set => SetValue(IsDragModeProperty, value);
-    }
 
-    /// <summary>Точки границы в процессе рисования администратором.</summary>
-    public static readonly BindableProperty BoundaryPreviewProperty =
-        BindableProperty.Create(nameof(BoundaryPreview), typeof(IList<SKPoint>), typeof(SvgView),
-            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
-
-    public IList<SKPoint>? BoundaryPreview
+    /// <summary>
+    /// Zoom to a node (center it on the canvas and set zoom).
+    /// </summary>
+    public void ZoomToNode(NavNode node, float zoomFactor = 2.5f)
     {
-        get => (IList<SKPoint>?)GetValue(BoundaryPreviewProperty);
-        set => SetValue(BoundaryPreviewProperty, value);
-    }
+        if (node == null || _canvasW <= 0 || _canvasH <= 0) return;
 
-    /// <summary>Подсветка границы узла-назначения (пользовательский режим).</summary>
-    public static readonly BindableProperty HighlightBoundaryNodeProperty =
-        BindableProperty.Create(nameof(HighlightBoundaryNode), typeof(NavNode), typeof(SvgView),
-            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
+        SKPoint canvasCenter = new(_canvasW / 2f, _canvasH / 2f);
+        SKPoint nodePos = new(node.X, node.Y);
 
-    public NavNode? HighlightBoundaryNode
-    {
-        get => (NavNode?)GetValue(HighlightBoundaryNodeProperty);
-        set => SetValue(HighlightBoundaryNodeProperty, value);
+        float currentScale = MatrixScale();
+        float targetScale = currentScale * zoomFactor;
+
+        if (targetScale > MaxZoom) targetScale = MaxZoom;
+        if (targetScale < MinZoom) targetScale = MinZoom;
+
+        float zoomCoeff = targetScale / currentScale;
+
+        _matrix = SKMatrix.CreateScaleTranslation(
+            targetScale, targetScale,
+            canvasCenter.X - nodePos.X * targetScale,
+            canvasCenter.Y - nodePos.Y * targetScale
+        );
+
+        InvalidateSurface();
     }
 
-    /// <summary>Подсветка границы узла-отправления (пользовательский режим).</summary>
-    public static readonly BindableProperty HighlightStartNodeProperty =
-        BindableProperty.Create(nameof(HighlightStartNode), typeof(NavNode), typeof(SvgView),
-            null, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
-
-    public NavNode? HighlightStartNode
+    /// <summary>
+    /// Apply a small rotation around `pivot` (clamped by `MaxRotationDeg`).
+    /// </summary>
+    private void ApplyRotation(float deltaDeg, SKPoint pivot)
     {
-        get => (NavNode?)GetValue(HighlightStartNodeProperty);
-        set => SetValue(HighlightStartNodeProperty, value);
+        if (MathF.Abs(deltaDeg) < 0.05f) return;
+
+        float clamped = deltaDeg;
+        if (_totalRotationDeg + deltaDeg >  MaxRotationDeg) clamped =  MaxRotationDeg - _totalRotationDeg;
+        if (_totalRotationDeg + deltaDeg < -MaxRotationDeg) clamped = -MaxRotationDeg - _totalRotationDeg;
+        if (MathF.Abs(clamped) < 0.01f) return;
+
+        _totalRotationDeg += clamped;
+        _matrix = _matrix.PostConcat(SKMatrix.CreateRotationDegrees(clamped, pivot.X, pivot.Y));
+        _panDirty = true;
     }
-
-    /// <summary>Номер текущего отображаемого этажа — используется для фильтрации подсветки границ.</summary>
-    public static readonly BindableProperty CurrentFloorNumberProperty =
-        BindableProperty.Create(nameof(CurrentFloorNumber), typeof(int), typeof(SvgView),
-            int.MinValue, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
-
-    public int CurrentFloorNumber
-    {
-        get => (int)GetValue(CurrentFloorNumberProperty);
-        set => SetValue(CurrentFloorNumberProperty, value);
-    }
-
-    /// <summary>Индекс выбранной вершины границы в режиме редактирования (-1 = не выбрана).</summary>
-    public static readonly BindableProperty SelectedBoundaryVertexIndexProperty =
-        BindableProperty.Create(nameof(SelectedBoundaryVertexIndex), typeof(int), typeof(SvgView),
             -1, propertyChanged: (b, _, _) => ((SvgView)b).InvalidateSurface());
 
     public int SelectedBoundaryVertexIndex
@@ -255,6 +236,18 @@ public class SvgView : SKCanvasView
     // ===== Internal state =====
 
     private static readonly ConcurrentDictionary<int, SKSvg> _svgCache = new();
+    /// <summary>Кеш растровых иконок для узлов с IconPath. Ключ — путь к файлу.</summary>
+    private readonly ConcurrentDictionary<string, SKBitmap?> _iconBitmapCache = new();
+
+    private SKBitmap? GetNodeIconBitmap(string path)
+        => _iconBitmapCache.GetOrAdd(path, p =>
+        {
+            try { return SKBitmap.Decode(p); }
+            catch { return null; }
+        });
+
+    /// <summary>Инвалидировать кеш иконок (например при удалении иконки у узла).</summary>
+    public void ClearIconCache() => _iconBitmapCache.Clear();
 
     public static readonly BindableProperty SvgContentProperty =
         BindableProperty.Create(nameof(SvgContent), typeof(string), typeof(SvgView),
@@ -299,6 +292,12 @@ public class SvgView : SKCanvasView
     private int      _draggingBoundaryPolyIdx   = -1;
     private int      _draggingBoundaryVertexIdx = -1;
     private bool     _didDrag;
+
+    // Rotation state
+    private float _totalRotationDeg = 0f;          // накопленный угол
+    private const float MaxRotationDeg = 25f;      // максимальный угол вращения
+    private float _lastTouchAngleRad = 0f;         // угол между пальцами на предыдущем шаге
+    private bool  _touchAngleInitialized = false;  // первый шаг двухпальцевого жеста
 
     // Отложенный зум, применяемый после завершения загрузки этажа
     private Action? _pendingZoom;
@@ -431,6 +430,7 @@ public class SvgView : SKCanvasView
         _bitmap = null;
         _picture = null;
         _matrix = SKMatrix.Identity;
+        _totalRotationDeg = 0f;
         _floorLoading = !string.IsNullOrWhiteSpace(relativePath);
         InvalidateSurface();
         if (!string.IsNullOrWhiteSpace(relativePath))
@@ -598,6 +598,11 @@ public class SvgView : SKCanvasView
         {
             nativeCanvas.PointerWheelChanged -= OnPointerWheelChanged;
             nativeCanvas.PointerWheelChanged += OnPointerWheelChanged;
+            nativeCanvas.PointerMoved -= OnPointerMovedWindows;
+            nativeCanvas.PointerMoved += OnPointerMovedWindows;
+            // Подавляем контекстное меню ПКМ, чтобы оно не мешало вращению
+            nativeCanvas.RightTapped -= OnRightTappedWindows;
+            nativeCanvas.RightTapped += OnRightTappedWindows;
         }
 #endif
     }
@@ -612,6 +617,49 @@ public class SvgView : SKCanvasView
         float factor = delta > 0 ? 1.1f : (1f / 1.1f);
         var pivot  = new SKPoint((float)pos.X, (float)pos.Y);
         ApplyZoom(factor, pivot);
+        e.Handled = true;
+    }
+
+    private void OnRightTappedWindows(object sender,
+        Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e)
+        => e.Handled = true;   // подавляем контекстное меню
+
+    // Двухкнопочное вращение на Windows
+    // Состояние кнопок читается прямо из Properties каждого PointerMoved,
+    // поэтому PointerPressed/Released не нужны.
+    private float _winLastRotX = -1f;   // -1 = режим вращения ещё не начался
+
+    private void OnPointerMovedWindows(object sender,
+        Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+    {
+        var uiElem = sender as Microsoft.UI.Xaml.UIElement;
+        var props  = e.GetCurrentPoint(uiElem).Properties;
+        bool bothDown = props.IsLeftButtonPressed && props.IsRightButtonPressed;
+
+        if (!bothDown)
+        {
+            _winLastRotX = -1f;   // сброс при отпускании любой кнопки
+            return;
+        }
+
+        float x = (float)e.GetCurrentPoint(uiElem).Position.X;
+
+        if (_winLastRotX < 0f)
+        {
+            // Первый кадр с двумя кнопками — запоминаем позицию, не крутим
+            _winLastRotX = x;
+            e.Handled = true;
+            return;
+        }
+
+        float dx = x - _winLastRotX;
+        _winLastRotX = x;
+        if (MathF.Abs(dx) < 0.5f) return;
+
+        // 0.3 градуса на пиксель горизонтального смещения
+        float deltaDeg = dx * 0.3f;
+        var canvasCenter = new SKPoint(_canvasW / 2f, _canvasH / 2f);
+        ApplyRotation(deltaDeg, canvasCenter);
         e.Handled = true;
     }
 #endif
@@ -932,8 +980,41 @@ public class SvgView : SKCanvasView
             else
                 nodeR = r * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
 
+            // Увеличить узлы начала/конца маршрута
+            if (!IsAdminMode && (node == hlNode || node == hlStartNode))
+                nodeR *= 1.4f;
+
             if (drawCircle)
             {
+                // ── Иконка пользователя вместо кружка ──────────────────────
+                if (!string.IsNullOrEmpty(node.IconPath))
+                {
+                    var bmp = GetNodeIconBitmap(node.IconPath);
+                    if (bmp != null)
+                    {
+                        float iconAlpha = (IsAdminMode && node.IsHidden) ? 0.35f : 1f;
+                        // Кольцо выделения
+                        if (node == SelectedNode)
+                        {
+                            using var selRing = new SKPaint
+                            {
+                                Color       = new SKColor(255, 152, 0, 220),
+                                StrokeWidth = 3f / sc,
+                                IsStroke    = true,
+                                IsAntialias = true,
+                            };
+                            canvas.DrawCircle(s, nodeR + 4f / sc, selRing);
+                        }
+                        var dest = new SKRect(s.X - nodeR, s.Y - nodeR, s.X + nodeR, s.Y + nodeR);
+                        using var iconPaint = new SKPaint { IsAntialias = true };
+                        if (iconAlpha < 1f)
+                            iconPaint.ColorFilter = SKColorFilter.CreateBlendMode(
+                                SKColors.White.WithAlpha((byte)(255 * iconAlpha)), SKBlendMode.DstIn);
+                        canvas.DrawBitmap(bmp, dest, iconPaint);
+                        goto skipCircle;
+                    }
+                }
+
                 // Цвет: персональный → выбранный → типовой
                 SKPaint fill;
                 if (node == SelectedNode)
@@ -973,6 +1054,8 @@ public class SvgView : SKCanvasView
                     using var textP = new SKPaint { Color = SKColors.White, IsAntialias = true };
                     canvas.DrawText(node.InnerLabel, s.X, s.Y + fontSize * 0.38f, SKTextAlign.Center, font, textP);
                 }
+
+                skipCircle:;
             }
 
             // Подпись под точкой
@@ -1148,6 +1231,40 @@ public class SvgView : SKCanvasView
             }
 
             float cr = 14f / sc;   // единый размер для всех видимых узлов
+            if (isStart || isEnd) cr *= 1.4f;  // увеличить узлы начала/конца маршрута
+
+            // ── Иконка пользователя ──────────────────────────────────────
+            if (!string.IsNullOrEmpty(node.IconPath))
+            {
+                var bmp = GetNodeIconBitmap(node.IconPath);
+                if (bmp != null)
+                {
+                    float iconR = cr * (node.NodeRadiusScale > 0.01f ? node.NodeRadiusScale : 1f);
+                    var dest = new SKRect(pt.X - iconR, pt.Y - iconR, pt.X + iconR, pt.Y + iconR);
+                    using var iconPaint = new SKPaint { IsAntialias = true };
+                    canvas.DrawBitmap(bmp, dest, iconPaint);
+
+                    // Буква A/B у старта и финиша поверх иконки
+                    string? letterI = isStart ? "A" : isEnd ? "B" : null;
+                    if (letterI != null)
+                        canvas.DrawText(letterI, pt.X, pt.Y + 4f / sc, SKTextAlign.Center, stepFont, stepTxt);
+
+                    // Подпись с именем узла
+                    if (!IsAdminMode && !node.IsWaypoint && !string.IsNullOrWhiteSpace(node.Name) && !node.IsFireExtinguisher)
+                    {
+                        var lbl  = node.Name;
+                        var lblW = lblFont.MeasureText(lbl, lblPaint);
+                        float pillX = pt.X - lblW / 2f - 5f / sc;
+                        float pillY = pt.Y + iconR + 3f / sc;
+                        var pill = new SKRect(pillX, pillY, pillX + lblW + 10f / sc, pillY + 15f / sc);
+                        using var pillBg = new SKPaint { Color = new SKColor(255, 255, 255, 230), IsAntialias = true };
+                        canvas.DrawRoundRect(pill, 4f / sc, 4f / sc, pillBg);
+                        canvas.DrawText(lbl, pt.X, pillY + 12f / sc, SKTextAlign.Center, lblFont, lblPaint);
+                    }
+                    continue;
+                }
+            }
+
             var fill = isStart ? sfill
                      : isEnd   ? efill
                      : node.IsTransition ? tfill
@@ -1218,6 +1335,7 @@ public class SvgView : SKCanvasView
     public void ResetZoom()
     {
         _matrix = SKMatrix.Identity;
+        _totalRotationDeg = 0f;
         InvalidateSurface();
     }
 
@@ -1235,6 +1353,7 @@ public class SvgView : SKCanvasView
             else
             {
                 _matrix = SKMatrix.Identity;
+                _totalRotationDeg = 0f;
                 InvalidateSurface();
             }
         }
@@ -1257,6 +1376,7 @@ public class SvgView : SKCanvasView
         else
         {
             _matrix = SKMatrix.Identity;
+            _totalRotationDeg = 0f;
             InvalidateSurface();
         }
     }
@@ -1400,6 +1520,7 @@ public class SvgView : SKCanvasView
                 _didDrag = false;
                 _draggingBoundaryPolyIdx   = -1;
                 _draggingBoundaryVertexIdx = -1;
+                _touchAngleInitialized     = false;   // сброс угла вращения при новом касании
                 StartPanRender();
                 if (IsAdminMode && _activePointers.Count == 1)
                 {
@@ -1456,12 +1577,30 @@ public class SvgView : SKCanvasView
                     var curDist  = Distance(pts[0], pts[1]);
                     var otherKey = _activePointers.Keys.First(k => k != e.Id);
                     var prevDist = Distance(prev, _activePointers[otherKey]);
+
+                    // Pinch-zoom
                     if (prevDist > 0)
                     {
                         float s = curDist / prevDist;
                         var pivot = MidPoint(pts[0], pts[1]);
                         ApplyZoom(s, pivot);
                     }
+
+                    // Two-finger rotation
+                    var other = _activePointers[otherKey];
+                    float curAngle = MathF.Atan2(other.Y - e.Location.Y, other.X - e.Location.X);
+                    if (_touchAngleInitialized)
+                    {
+                        float deltaRad = curAngle - _lastTouchAngleRad;
+                        // Нормализация дельты в диапазон [-π .. +π]
+                        while (deltaRad >  MathF.PI) deltaRad -= 2f * MathF.PI;
+                        while (deltaRad < -MathF.PI) deltaRad += 2f * MathF.PI;
+                        float deltaDeg = deltaRad * (180f / MathF.PI);
+                        var pivot = MidPoint(pts[0], pts[1]);
+                        ApplyRotation(deltaDeg, pivot);
+                    }
+                    _lastTouchAngleRad      = curAngle;
+                    _touchAngleInitialized  = true;
                 }
                 break;
 
@@ -1528,6 +1667,7 @@ public class SvgView : SKCanvasView
         }
     }
 
+<<<<<<< HEAD
     /// <summary>Зумирует карту на указанный узел с небольшим коэффициентом увеличения</summary>
     public void ZoomToNode(NavNode node, float zoomFactor = 2.5f)
     {
@@ -1558,6 +1698,26 @@ public class SvgView : SKCanvasView
         );
 
         InvalidateSurface();
+=======
+    /// <summary>
+    /// Применяет поворот карты вокруг <paramref name="pivot"/> (экранные координаты).
+    /// Общий накопленный угол ограничен ±<see cref="MaxRotationDeg"/>.
+    /// </summary>
+    private void ApplyRotation(float deltaDeg, SKPoint pivot)
+    {
+        if (MathF.Abs(deltaDeg) < 0.05f) return;
+
+        // Зажимаем, чтобы не выйти за пределы допустимого диапазона
+        float clamped = deltaDeg;
+        if (_totalRotationDeg + deltaDeg >  MaxRotationDeg) clamped =  MaxRotationDeg - _totalRotationDeg;
+        if (_totalRotationDeg + deltaDeg < -MaxRotationDeg) clamped = -MaxRotationDeg - _totalRotationDeg;
+        if (MathF.Abs(clamped) < 0.01f) return;
+
+        _totalRotationDeg += clamped;
+        _matrix = _matrix.PostConcat(
+            SKMatrix.CreateRotationDegrees(clamped, pivot.X, pivot.Y));
+        _panDirty = true;
+>>>>>>> 88bef98 (feat: добавить поддержку иконок, вращения и т.п.)
     }
 
     private static float Distance(SKPoint a, SKPoint b)

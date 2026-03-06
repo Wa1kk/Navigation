@@ -331,8 +331,8 @@
                                         OnColor="#EF4444" />
                             </Grid>
 
-                            <!-- Размер точки -->
-                            <Label Text="{Binding SelectedNodeScale, StringFormat='Размер точки: {0:F1}×'}"
+                            <!-- Размер точки / иконки -->
+                            <Label Text="{Binding SelectedNodeScale, StringFormat='Размер точки/иконки: {0:F1}×'}"
                                    FontSize="12" TextColor="#94A3B8" />
                             <Slider Minimum="0.4" Maximum="3.0" ThumbColor="#93C5FD"
                                     MinimumTrackColor="#2563EB" MaximumTrackColor="#334155"
@@ -377,6 +377,27 @@
                                         BackgroundColor="#009688"
                                         Command="{Binding SetNodeColorCommand}" CommandParameter="009688" />
                             </FlexLayout>
+
+                            <!-- Иконка вершины -->
+                            <Label Text="Иконка вершины:" FontSize="12" TextColor="#94A3B8" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                                <Button Grid.Column="0"
+                                        x:Name="PickIconButton"
+                                        Text="{Binding SelectedNodeIconFileName, StringFormat='🖼 {0}'}"
+                                        Clicked="OnPickNodeIconClicked"
+                                        BackgroundColor="#1E3A5F" TextColor="#7DD3FC"
+                                        LineBreakMode="TailTruncation"
+                                        FontSize="12" HeightRequest="32" CornerRadius="6" />
+                                <Button Grid.Column="1" Text="✕"
+                                        Command="{Binding ClearNodeIconCommand}"
+                                        IsVisible="{Binding SelectedNodeHasIcon}"
+                                        BackgroundColor="#7F1D1D" TextColor="#FCA5A5"
+                                        WidthRequest="36" HeightRequest="32" CornerRadius="6" Padding="0" />
+                            </Grid>
+                            <!-- Размер иконки (тот же ползунок NodeRadiusScale) -->
+                            <Label Text="{Binding SelectedNodeScale, StringFormat='Размер иконки: {0:F1}×'}"
+                                   FontSize="11" TextColor="#64748B"
+                                   IsVisible="{Binding SelectedNodeHasIcon}" />
 
                             <!-- Сброс стиля -->
                             <Button Text="↺ Сброс стиля"

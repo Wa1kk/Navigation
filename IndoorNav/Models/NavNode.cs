@@ -86,5 +86,11 @@ public class NavNode
     /// </summary>
     public List<List<float[]>>? Boundaries { get; set; }
 
+    /// <summary>
+    /// Абсолютный путь к пользовательскому файлу иконки (PNG/JPG/WEBP).
+    /// Если задан — вместо кружка рисуется изображение.
+    /// </summary>
+    public string? IconPath { get; set; }
+
     public override string ToString() => Name;
 }
