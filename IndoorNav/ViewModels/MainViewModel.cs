@@ -89,6 +89,10 @@ public class MainViewModel : INotifyPropertyChanged
             if (value != null)
                 Preferences.Default.Set("LastBuildingId", value.Id);
             RebuildBuildingItems();
+            // Сбрасываем маршрут, выделение точек и поисковый текст при смене корпуса
+            ExecuteClearRoute();
+            _pickerSearchText = string.Empty;
+            OnPropertyChanged(nameof(PickerSearchText));
         }
     }
 
@@ -1359,64 +1363,28 @@ public class MainViewModel : INotifyPropertyChanged
 
 
     /// <summary>Строит здание из данных графа — мгновенно, без обращений к файловой системе.</summary>
-    private static async Task<Building> DiscoverBuildingAsync(string id, string name, string address, NavGraphService graphService)
+    private static Task<Building> DiscoverBuildingAsync(string id, string name, string address, NavGraphService graphService)
     {
         var building = new Building(id, name, address);
 
-        static async Task<bool> FloorExistsAsync(string id, int num)
-        {
-            var svgRelativePath = $"floor{num}.svg";
-            // Try pre-generated WebP first
-            var cacheKey = $"{id}_{svgRelativePath}".Replace('/', '_');
-            try
-            {
-                using var s = await FileSystem.OpenAppPackageFileAsync($"FloorImages/{cacheKey}.webp").ConfigureAwait(false);
-                return true;
-            }
-            catch { }
-            // Fallback: SVG source
-            try
-            {
-                using var s = await FileSystem.OpenAppPackageFileAsync($"SvgFloors/{id}/{svgRelativePath}").ConfigureAwait(false);
-                return true;
-            }
-            catch { return false; }
-        }
+        // Используем граф как единственный источник истины для номеров этажей.
+        // Это исключает появление «призрачных» этажей из старых/лишних SVG-файлов
+        // (например, floor-1.svg), у которых нет узлов в графе.
+        var graphFloors = graphService.Graph.Nodes
+            .Where(n => n.BuildingId == id)
+            .Select(n => n.FloorNumber)
+            .Distinct()
+            .OrderBy(n => n);
 
-        // Basement
-        if (await FloorExistsAsync(id, -1).ConfigureAwait(false))
-            building.Floors.Add(new Floor(-1, $"{id}/floor-1.svg"));
+        foreach (var num in graphFloors)
+            building.Floors.Add(new Floor(num, $"{id}/floor{num}.svg"));
 
-        // Ground floor (0) - some buildings may have an explicit 0 level
-        if (await FloorExistsAsync(id, 0).ConfigureAwait(false))
-            building.Floors.Add(new Floor(0, $"{id}/floor0.svg"));
-
-        // Floors 1..50
-        for (int i = 1; i <= 50; i++)
-        {
-            if (await FloorExistsAsync(id, i).ConfigureAwait(false))
-                building.Floors.Add(new Floor(i, $"{id}/floor{i}.svg"));
-            else
-                break;
-        }
-
-        // If no floor files found, fall back to graph-derived floors so building stays visible
+        // Если в графе нет данных — показываем хотя бы первый этаж,
+        // чтобы здание было видно в списке.
         if (building.Floors.Count == 0)
-        {
-            var graphFloors = graphService.Graph.Nodes
-                .Where(n => n.BuildingId == id)
-                .Select(n => n.FloorNumber)
-                .Distinct()
-                .OrderBy(n => n);
-            foreach (var num in graphFloors)
-                building.Floors.Add(new Floor(num, $"{id}/floor{num}.svg"));
+            building.Floors.Add(new Floor(1, $"{id}/floor1.svg"));
 
-            // Always show at least floor 1 so the building appears
-            if (building.Floors.Count == 0)
-                building.Floors.Add(new Floor(1, $"{id}/floor1.svg"));
-        }
-
-        return building;
+        return Task.FromResult(building);
     }
 
     // ── Floor selector & building picker helpers ────────────────────────────────

@@ -69,6 +69,11 @@ public class AdminViewModel : INotifyPropertyChanged
     private NavNode?       _selectedNode;
     private string         _statusText = "";
 
+    // ---- Мультивыбор ----
+    private bool _isMultiSelectMode;
+    private readonly HashSet<NavNode> _multiSelectedSet = new();
+    public ObservableCollection<NavNode> MultiSelectedNodes { get; } = new();
+
     public ObservableCollection<Building> Buildings { get; } = new();
 
     public Building? SelectedBuilding
@@ -282,6 +287,9 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command<StudentRowVm> EditStudentCommand   { get; }
     public Command<string> SetNodeColorCommand    { get; }
     public Command ClearNodeIconCommand          { get; }
+    public Command ToggleMultiSelectModeCommand   { get; }
+    public Command ClearMultiSelectionCommand     { get; }
+    public Command RemoveIconFromSelectionCommand { get; }
 
     // ── Students ──
     public ObservableCollection<StudentRowVm> Students { get; } = new();
@@ -495,22 +503,74 @@ public class AdminViewModel : INotifyPropertyChanged
     public bool SelectedHidden
     {
         get => SelectedNode?.IsHidden ?? false;
-        set { if (SelectedNode != null) { SelectedNode.IsHidden = value; OnPropertyChanged(); RefreshOverlay(); } }
+        set
+        {
+            if (IsMultiSelectMode && _multiSelectedSet.Count > 0)
+            {
+                foreach (var n in _multiSelectedSet) n.IsHidden = value;
+                if (SelectedNode != null) OnPropertyChanged();
+            }
+            else if (SelectedNode != null)
+            {
+                SelectedNode.IsHidden = value;
+                OnPropertyChanged();
+            }
+            RefreshOverlay();
+        }
     }
     public bool SelectedLabelHidden
     {
         get => SelectedNode?.IsLabelHidden ?? false;
-        set { if (SelectedNode != null) { SelectedNode.IsLabelHidden = value; OnPropertyChanged(); RefreshOverlay(); } }
+        set
+        {
+            if (IsMultiSelectMode && _multiSelectedSet.Count > 0)
+            {
+                foreach (var n in _multiSelectedSet) n.IsLabelHidden = value;
+                if (SelectedNode != null) OnPropertyChanged();
+            }
+            else if (SelectedNode != null)
+            {
+                SelectedNode.IsLabelHidden = value;
+                OnPropertyChanged();
+            }
+            RefreshOverlay();
+        }
     }
     public float SelectedNodeScale
     {
         get => SelectedNode?.NodeRadiusScale ?? 1f;
-        set { if (SelectedNode != null) { SelectedNode.NodeRadiusScale = value; OnPropertyChanged(); RefreshOverlay(); } }
+        set
+        {
+            if (IsMultiSelectMode && _multiSelectedSet.Count > 0)
+            {
+                foreach (var n in _multiSelectedSet) n.NodeRadiusScale = value;
+                if (SelectedNode != null) OnPropertyChanged();
+            }
+            else if (SelectedNode != null)
+            {
+                SelectedNode.NodeRadiusScale = value;
+                OnPropertyChanged();
+            }
+            RefreshOverlay();
+        }
     }
     public float SelectedLabelScale
     {
         get => SelectedNode?.LabelScale ?? 1f;
-        set { if (SelectedNode != null) { SelectedNode.LabelScale = value; OnPropertyChanged(); RefreshOverlay(); } }
+        set
+        {
+            if (IsMultiSelectMode && _multiSelectedSet.Count > 0)
+            {
+                foreach (var n in _multiSelectedSet) n.LabelScale = value;
+                if (SelectedNode != null) OnPropertyChanged();
+            }
+            else if (SelectedNode != null)
+            {
+                SelectedNode.LabelScale = value;
+                OnPropertyChanged();
+            }
+            RefreshOverlay();
+        }
     }
     public string SelectedNodeColor
     {
@@ -564,6 +624,39 @@ public class AdminViewModel : INotifyPropertyChanged
         string.IsNullOrEmpty(SelectedNode?.IconPath)
             ? "нет"
             : System.IO.Path.GetFileName(SelectedNode.IconPath);
+
+    // ---- Мультивыбор ----
+    public bool IsMultiSelectMode
+    {
+        get => _isMultiSelectMode;
+        private set
+        {
+            if (_isMultiSelectMode == value) return;
+            _isMultiSelectMode = value;
+            OnPropertyChanged();
+        }
+    }
+    public int  MultiSelectCount  => _multiSelectedSet.Count;
+    public bool HasMultiSelection => _multiSelectedSet.Count > 0;
+
+    /// <summary>Применить иконку ко всем выбранным в мультирежиме точкам.</summary>
+    public void SetIconForSelection(string iconPath)
+    {
+        if (_multiSelectedSet.Count == 0) return;
+        foreach (var n in _multiSelectedSet)
+            n.IconPath = iconPath;
+        RefreshOverlay();
+        StatusText = $"Иконка назначена {_multiSelectedSet.Count} точкам.";
+    }
+
+    private void ClearMultiSelectionInternal()
+    {
+        _multiSelectedSet.Clear();
+        MultiSelectedNodes.Clear();
+        OnPropertyChanged(nameof(MultiSelectCount));
+        OnPropertyChanged(nameof(HasMultiSelection));
+        RefreshOverlay();
+    }
 
     public bool SelectedNodeIsTransition =>
         SelectedNode?.IsTransition == true;
@@ -1220,6 +1313,42 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(SelectedNodeIconFileName));
             RefreshOverlay();
         });
+        ToggleMultiSelectModeCommand = new Command(() =>
+        {
+            IsMultiSelectMode = !IsMultiSelectMode;
+            if (IsMultiSelectMode)
+            {
+                // Если уже была выбрана точка — включаем её в мультивыбор,
+                // чтобы геттеры (SelectedHidden, SelectedNodeScale и т.д.) отражали
+                // выбранное состояние и тумблеры/слайдеры не «отскакивали» назад.
+                if (SelectedNode != null && _multiSelectedSet.Add(SelectedNode))
+                {
+                    MultiSelectedNodes.Add(SelectedNode);
+                    OnPropertyChanged(nameof(MultiSelectCount));
+                    OnPropertyChanged(nameof(HasMultiSelection));
+                }
+                StatusText = "Режим мультивыбора ВКЛ. Нажмите на точки для выделения.";
+            }
+            else
+            {
+                ClearMultiSelectionInternal();
+                StatusText = "Режим мультивыбора выключён.";
+            }
+        });
+        ClearMultiSelectionCommand = new Command(() =>
+        {
+            ClearMultiSelectionInternal();
+            StatusText = "Выделение снято.";
+        });
+        RemoveIconFromSelectionCommand = new Command(() =>
+        {
+            if (_multiSelectedSet.Count == 0) return;
+            int count = _multiSelectedSet.Count;
+            foreach (var n in _multiSelectedSet)
+                n.IconPath = null;
+            RefreshOverlay();
+            StatusText = $"Иконки удалены с {count} точек.";
+        });
         ResetGraphCommand = new Command(async () =>
         {
             bool ok = await Shell.Current.DisplayAlert(
@@ -1607,16 +1736,38 @@ public class AdminViewModel : INotifyPropertyChanged
                 break;
 
             default:
-                SelectedNode = node;
-                StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
-                DeleteSelectedCommand.ChangeCanExecute();
-                RenameSelectedCommand.ChangeCanExecute();
-                EditCoordinatesCommand.ChangeCanExecute();
-                EditTransitionGroupIdCommand.ChangeCanExecute();
-                ShowQrCodeCommand.ChangeCanExecute();
-                SetBoundaryModeCommand.ChangeCanExecute();
-                ClearBoundaryCommand.ChangeCanExecute();
-                RemoveLastBoundaryCommand.ChangeCanExecute();
+                if (IsMultiSelectMode)
+                {
+                    // В режиме мультивыбора — переключаем узел в/из коллекции
+                    if (_multiSelectedSet.Contains(node))
+                    {
+                        _multiSelectedSet.Remove(node);
+                        MultiSelectedNodes.Remove(node);
+                        StatusText = $"Снято: {node.Name}. Выбрано: {_multiSelectedSet.Count}";
+                    }
+                    else
+                    {
+                        _multiSelectedSet.Add(node);
+                        MultiSelectedNodes.Add(node);
+                        StatusText = $"Добавлено: {node.Name}. Выбрано: {_multiSelectedSet.Count}";
+                    }
+                    OnPropertyChanged(nameof(MultiSelectCount));
+                    OnPropertyChanged(nameof(HasMultiSelection));
+                    RefreshOverlay();
+                }
+                else
+                {
+                    SelectedNode = node;
+                    StatusText   = $"Выбран: {node.Name} ({node.X:F0}, {node.Y:F0})";
+                    DeleteSelectedCommand.ChangeCanExecute();
+                    RenameSelectedCommand.ChangeCanExecute();
+                    EditCoordinatesCommand.ChangeCanExecute();
+                    EditTransitionGroupIdCommand.ChangeCanExecute();
+                    ShowQrCodeCommand.ChangeCanExecute();
+                    SetBoundaryModeCommand.ChangeCanExecute();
+                    ClearBoundaryCommand.ChangeCanExecute();
+                    RemoveLastBoundaryCommand.ChangeCanExecute();
+                }
                 break;
         }
     }

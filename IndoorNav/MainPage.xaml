@@ -573,44 +573,43 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Route input bar (DESKTOP – horizontal) -->
+                <!-- Route input bar (DESKTOP – vertical stack, responsive) -->
                 <Border Padding="16,12"
                         IsVisible="{OnIdiom Phone=False, Default=True}"
                         StrokeShape="RoundRectangle 12"
                         BackgroundColor="White"
                         Stroke="#E2E8F0" StrokeThickness="1">
-                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="14">
+                    <VerticalStackLayout Spacing="8">
 
-                        <!-- Откуда field -->
-                        <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="ОТ" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                                <Border Grid.Column="0" Padding="10,8"
-                                        StrokeShape="RoundRectangle 8"
-                                        Stroke="#E2E8F0" StrokeThickness="1"
-                                        BackgroundColor="#F8FAFC">
-                                    <Label Text="{Binding StartNodeDisplay}"
-                                           FontSize="13" TextColor="#334155"
-                                           LineBreakMode="TailTruncation" />
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-                                <!-- QR-ссылка (только на десктопе) -->
-                                <Button Grid.Column="1"
-                                        Text="📷"
-                                        Command="{Binding ScanQrCommand}"
-                                        BackgroundColor="#0E7490" TextColor="White"
-                                        CornerRadius="8" WidthRequest="36" HeightRequest="36"
-                                        Padding="0" FontSize="15"
-                                        ToolTipProperties.Text="Ввести QR-ссылку" />
-                            </Grid>
-                        </VerticalStackLayout>
+                        <!-- ОТ row -->
+                        <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="ОТ" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#94A3B8" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="10,9"
+                                    StrokeShape="RoundRectangle 8"
+                                    Stroke="#E2E8F0" StrokeThickness="1"
+                                    BackgroundColor="#F8FAFC">
+                                <Label Text="{Binding StartNodeDisplay}"
+                                       FontSize="13" TextColor="#334155"
+                                       LineBreakMode="TailTruncation" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Button Grid.Column="2"
+                                    Text="📷"
+                                    Command="{Binding ScanQrCommand}"
+                                    BackgroundColor="#0E7490" TextColor="White"
+                                    CornerRadius="8" WidthRequest="38" HeightRequest="38"
+                                    Padding="0" FontSize="15"
+                                    ToolTipProperties.Text="Ввести QR-ссылку" />
+                        </Grid>
 
-                        <!-- Куда field — скрыто в режиме ЧС -->
-                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding IsNormalMode}">
-                            <Label Text="ДО" FontSize="10" CharacterSpacing="1.5" TextColor="#94A3B8" />
-                            <Border Padding="10,8"
+                        <!-- ДО row — скрыто в режиме ЧС -->
+                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
+                            <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#94A3B8" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="10,9"
                                     StrokeShape="RoundRectangle 8"
                                     Stroke="#E2E8F0" StrokeThickness="1"
                                     BackgroundColor="#F8FAFC">
@@ -621,12 +620,13 @@
                                     <TapGestureRecognizer Command="{Binding OpenEndPickerCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
-                        </VerticalStackLayout>
+                        </Grid>
 
-                        <!-- Подсказка местоположения в режиме ЧС (вместо ДО) -->
-                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding IsEmergencyActive}">
-                            <Label Text="ЧС — выберите точку выхода" FontSize="10" CharacterSpacing="1.5" TextColor="#DC2626" />
-                            <Border Padding="10,8"
+                        <!-- Подсказка в режиме ЧС (вместо ДО) -->
+                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsEmergencyActive}">
+                            <Label Grid.Column="0" Text="ЧС" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#DC2626" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="10,9"
                                     StrokeShape="RoundRectangle 8"
                                     Stroke="#FCA5A5" StrokeThickness="1"
                                     BackgroundColor="#FEF2F2">
@@ -634,37 +634,38 @@
                                        FontSize="13" TextColor="#991B1B"
                                        LineBreakMode="TailTruncation" />
                             </Border>
-                        </VerticalStackLayout>
+                        </Grid>
 
-                        <!-- Build + Clear buttons + blocked-route button -->
-                        <VerticalStackLayout Grid.Column="2" VerticalOptions="End" Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                <!-- Обычная кнопка маршрута -->
-                                <Button Grid.Column="0"
-                                        Text="Построить маршрут"
-                                        Command="{Binding BuildRouteCommand}"
-                                        IsVisible="{Binding IsNormalMode}"
-                                        BackgroundColor="#2563EB" TextColor="White"
-                                        FontSize="13" Padding="18,9" CornerRadius="8" />
-                                <!-- Кнопка эвакуации в режиме ЧС -->
-                                <Button Grid.Column="0"
-                                        Text="🚨 До выхода"
-                                        Command="{Binding BuildEmergencyRouteCommand}"
-                                        IsVisible="{Binding IsEmergencyActive}"
-                                        BackgroundColor="#DC2626" TextColor="White"
-                                        FontAttributes="Bold"
-                                        FontSize="13" Padding="18,9" CornerRadius="8" />
-                                <Button Grid.Column="1"
-                                        Text="✕"
-                                        Command="{Binding ClearRouteCommand}"
-                                        BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
-                                        TextColor="White"
-                                        FontSize="14" WidthRequest="38" HeightRequest="38"
-                                        CornerRadius="8" Padding="0" />
-                            </Grid>
-                        </VerticalStackLayout>
+                        <!-- Кнопки действий -->
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
+                            <Button Grid.Column="0"
+                                    Text="Построить маршрут"
+                                    Command="{Binding BuildRouteCommand}"
+                                    BackgroundColor="#2563EB" TextColor="White"
+                                    FontSize="13" HeightRequest="40" CornerRadius="8" />
+                            <Button Grid.Column="1" Text="✕"
+                                    Command="{Binding ClearRouteCommand}"
+                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                    TextColor="White"
+                                    FontSize="14" WidthRequest="40" HeightRequest="40"
+                                    CornerRadius="8" Padding="0" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsEmergencyActive}">
+                            <Button Grid.Column="0"
+                                    Text="🚨 До выхода"
+                                    Command="{Binding BuildEmergencyRouteCommand}"
+                                    BackgroundColor="#DC2626" TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="13" HeightRequest="40" CornerRadius="8" />
+                            <Button Grid.Column="1" Text="✕"
+                                    Command="{Binding ClearRouteCommand}"
+                                    BackgroundColor="{Binding HasAnySelection, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#EF4444|#CBD5E1'}"
+                                    TextColor="White"
+                                    FontSize="14" WidthRequest="40" HeightRequest="40"
+                                    CornerRadius="8" Padding="0" />
+                        </Grid>
 
-                    </Grid>
+                    </VerticalStackLayout>
                 </Border>
 
                 </VerticalStackLayout>

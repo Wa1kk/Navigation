@@ -64,7 +64,7 @@ public class BuildingPickerItemVm : INotifyPropertyChanged
     }
 
     /// <summary>Цвет фона строки: светло-голубой для выбранного корпуса.</summary>
-    public Color RowBgColor => _isSelected ? Color.FromArgb("#EFF6FF") : Colors.White;
+    public Color RowBgColor => _isSelected ? Color.FromArgb("#eff6ffe8") : Colors.White;
 
     public BuildingPickerItemVm(Building building) => Building = building;
 }

@@ -15,7 +15,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": null,
@@ -64,7 +64,8 @@
             1407.004
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-log-in-3596092.png"
     },
     {
       "Id": "c9b186ac-5eda-4a88-aa59-47dcb33bbee3",
@@ -82,7 +83,7 @@
       "IsEvacuationExit": false,
       "IsHidden": false,
       "IsLabelHidden": false,
-      "NodeRadiusScale": 1,
+      "NodeRadiusScale": 1.1596,
       "LabelScale": 1,
       "NodeColorHex": "FF9800",
       "IsRoom": false,
@@ -120,7 +121,8 @@
             2889.5977
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-microphone-483039.png"
     },
     {
       "Id": "aa65cdf9-8917-4d4e-ab82-cb120feb6eeb",
@@ -137,8 +139,8 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
-      "NodeRadiusScale": 1,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 1.1596,
       "LabelScale": 1,
       "NodeColorHex": "FF9800",
       "IsRoom": false,
@@ -168,7 +170,8 @@
             14.633217
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-hanger-4399105.png"
     },
     {
       "Id": "bca1b6e2-086f-42ee-9724-aabd6b69e4e1",
@@ -185,7 +188,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -216,7 +219,8 @@
             13.633217
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "5feb57be-8861-4da1-8bbc-1e7d956a9953",
@@ -233,8 +237,8 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
-      "NodeRadiusScale": 1,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 1.1596,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
       "IsRoom": false,
@@ -264,7 +268,8 @@
             654.6747
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "f0e84a67-5add-47d1-be95-7fb1e4a19148",
@@ -312,7 +317,8 @@
             654.67847
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "8c7dc053-8b0b-4764-8900-95e71b1ccf45",
@@ -360,7 +366,8 @@
             937.474
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1035fa02-8f6b-4778-a967-b5a291360fb6",
@@ -377,7 +384,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -408,7 +415,8 @@
             655.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "c86284aa-09e0-4bac-8caf-aca380c6d42a",
@@ -425,7 +433,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -456,7 +464,8 @@
             655.58496
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "935ad992-f0e7-49da-b2ab-89d08bedb5a7",
@@ -522,7 +531,8 @@
             652.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c77aa176-03b4-4357-b5ab-438c5fa1ed86",
@@ -570,7 +580,8 @@
             1570.585
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "de6419a5-1554-4a81-a5f6-56db01c2760f",
@@ -636,7 +647,8 @@
             655.58496
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "cecfa3a8-4765-4702-b2ad-5d1516651d1e",
@@ -684,7 +696,8 @@
             938.096
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5dafbf3e-eef1-456c-a982-f402d9656f9f",
@@ -750,7 +763,8 @@
             653.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4b669857-ddc1-4d92-b069-02a04bcf9a1b",
@@ -767,7 +781,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -798,7 +812,8 @@
             654.22925
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "89aa3ab2-d0b3-44f8-a948-8f3fa0d5170d",
@@ -815,7 +830,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -846,7 +861,8 @@
             654.0007
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "82ab3ee7-6941-4bc6-aaca-b068be46e311",
@@ -912,7 +928,8 @@
             561.48413
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9dbeb29c-37cf-4c42-acc7-3bf9ccc602d9",
@@ -929,7 +946,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -960,7 +977,8 @@
             655.3535
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "68fe1db4-0b89-4bdb-ad51-b91221195baa",
@@ -977,7 +995,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1008,7 +1026,8 @@
             654.323
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "9ce41e6a-d2d3-494c-a67e-a7864e9f861c",
@@ -1082,7 +1101,8 @@
             16.21585
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7645697d-d702-474f-a180-0446cb2236f5",
@@ -1099,19 +1119,20 @@
       "IsFireExtinguisher": true,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
-      "NodeRadiusScale": 0.8,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 0.9256,
       "LabelScale": 1,
       "NodeColorHex": "4CAF50",
       "IsRoom": false,
       "IsWaypoint": false,
-      "InnerLabel": "\uD83E\uDDEF",
+      "InnerLabel": "",
       "SearchTags": "",
       "Category": "",
-      "IsCategoryHidden": false,
+      "IsCategoryHidden": true,
       "DisplayName": "\u041E\u0433\u043D\u0435\u0442\u0443\u0448\u0438\u0442\u0435\u043B\u044C",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-fire-extinguisher-4084240.png"
     },
     {
       "Id": "a1ff7d5f-4730-4c85-8075-0a3f66c7cae7",
@@ -1140,7 +1161,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
     },
     {
       "Id": "704c1a38-08d9-4bb3-b107-70214e8762da",
@@ -1157,7 +1179,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": true,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 0.8,
       "LabelScale": 1,
       "NodeColorHex": "DC2626",
@@ -1169,7 +1191,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
     },
     {
       "Id": "f98b020f-3331-458c-9213-51556f733a85",
@@ -1186,7 +1209,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": null,
@@ -1259,15 +1282,16 @@
             1042.7417
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-log-in-3596092.png"
     },
     {
       "Id": "e3543ee1-b1da-4a75-b7f7-64d002315957",
       "Name": "\u0413\u0430\u0440\u0434\u0435\u0440\u043E\u0431",
       "BuildingId": "BuildingA",
       "FloorNumber": 1,
-      "X": 2310.4941,
-      "Y": 447.43842,
+      "X": 2105.5916,
+      "Y": 297.0126,
       "IsTransition": false,
       "IsElevator": false,
       "TransitionGroupId": "",
@@ -1276,8 +1300,8 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
-      "NodeRadiusScale": 1,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 1.3936,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
       "IsRoom": false,
@@ -1307,7 +1331,8 @@
             627.7569
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-hanger-4399105.png"
     },
     {
       "Id": "b05098f1-5b0b-4042-b0aa-8d864975892d",
@@ -1324,7 +1349,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "F44336",
@@ -1373,7 +1398,8 @@
             9.004974
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-security-guard-8118479.png"
     },
     {
       "Id": "be38797f-bd39-4bd0-a48b-bf05af82fa3e",
@@ -1390,8 +1416,8 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
-      "NodeRadiusScale": 1,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 1.2636,
       "LabelScale": 1,
       "NodeColorHex": "9C27B0",
       "IsRoom": false,
@@ -1439,7 +1465,8 @@
             2507.049
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
     },
     {
       "Id": "b7a16e32-e50c-4fb1-b405-4f72215ee76f",
@@ -1456,7 +1483,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1487,7 +1514,8 @@
             972.9346
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "3021cca7-c941-4719-b144-4e9835eaceb9",
@@ -1504,7 +1532,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1535,7 +1563,8 @@
             1036.7697
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "a7531843-3ce2-44f0-8f22-32930b73f10c",
@@ -1552,7 +1581,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1583,7 +1612,8 @@
             972.31885
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "e7d57dbd-482b-4d26-867b-93145630b61b",
@@ -1600,7 +1630,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1631,7 +1661,8 @@
             971.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "3d75bcd6-3dd1-42d2-b2f5-6d8e7818f683",
@@ -1648,7 +1679,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1679,7 +1710,8 @@
             973.22516
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "0e893001-ad26-4035-b52c-0d07c52c0eb1",
@@ -1696,7 +1728,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1.027,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1727,7 +1759,8 @@
             1396.6553
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "398880ab-c92a-480d-b6bf-6ebe5c12e987",
@@ -1744,7 +1777,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1775,7 +1808,8 @@
             1418.8323
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "1edb969f-404a-4edf-a4b2-e4c351214c92",
@@ -1792,7 +1826,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1823,7 +1857,8 @@
             1418.814
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "51eccd32-0738-4cbe-84d6-314b6a73c0f8",
@@ -1840,7 +1875,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1871,7 +1906,8 @@
             1420.6324
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "79e20f14-12bb-4fa3-ad8c-a44c7db90823",
@@ -1888,7 +1924,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -1919,7 +1955,8 @@
             1419.106
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "c0995142-5623-4a8a-bac2-29fc6606e4d2",
@@ -1967,7 +2004,8 @@
             2508.38
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "528a62bf-0a67-49aa-a178-1a9eb7d4c78c",
@@ -2015,7 +2053,8 @@
             962.45325
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7a075314-5262-4687-a19b-c49089f596d0",
@@ -2063,7 +2102,8 @@
             627.7569
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4f9f9b68-c230-412c-afe6-c3bb0e41433d",
@@ -2111,7 +2151,8 @@
             9.575104
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "52d0f144-5f0f-46ad-9fda-725ffdc90cfd",
@@ -2159,7 +2200,8 @@
             9.004974
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b3d03d0a-317e-4c0c-8132-41afa4fde503",
@@ -2207,7 +2249,8 @@
             673.005
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "eda43df4-68eb-41b6-b9ab-d3201d0a3b80",
@@ -2273,7 +2316,8 @@
             186.00497
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "8c859bb1-8435-484d-91b1-cc3910174ce4",
@@ -2290,7 +2334,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "2196F3",
@@ -2339,7 +2383,8 @@
             1431.7697
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
     },
     {
       "Id": "16b41e56-b9b6-4071-a2a8-753ae2efb3e3",
@@ -2368,7 +2413,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d379c716-b9f2-441a-8af7-980b2f7c4d82",
@@ -2397,7 +2443,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "900d722e-e4e9-483a-b647-192ef5d553ce",
@@ -2426,7 +2473,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0ce5c508-6211-406d-93de-dddc6dfffe01",
@@ -2455,7 +2503,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "26f6bb88-34bd-4be9-8b86-68529c2ed05c",
@@ -2484,7 +2533,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0e8415ce-1cbf-4044-8c13-69029134e73c",
@@ -2513,7 +2563,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ce294852-f851-45de-9036-3ef37269c1f8",
@@ -2542,7 +2593,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c0489fa7-7812-43ec-af7e-4001b97bb919",
@@ -2571,7 +2623,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5a157a64-2a44-428f-86c9-5dc33188319a",
@@ -2600,7 +2653,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4b617024-dff3-47f1-af67-955c8119c240",
@@ -2629,7 +2683,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "13210352-6a81-4b29-801f-87456e4fb519",
@@ -2658,7 +2713,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fa74c4d5-287a-425e-9e3b-2ac0a3f1b521",
@@ -2687,7 +2743,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "638d544e-0cbc-4315-88c2-6094094255b7",
@@ -2716,7 +2773,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "00e97433-4bd9-4f54-a409-aa3bf1573c14",
@@ -2745,7 +2803,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b559b614-2dad-45a7-a194-8b5d3afd4008",
@@ -2774,7 +2833,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ccf846d5-3409-41c7-b8ee-dff26c432f4e",
@@ -2803,7 +2863,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d2d3866a-c8e3-4929-b3d4-e502072d1513",
@@ -2832,7 +2893,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ee924637-e2b6-4b91-ab07-832b68a4b415",
@@ -2861,7 +2923,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2510234e-beff-4564-acf1-5fd9ee1188a1",
@@ -2890,7 +2953,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a9e7771f-3b0e-4ae9-8882-81904390c4fa",
@@ -2919,7 +2983,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4dfbbde3-8d97-492e-bbee-da004ebd0c95",
@@ -2948,7 +3013,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "188052db-21b2-4bc5-9f69-77b0cc7750e8",
@@ -2977,7 +3043,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1db61f88-a6a5-48cc-ad85-b61e53fb1aab",
@@ -3006,7 +3073,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "11cab053-1b7c-4bf4-abbc-dffb4ab376c5",
@@ -3035,7 +3103,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e3d7c63b-b939-4a00-b9e4-e835f62bc290",
@@ -3064,7 +3133,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "66428cc4-ba6e-48f0-83b7-5879d5cfb3c8",
@@ -3093,7 +3163,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5f91913f-38c5-4290-8349-52c7efa8e153",
@@ -3122,7 +3193,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7fbb5c59-e7f7-4e66-817c-6196a494ac36",
@@ -3170,7 +3242,8 @@
             9.610886
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "065159dd-9ae5-434c-96fc-0c575230ccd2",
@@ -3218,7 +3291,8 @@
             116.99234
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b7b0bce2-c398-4758-af81-a727f97222c5",
@@ -3266,7 +3340,8 @@
             1405.2407
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9ca50f9f-09c6-4935-80e5-647b41934935",
@@ -3314,7 +3389,8 @@
             628.30493
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1566742c-8de4-4ce2-9cc4-9d304558a6cf",
@@ -3362,7 +3438,8 @@
             9.610886
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "20787d08-a16a-475b-bb0a-afebedc94dc4",
@@ -3410,7 +3487,8 @@
             627.30493
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f38d1e21-1072-4c6b-a004-aa00308419c8",
@@ -3476,7 +3554,8 @@
             629.20184
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "ff83ffa7-f7a9-4407-aa92-5ddfdb9e8fa3",
@@ -3524,7 +3603,8 @@
             10.684692
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4e04ff34-7941-40a9-ad07-f810cab3147d",
@@ -3572,7 +3652,8 @@
             9.610886
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "569124b0-b6a5-4739-9976-1ddaa4357e4e",
@@ -3620,7 +3701,8 @@
             1026.814
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "0718947c-edf0-495d-987b-2920b1f95645",
@@ -3686,7 +3768,8 @@
             2532.522
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7717b3b4-a308-46cd-b6bc-73fabc05a772",
@@ -3734,7 +3817,8 @@
             2508.2407
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "dbc842f0-c4ad-463d-a984-9ba3b2c6b804",
@@ -3800,7 +3884,8 @@
             2532.5222
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "759d328f-4f3d-414c-8d98-dfa5b1a2a411",
@@ -3829,7 +3914,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1fb8af81-1c25-42cb-a859-838db49b9e22",
@@ -3858,7 +3944,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "73e8b00a-9abd-4ecd-868f-33890480a576",
@@ -3887,7 +3974,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "98040dea-7394-4fda-9a4a-7da6911afb24",
@@ -3916,7 +4004,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8ba6f0b0-35da-4d89-983f-7bf071fa1b56",
@@ -3945,7 +4034,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1b6bee67-c5a1-42dd-8ff6-3885fd8ba68a",
@@ -3974,7 +4064,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "261e29b6-6341-466a-b76e-090d36c98a32",
@@ -4003,7 +4094,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9375fb16-a877-474c-b0a3-b7add3b4fa21",
@@ -4032,7 +4124,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c5d59cff-46bd-4817-b685-bfd993ca2fe0",
@@ -4061,7 +4154,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "17242475-2853-47ab-8de3-afcbda966b3d",
@@ -4090,7 +4184,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "747993d5-b66b-4a3b-986a-3d07b6fc5ab8",
@@ -4119,7 +4214,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e9467db2-c7e2-43dc-ba6d-9197bb489deb",
@@ -4148,7 +4244,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9516de8a-3cc5-417f-a9ea-74b7175203bd",
@@ -4177,7 +4274,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ae7dad70-0cef-43b1-8f23-e46225d55d27",
@@ -4206,7 +4304,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0288692e-71f9-47c9-b4e2-ecc5ab71e197",
@@ -4235,7 +4334,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d48e9c0e-572d-439e-ac78-7d18235ac18c",
@@ -4264,7 +4364,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c3dc14fd-fd02-4013-a919-1671e8eae062",
@@ -4293,7 +4394,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1a84e74a-be7c-4ed5-b584-c239e1b6b581",
@@ -4322,7 +4424,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5e67408e-9ff9-4baa-9d98-27538725680b",
@@ -4351,7 +4454,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1e122a82-d0e7-4134-88e9-a39534de12ef",
@@ -4380,7 +4484,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "78f997dd-313e-4157-8d1c-93b30b8a74d3",
@@ -4409,7 +4514,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "30c0449b-d9e4-4c3f-974f-7ae67ced9829",
@@ -4438,7 +4544,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9c217228-87be-4782-945d-8e307445c46d",
@@ -4467,7 +4574,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c97e71b1-da61-4542-b7b7-660863e21cc9",
@@ -4496,7 +4604,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f3e1acb1-745a-4e5d-8925-334abe512eaa",
@@ -4525,7 +4634,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "acba1164-7142-45ed-b03f-e87d45cf03e7",
@@ -4554,7 +4664,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "09a787bb-367b-40ee-8f73-30a16cd617fe",
@@ -4583,7 +4694,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "49cc55b6-1e51-4230-b93a-b6b7f4f340e6",
@@ -4612,7 +4724,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ff31602a-f72b-4193-ab33-334363c19b72",
@@ -4641,7 +4754,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "57a3034a-421d-41ac-8acd-6a6b8ff0ebef",
@@ -4670,7 +4784,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fd13cd65-1165-4cdd-992e-e82320dfb760",
@@ -4687,7 +4802,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "9C27B0",
@@ -4736,7 +4851,8 @@
             1959.6875
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
     },
     {
       "Id": "f7ae263d-78c3-4008-97e3-37fe996f3ffc",
@@ -4765,7 +4881,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6e5425d2-02d6-492f-9828-bf3f6050e17a",
@@ -4794,7 +4911,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7e8274fb-d33e-4234-ae46-e42f428b640b",
@@ -4823,7 +4941,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "610133d3-d010-473c-8a44-606dc8f4baf4",
@@ -4852,7 +4971,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "576142ac-83d3-4eae-976e-8f9ea8b98252",
@@ -4881,7 +5001,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c3bfdb7f-5a2d-4cb3-8723-6fe686b7026e",
@@ -4910,7 +5031,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "545a5aa9-8109-4575-9f61-d2f557b356b1",
@@ -4939,7 +5061,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1b052eb1-bf17-44b9-b37c-0b314bff71f2",
@@ -4968,7 +5091,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a8495a9e-8489-4f45-919b-39a51178fdb8",
@@ -4997,7 +5121,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7e6f6e5a-5333-4cc9-a01b-f7ba76d03740",
@@ -5026,7 +5151,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a6983446-cf55-4758-86d5-3c326ebb3b97",
@@ -5055,7 +5181,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c611d541-0c36-48ee-b170-88c839f1dd04",
@@ -5084,7 +5211,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "95884edd-2c5c-4c45-a987-57e923c1548c",
@@ -5113,7 +5241,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "68583799-5b3f-4543-a1b8-dc787c579608",
@@ -5142,7 +5271,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f5586a91-16bf-472e-beb1-d219bfd57b59",
@@ -5171,7 +5301,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "04b59791-7dd0-4edb-a226-4146821e11b4",
@@ -5200,7 +5331,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a4031d59-28f3-4875-b263-2e257cda0a14",
@@ -5229,7 +5361,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9f5cb9b4-7f63-4038-b069-984d2a8f988d",
@@ -5258,7 +5391,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "96623f9f-dd51-412c-be48-d70f7541e46a",
@@ -5287,7 +5421,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ef589176-124f-4196-839f-2be25cc089ab",
@@ -5316,7 +5451,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "69586a99-f666-4ecd-b53a-8004754b4e26",
@@ -5345,7 +5481,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1a53e5c1-e1ff-4f05-a773-3269cd9964f0",
@@ -5374,7 +5511,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ce4d6acc-ddcb-4f02-b065-55b3d81ad880",
@@ -5403,7 +5541,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1b6075b6-a4ca-41d4-951f-d25cf3b0cf69",
@@ -5432,7 +5571,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "630438b1-3458-4c26-ada3-fafdd679c250",
@@ -5461,7 +5601,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1ffbc528-48fd-4ebe-8578-ae0848d5c2f1",
@@ -5490,7 +5631,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "eccdd7d4-6224-4b83-8b37-f8942f643c5e",
@@ -5519,7 +5661,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2583510c-3fcb-481e-b94a-8409cd161916",
@@ -5548,7 +5691,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c92cd4dd-f5ed-40a0-bb6c-0c3895a46884",
@@ -5596,7 +5740,8 @@
             2509.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4718680e-644a-47d3-ab95-4d1e632d4413",
@@ -5644,7 +5789,8 @@
             1405.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "3d658a0c-2167-4c4a-a02d-c028aa1dfbe7",
@@ -5692,7 +5838,8 @@
             118.15747
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b8d20488-ba81-49ae-9fc3-b9a6ce81f14a",
@@ -5740,7 +5887,8 @@
             9.157471
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "ae0dfd90-b759-4222-98a5-94624bc36b3a",
@@ -5788,7 +5936,8 @@
             627.3922
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f054aa54-1550-4842-a732-46bd25b44f7f",
@@ -5836,7 +5985,8 @@
             627.3922
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b9012f44-570d-4169-ab00-8f7e68113525",
@@ -5884,7 +6034,8 @@
             628.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "becaf74c-44f6-4ed7-a67e-e6283ed1b005",
@@ -5950,7 +6101,8 @@
             628.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "e748b5e5-41ca-4bb0-9af8-2c3ba34cae83",
@@ -5998,7 +6150,8 @@
             10.157471
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "398171d2-a2fb-4890-bdad-6870b8ad48ba",
@@ -6046,7 +6199,8 @@
             1026.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "96e68633-4688-4389-9466-6ec9c6ded9ae",
@@ -6112,7 +6266,8 @@
             2056.1575
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9810e8d0-9dd8-4650-8ea8-2503d5ddc495",
@@ -6129,7 +6284,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "2196F3",
@@ -6178,7 +6333,8 @@
             1756.3142
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
     },
     {
       "Id": "05a09860-4e36-4291-ac76-45ac2fb37de2",
@@ -6195,7 +6351,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "9C27B0",
@@ -6244,7 +6400,8 @@
             2117.0732
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
     },
     {
       "Id": "30d95842-5655-4e4b-8b80-0e3702694813",
@@ -6273,7 +6430,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "04a196ee-3de7-46f7-9b90-05d98b94ffdc",
@@ -6302,7 +6460,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "31ec0b6a-3d47-469e-8a25-08320aefed94",
@@ -6331,7 +6490,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2dd5d45c-2ff3-4293-b8b0-0d2c2aff4606",
@@ -6360,7 +6520,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8a115389-0769-4d2e-988d-e17af27f00ff",
@@ -6389,7 +6550,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "65e8f2a1-c93f-45e0-ade7-6aaa85b0dc5b",
@@ -6418,7 +6580,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "43de7375-7048-4f33-8656-5fb7a86edf3c",
@@ -6447,7 +6610,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4347f1d9-0047-4194-9ddd-ce40ac045a9f",
@@ -6476,7 +6640,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e53db1e1-69fd-4cb4-8131-511e82c64470",
@@ -6505,7 +6670,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9dfd71de-841b-42f1-9a12-b5ba7e831b7f",
@@ -6534,7 +6700,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "274b6725-5347-421e-8d48-9831dd8fdbc8",
@@ -6563,7 +6730,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "60b13662-eab0-4998-95a2-29d11e4df908",
@@ -6592,7 +6760,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e30b0587-9ba6-4bcc-9a45-92af86616ba4",
@@ -6609,7 +6778,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "2196F3",
@@ -6658,7 +6827,8 @@
             2116.733
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
     },
     {
       "Id": "4658ac9c-2925-4215-be8f-24c81b429fc3",
@@ -6706,7 +6876,8 @@
             2507.0017
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "e545fc93-04d9-4b4e-9d18-5b988aa88b08",
@@ -6754,7 +6925,8 @@
             1707.2539
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f6d31d6a-0a5e-43b6-b6ae-7f8da3f4fd8e",
@@ -6802,7 +6974,8 @@
             960.0814
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1d28ae2e-862c-4e53-a82e-442004cd8d32",
@@ -6850,7 +7023,8 @@
             627.443
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d58e392e-14a7-4ede-ad96-56b4c106cbdb",
@@ -6898,7 +7072,8 @@
             8.674957
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b2e8744b-a439-40ec-923b-92e8cab71b4d",
@@ -6946,7 +7121,8 @@
             627.443
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "e52ffd59-dd17-4b79-84e3-3d30d04244fa",
@@ -6994,7 +7170,8 @@
             627.443
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "6cafa26d-2387-4dda-8710-21551edba563",
@@ -7042,7 +7219,8 @@
             1026.1058
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f4055c5f-6f86-4103-bec5-9ea108f4096a",
@@ -7090,7 +7268,8 @@
             2532.106
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "63f07464-a8d2-4604-952f-b59e027e228c",
@@ -7156,7 +7335,8 @@
             2533.106
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "dc2508d9-eff7-4f7c-a402-ae687e240f7d",
@@ -7185,7 +7365,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9b4982db-c26e-43dd-b2ca-fb537f7e4fd7",
@@ -7214,7 +7395,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2cefe51e-cf32-4d7a-a268-17bb92bccd38",
@@ -7243,7 +7425,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "86fc0f8a-4bc5-4d3e-9fdb-3fb6e5be2d4f",
@@ -7272,7 +7455,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d10eefcf-a226-4a41-84ed-e9d42cc5567d",
@@ -7301,7 +7485,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f792b04d-916c-4def-80e6-9d2555f681b0",
@@ -7330,7 +7515,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "26e9e77b-237c-4a8f-b5c6-cf23d6f598fd",
@@ -7359,7 +7545,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "21948261-f9c2-477c-9cd1-8b25038902de",
@@ -7388,7 +7575,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fc453781-cafd-45a7-950b-01e84bd1708a",
@@ -7417,7 +7605,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "408d7132-37bb-4f4a-8d79-44921d1a47dd",
@@ -7446,7 +7635,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "969075e6-1572-4bd8-824d-8d3eec3b5ca1",
@@ -7475,7 +7665,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "072e6e7c-61b6-4b97-9ae8-fdcd37de591f",
@@ -7504,7 +7695,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "845b11fd-2472-44d3-898a-fa49dd7c6a20",
@@ -7533,7 +7725,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "30f1eb25-bbca-4d4d-95b7-901b4810287f",
@@ -7562,7 +7755,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d9aa5e3b-6103-4568-afc7-f5b1876a822b",
@@ -7579,7 +7773,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -7610,7 +7804,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "47857f10-1e32-471b-b1ab-2e9af2cf004b",
@@ -7627,7 +7822,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -7658,7 +7853,8 @@
             653.80664
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "02030619-d689-4807-a0a6-d23f45435da9",
@@ -7675,7 +7871,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -7706,7 +7902,8 @@
             654.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "ea853c8d-f24f-43ba-aa2d-f526820d1d36",
@@ -7723,7 +7920,7 @@
       "IsFireExtinguisher": false,
       "IsEvacuationExit": false,
       "IsHidden": false,
-      "IsLabelHidden": false,
+      "IsLabelHidden": true,
       "NodeRadiusScale": 1,
       "LabelScale": 1,
       "NodeColorHex": "607D8B",
@@ -7754,7 +7951,8 @@
             654.27594
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
     },
     {
       "Id": "e9aff541-d2ea-451d-812e-53721f58ac03",
@@ -7820,7 +8018,8 @@
             1570.0094
           ]
         ]
-      ]
+      ],
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-security-guard-8118479.png"
     },
     {
       "Id": "749b46c5-3e47-4833-83b1-8ec443756ea5",
@@ -7868,7 +8067,8 @@
             15.674476
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "0f2be275-697d-4827-96ec-0698cfe16498",
@@ -7916,7 +8116,8 @@
             1570.2347
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "a5f86a15-e8d9-4891-bb42-ec97f4818cb7",
@@ -7964,7 +8165,8 @@
             1569.1348
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "83e974d4-7c12-498d-aa38-7c3e008f4985",
@@ -8012,7 +8214,8 @@
             654.6747
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "ec76ce4a-69bb-4ad4-911c-37437d14b377",
@@ -8060,7 +8263,8 @@
             15.674475
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "43e26b55-9045-489e-b695-e745550b0f87",
@@ -8108,7 +8312,8 @@
             936.63446
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "05ac7bef-2405-4d2c-8d4d-8f926089a721",
@@ -8156,7 +8361,8 @@
             15.674477
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "cd4066cb-0164-4ef3-91b8-9a131f09ca42",
@@ -8230,7 +8436,8 @@
             653.6334
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c3b9744d-d5e0-4afa-93e0-79b138caea59",
@@ -8296,7 +8503,8 @@
             938.19495
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "b7a137ec-4a30-4ee2-8e7c-0d1e49d852d7",
@@ -8362,7 +8570,8 @@
             652.6334
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f8bc550b-d97e-4695-a5bd-8af9a04d2f6d",
@@ -8410,7 +8619,8 @@
             938.1949
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "0eab4823-a5c8-4859-9c51-72ebd80f1a04",
@@ -8458,7 +8668,8 @@
             15.633209
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "63b22a82-9c1e-4763-a456-a177d828977c",
@@ -8524,7 +8735,8 @@
             1569.7255
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "104956e4-e872-4213-9b39-763f79349475",
@@ -8572,7 +8784,8 @@
             654.6334
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5edbee50-fecb-4b6b-8ebf-6b291e196ca4",
@@ -8620,7 +8833,8 @@
             654.6334
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "a2d492e1-ee1f-496b-91cc-996845ea3b85",
@@ -8668,7 +8882,8 @@
             654.6334
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f5529478-c0eb-46ae-b91a-9a7327998b0c",
@@ -8716,7 +8931,8 @@
             934.22363
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c99f26d2-3887-439c-9eb1-fcd7bb430222",
@@ -8808,7 +9024,8 @@
             654.67847
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "6d7fbe50-0196-42a0-b13a-82e6e61fc310",
@@ -8837,7 +9054,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e82808fa-bba3-445e-8681-f46c3fdc4268",
@@ -8866,7 +9084,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "49ba6098-92fc-4f15-a430-6dcf86e69bef",
@@ -8895,7 +9114,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7acf7c38-0175-450b-a1f0-a06c3842623a",
@@ -8924,7 +9144,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "22341d46-df57-41e4-a79e-7693ba6f89b1",
@@ -8953,7 +9174,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "02f03163-76c6-4671-8508-9897b07870bc",
@@ -8982,7 +9204,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a9695f67-a1a8-4192-9e9a-bf2ef876df8b",
@@ -9011,7 +9234,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "050e4e49-8b9d-4315-bf92-6a15de3136fb",
@@ -9040,7 +9264,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "faae4673-6a2a-4427-921d-4a4ed3e02cc3",
@@ -9069,7 +9294,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a55d6f36-0c03-4f30-b2c3-4c656fafcb18",
@@ -9098,7 +9324,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "382f3bd3-d39a-45d5-97fd-17d2ba532b97",
@@ -9127,7 +9354,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c31b8f96-c278-495c-8c8b-458b265c3440",
@@ -9156,7 +9384,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b7818e6c-c16a-48e1-b089-6b3ea35a0265",
@@ -9185,7 +9414,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0e8d7deb-1f6c-4eb8-b72b-d5cb81b65552",
@@ -9214,7 +9444,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ba81559b-71fd-4633-82ef-bd8f682eb91b",
@@ -9243,7 +9474,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp16",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a7b6fac5-4d6e-44b9-8cf6-e5a918b68b5b",
@@ -9272,7 +9504,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp18",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5769f901-683f-490e-bed7-d6ef19ebd478",
@@ -9301,7 +9534,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp19",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0b06217b-301d-4f60-ace0-093edfb5bd8f",
@@ -9330,7 +9564,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp21",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dd134a2f-b6c9-4fe6-8683-404003fb8440",
@@ -9359,7 +9594,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp22",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cd936929-6b3c-4af9-b578-26b9e585dbaf",
@@ -9388,7 +9624,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp23",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "37f48910-93af-4732-95c3-c4dcd3f1c641",
@@ -9417,7 +9654,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp24",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "72033323-2e08-417e-a283-670ddc6e801c",
@@ -9446,7 +9684,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "87cb27b1-c8c9-4839-9dac-2594deddbe07",
@@ -9475,7 +9714,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7dbe63bc-dd4c-4b92-9fd6-e296b4d0d47f",
@@ -9504,7 +9744,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp26",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b565ee48-b29d-4d69-bea8-3ee9455e3616",
@@ -9533,7 +9774,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp25",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "766f88db-71fc-4abe-aa53-271776e00113",
@@ -9562,7 +9804,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "870dee23-79c4-435d-b5b2-196ff51dfe0e",
@@ -9591,7 +9834,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a23b8095-34d5-4ccb-873c-46458501fa8c",
@@ -9620,7 +9864,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f974afe2-ae80-4b3f-a177-445c479088f5",
@@ -9649,7 +9894,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "687e0e99-8f60-4bab-a89c-13991c711d54",
@@ -9678,7 +9924,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a5fe2584-219e-4606-abb8-159f4a9159f5",
@@ -9707,7 +9954,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "805a1b4a-a790-42bc-9ce8-48b57dcc21a6",
@@ -9736,7 +9984,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "24d5257c-9d96-4253-b601-7f86a77c712d",
@@ -9765,7 +10014,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dafa1cb4-2ee2-488e-8d56-1ba8f1f2f8f8",
@@ -9794,7 +10044,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6e13505e-dc64-4ab0-9539-4a8d22f7ad47",
@@ -9823,7 +10074,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d02dbe5f-6155-4261-9a14-cae3fbc4666c",
@@ -9852,7 +10104,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "45926b07-3bf3-4ed8-af91-751a451d1fef",
@@ -9881,7 +10134,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0d5017da-5cfe-4479-b529-33495d64f575",
@@ -9910,7 +10164,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7718a64f-3bec-41c1-beba-63571aeaf1e1",
@@ -9939,7 +10194,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b3544637-d1a1-40c2-8cf4-6028e3f0639c",
@@ -9968,7 +10224,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "314a67b3-3b3a-4945-80b3-60d64a1a9d25",
@@ -9997,7 +10254,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0c9aa922-c82c-4bb9-9d45-f82a9d39476a",
@@ -10026,7 +10284,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7c25c5e5-2570-4f18-ae4d-12cf4ab451bd",
@@ -10055,7 +10314,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "687fc454-5f6e-4c72-a2a5-9bb771ffb6c0",
@@ -10084,7 +10344,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5360abd5-620e-4e27-867b-9e443959c4d0",
@@ -10113,7 +10374,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ff3c8d53-fcff-42c3-8686-e60a07bfb0f6",
@@ -10142,7 +10404,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1fc65a11-2f33-4785-b664-80085538891a",
@@ -10171,7 +10434,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4946cb12-bb2c-4d44-9174-5958015b0433",
@@ -10200,7 +10464,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e4937ede-7594-4737-8199-6694d1d3dc26",
@@ -10229,7 +10494,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a222d595-bcd0-4550-9f5c-f8d2403d4531",
@@ -10258,7 +10524,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9a5235d8-0ac6-45d0-89f2-d27c225d3322",
@@ -10287,7 +10554,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "75ed4fba-3918-491b-8007-c77c215655d4",
@@ -10316,7 +10584,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp15",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c6f4a48b-e854-437b-be79-eb34ac623584",
@@ -10345,7 +10614,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp17",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ae9e1c36-4033-47f7-adfc-b53fc3a3b2d4",
@@ -10374,7 +10644,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0bec14f0-a091-459a-b20b-24da12af0491",
@@ -10403,7 +10674,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cd7366e5-f188-49e1-a962-3ff0392b2509",
@@ -10432,7 +10704,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b095056a-d9ed-4f17-b27f-8d2939446fa6",
@@ -10461,7 +10734,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dfdd114e-34e4-4e52-936a-d35dc4e093a1",
@@ -10490,7 +10764,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp20",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1f760eb7-d85a-46c5-89ba-6ecd8d01a448",
@@ -10519,7 +10794,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a3285204-3274-467a-8111-5d81d7498cdf",
@@ -10548,7 +10824,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3b081da9-2353-4908-9a69-aa5b10bab1f2",
@@ -10577,7 +10854,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "749aee85-3d00-4923-b849-8de3d8d5b688",
@@ -10606,7 +10884,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5f2e8b73-1ae7-40cf-9ccc-e1cb1b63b770",
@@ -10635,7 +10914,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "QR-5f2e8b73",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "af12457c-61d0-4607-8c56-7e6dd9842677",
@@ -10683,7 +10963,8 @@
             15.089184
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "42532c74-ffa3-4241-a4d0-0b7dbd30c7b4",
@@ -10731,7 +11012,8 @@
             938.096
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "37a395a0-0935-44c1-a910-bdc57ee772e8",
@@ -10779,7 +11061,8 @@
             654.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "16c0335b-22c9-4031-b2b6-664b232aa349",
@@ -10827,7 +11110,8 @@
             938.096
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4e7e8dff-2f74-4ca5-b56e-bb6bb5c8acb8",
@@ -10875,7 +11159,8 @@
             1570.5875
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "91710095-b24d-41c3-a480-48b53a5cbe86",
@@ -10949,7 +11234,8 @@
             653.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5b5cf06a-a2f8-43dc-a6a4-c7a39aaf440d",
@@ -10997,7 +11283,8 @@
             14.584839
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c7c64f75-8edd-4434-b5f8-a55ffe53be19",
@@ -11045,7 +11332,8 @@
             1569.1234
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "6164b602-8ed5-465e-9e00-26524b6f8525",
@@ -11093,7 +11381,8 @@
             13.584839
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9da5222f-ac32-4e2a-929b-0757f82cfb83",
@@ -11159,7 +11448,8 @@
             936.6319
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "83f32fad-fcf9-4f97-b856-3e3ca9dfcdf3",
@@ -11207,7 +11497,8 @@
             654.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c0016e6d-b7cb-42a4-abbd-3e68c9c68134",
@@ -11255,7 +11546,8 @@
             1569.6558
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "88073deb-274c-4352-a331-b70d3aa86e8f",
@@ -11303,7 +11595,8 @@
             1569.9355
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "11a592db-0aa4-41eb-a90e-3564d0d4c0b4",
@@ -11351,7 +11644,8 @@
             653.5849
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "48a360c5-260e-4856-b4b2-84120341453f",
@@ -11380,7 +11674,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2cf8d29c-9ec2-4bbb-968f-aba5778ffa85",
@@ -11409,7 +11704,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d268afba-a8e4-4ec2-8850-192ea21ebaef",
@@ -11438,7 +11734,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4c7f8444-535f-46d9-b4de-adbfe3a15f41",
@@ -11467,7 +11764,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7a39c4a5-d5b7-4941-b92a-ef2fdb99d03b",
@@ -11496,7 +11794,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e6319d8f-8b1b-41de-93df-529050a9dbb3",
@@ -11525,7 +11824,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "19878434-46d7-49e6-b6bf-8ce8c12cf8ae",
@@ -11554,7 +11854,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "337f3bd7-a456-4803-966f-159bdc8b3eec",
@@ -11583,7 +11884,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "827263d2-a4b7-4d2d-957e-d6275e1384f8",
@@ -11612,7 +11914,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "eff637e3-1228-4147-902e-20454d0b9f6d",
@@ -11641,7 +11944,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9094e2f6-b68e-4ae7-a1fc-4c31da0b756c",
@@ -11670,7 +11974,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c51b1973-ac0a-454f-8d84-8391c62ef60f",
@@ -11699,7 +12004,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "33abc622-ec88-45f3-99d3-01aac72c11a5",
@@ -11728,7 +12034,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9ecc914e-4366-4b26-a1d7-da9c655eb337",
@@ -11757,7 +12064,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3211b8fa-5fd2-46a5-939d-2a9a2cb35e50",
@@ -11786,7 +12094,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp15",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "352c4f3c-dee4-41cc-8c67-d4867c881590",
@@ -11815,7 +12124,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp16",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3b3894b4-9d44-4ae1-8ce3-8670b8c4051c",
@@ -11844,7 +12154,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp17",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "59826095-46df-469a-b6b4-bee807cfd302",
@@ -11873,7 +12184,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp18",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a91e875d-ff1a-42bc-ae28-19e14b8864f8",
@@ -11902,7 +12214,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp19",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c52c10c5-7bcc-4021-a7d0-a6da03520001",
@@ -11931,7 +12244,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6213ea4e-f23b-4d9e-aa1e-7ae20d89cf68",
@@ -11960,7 +12274,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3572496d-64ef-4c62-be01-cf9f407527c5",
@@ -11989,7 +12304,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "87b34c83-de8c-4370-af56-4e3467be8260",
@@ -12018,7 +12334,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1fd8788b-09d5-4656-8f8f-d6c263d67276",
@@ -12047,7 +12364,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "aaa42bb0-373e-400d-bd21-5b7048abdd57",
@@ -12076,7 +12394,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9468b93a-4bc5-468f-bc2c-83b3f2008c7a",
@@ -12105,7 +12424,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7eaccd7b-c76b-4a0e-bf77-16c10534b87c",
@@ -12134,7 +12454,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4a99fa91-2e94-4150-a8e6-606237451f66",
@@ -12163,7 +12484,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "75c35aa4-8d13-4961-bb1e-d58bfa86ea1c",
@@ -12192,7 +12514,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "74f1321d-723c-42c5-b99f-4f0b3d1184f7",
@@ -12221,7 +12544,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5bce9e49-ea02-43db-85a0-9d099a9e64b0",
@@ -12250,7 +12574,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9b6f9ee3-6b12-40e3-91aa-3009d108c9b2",
@@ -12279,7 +12604,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "aa24ff7a-dcc8-42b7-965b-55bcc04c5bc6",
@@ -12308,7 +12634,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "58dc5700-68d6-4a8a-9eaf-d37c4c6e86db",
@@ -12337,7 +12664,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f2a7c40c-417d-4744-8ea7-5f20c037cbc4",
@@ -12366,7 +12694,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dce8def8-e6a6-4dad-949a-e6284a1e830d",
@@ -12395,7 +12724,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "96303371-4414-4eb0-b293-2dbaf4ddccc9",
@@ -12424,7 +12754,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "bc422761-8240-4d49-8e88-c5d616e99cb2",
@@ -12453,7 +12784,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0e41b461-bac1-4743-977a-b2cfd7b01977",
@@ -12482,7 +12814,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "118e513a-c4ed-4561-b588-8ff14d160908",
@@ -12511,7 +12844,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "611e908e-f717-4d57-a814-db8b5d681165",
@@ -12540,7 +12874,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "71b97340-dae8-4bde-815b-f3a62f1ce38e",
@@ -12569,7 +12904,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "618d78d4-7eff-4a95-af49-015ad0427196",
@@ -12598,7 +12934,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "67239c43-3eb0-47d0-a005-7ec14d9bfef4",
@@ -12627,7 +12964,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
     },
     {
       "Id": "628f871c-e33e-4c02-874b-3484ea3f91d6",
@@ -12656,7 +12994,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
     },
     {
       "Id": "656498cb-5711-40bf-872c-9b8832fae983",
@@ -12685,7 +13024,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "QR-656498cb",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "08749361-427a-4c83-95c1-fd07a58c3dfb",
@@ -12714,7 +13054,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "51b475f8-9128-4d88-ab58-2288e671c7b0",
@@ -12743,7 +13084,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "be57954e-baf6-4b70-bf3c-c055df96d62e",
@@ -12772,7 +13114,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "76b1dd80-bae9-4dd2-ac29-9ce2312f2c9c",
@@ -12801,7 +13144,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "28f9f2f2-6691-4a05-9925-b2cb23507825",
@@ -12830,7 +13174,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b3d1317b-51f1-48a2-8a60-0847c2df6f85",
@@ -12859,7 +13204,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a497aa27-4bf8-4d8a-83ae-4fc3a36ebc11",
@@ -12888,7 +13234,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f6154b90-ae66-4ebd-bb71-7025a2db0b58",
@@ -12917,7 +13264,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "137de150-89b7-4a5a-bf4b-40fe192012b1",
@@ -12946,7 +13294,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a152a8bc-48d0-4203-9b64-18e45350a8b7",
@@ -12975,7 +13324,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7d22e154-0d59-422e-8d05-0eb27f1602c4",
@@ -13004,7 +13354,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "70933753-72fe-4785-9a84-8f2e62c6eec4",
@@ -13033,7 +13384,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "57118e1b-4446-4614-b9e6-0ab392450b8f",
@@ -13062,7 +13414,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ffd9b5b5-c481-4d1a-8e5a-448c08973774",
@@ -13091,7 +13444,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "69d16614-84d0-4981-be64-443a62260b4e",
@@ -13120,7 +13474,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "088e64c8-4be4-4598-870e-6d409435fd8e",
@@ -13149,7 +13504,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0cdd3b8c-638d-4d4c-bdf9-d88663ac9034",
@@ -13178,7 +13534,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "61567196-2c36-4978-8b4c-6833339da513",
@@ -13207,7 +13564,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp15",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "05a39e82-e84c-49e7-9e19-08af797bafd7",
@@ -13236,7 +13594,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp16",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1a0e07c8-cb91-4f37-80e2-b6b50c74c797",
@@ -13265,7 +13624,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp17",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "507757dc-0eb8-472e-b770-6a875bdb4bb7",
@@ -13294,7 +13654,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp18",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5a564701-5438-4446-802b-5ddb20c2586e",
@@ -13323,7 +13684,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp19",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b7dbd6d0-214b-46c3-b57a-34dc6d53784c",
@@ -13352,7 +13714,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp20",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dec821e5-d394-43aa-828e-dddc950184d0",
@@ -13381,7 +13744,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp21",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "473ebf4b-113d-4478-973f-25766cab6fba",
@@ -13410,7 +13774,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp22",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ccd6284f-11da-4625-9957-a065880003c9",
@@ -13439,7 +13804,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5d1ada61-f11d-4e22-8ca0-a0668d2f0aa2",
@@ -13468,7 +13834,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d992592d-9ebb-4209-bc2e-a06c67dbc631",
@@ -13497,7 +13864,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "38feee78-e3e7-44a5-acc9-c024e575f8f7",
@@ -13526,7 +13894,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9b720b75-628c-45e2-8828-02e7b0598926",
@@ -13555,7 +13924,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d6890f02-d058-4cb6-83fe-870f6c03a692",
@@ -13584,7 +13954,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5459b9a3-35d7-40d7-9e78-243cfdd49297",
@@ -13613,7 +13984,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "668733ba-137c-425b-b4b6-01ea95d2487c",
@@ -13642,7 +14014,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "55a28e75-d398-4d3c-b67f-1ac890cdbf75",
@@ -13671,7 +14044,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "63e264ec-19e1-4633-8fc0-e1bc4633e857",
@@ -13700,7 +14074,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9c1e2e3b-90ca-4565-a6f7-71667c3e23af",
@@ -13729,7 +14104,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b04db92e-f68b-4163-80c9-c89c94e8ba06",
@@ -13758,7 +14134,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "bb7034bf-c112-4cd7-9736-2b56355ba727",
@@ -13787,7 +14164,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3fd3797d-d785-48bb-a9f0-db76b7211cf9",
@@ -13816,7 +14194,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cb87caf4-8144-49e7-8987-7ce4c1538f9a",
@@ -13845,7 +14224,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a7afc4fa-78de-46f2-a0db-e5d831f3e5ef",
@@ -13874,7 +14254,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6c08153c-53f3-44f9-b8d2-ef9aee70a8b5",
@@ -13903,7 +14284,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "098715c9-5b02-4f1e-b3ff-a2d3b0c414b1",
@@ -13932,7 +14314,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fc208e53-b857-4356-82f2-fd0c480c7ec1",
@@ -13961,7 +14344,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cecba959-82d9-4527-aeee-b6860e18919c",
@@ -13990,7 +14374,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5205be18-ec5b-4e34-a788-5bed0bd508b4",
@@ -14019,7 +14404,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8efa570f-1482-409a-9f25-d4a73be386a5",
@@ -14048,7 +14434,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a5b1e333-e87f-496f-bcba-5abaf0efa63d",
@@ -14077,7 +14464,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "36c9a049-b8f2-448e-bcf8-9fed9d5d425d",
@@ -14106,7 +14494,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7ab38ddd-70ed-46ec-9d12-39cfe7478f67",
@@ -14135,7 +14524,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8512b08b-2a96-4345-8fdc-016710bcc02f",
@@ -14164,7 +14554,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "486ca1ac-ce54-4aef-8662-447fcd9358b5",
@@ -14193,7 +14584,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ac9f425e-d50f-473d-85ab-039fd17e7dda",
@@ -14222,7 +14614,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4dcde51c-b68d-4b67-9ef0-b97699b110e0",
@@ -14251,7 +14644,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8b752d13-2bba-439d-b6ce-044e40149c9b",
@@ -14299,7 +14693,8 @@
             13.681889
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9e6d491e-2bff-45e5-898b-fbd9cb6059d3",
@@ -14347,7 +14742,8 @@
             1568.6824
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d8eac0ec-3fe0-4757-97b1-3cbfeda2fdad",
@@ -14395,7 +14791,8 @@
             653.6821
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "42440ccf-be83-43f8-b82c-39248324109e",
@@ -14443,7 +14840,8 @@
             935.6822
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7fb4e2ff-c337-4540-9a32-d882c2f2a74e",
@@ -14491,7 +14889,8 @@
             654.6821
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "3f35a30f-18af-4d25-9e08-059a55d1acfb",
@@ -14539,7 +14938,8 @@
             1567.6824
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1c493476-3cc5-4b37-a14a-52e1046ab8a8",
@@ -14587,7 +14987,8 @@
             653.6821
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "ca5c404e-b6a7-4275-be68-93be8f878565",
@@ -14635,7 +15036,8 @@
             1569.6825
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "2a52a9f7-1a59-4af8-9c78-b9995449fe48",
@@ -14709,7 +15111,8 @@
             479.68207
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "efe91c06-067c-4b0c-98ea-ef95d69b455f",
@@ -14801,7 +15204,8 @@
             935.7577
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "0a7f2c7f-b95d-4192-a0ca-d7ce96612fbd",
@@ -14867,7 +15271,8 @@
             655.6821
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "2c3b9842-9480-42b5-9316-b8ce0c9472c9",
@@ -14915,7 +15320,8 @@
             1568.0978
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5fb8653c-a63a-4ce3-9632-57b72303af39",
@@ -14963,7 +15369,8 @@
             652.88416
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "81c13c6a-0152-4d8b-9dba-0491773a9e92",
@@ -15011,7 +15418,8 @@
             936.0978
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "035690dc-6a4b-46e0-9d2a-73ebb0695fa9",
@@ -15059,7 +15467,8 @@
             14.483952
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7effe581-8b09-4889-a9df-f43b3bb2fee8",
@@ -15107,7 +15516,8 @@
             1568.0978
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5460b487-0d51-475d-a8b0-341275531397",
@@ -15155,7 +15565,8 @@
             1569.0978
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "fc29cf67-f2a8-466b-b9f1-eb4b09f80fc0",
@@ -15203,7 +15614,8 @@
             653.4842
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "f3dba885-6a9b-440e-bae8-a6d876305a62",
@@ -15251,7 +15663,8 @@
             1571.0978
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "dedf7d4e-62b9-41d2-bbc4-2786c5e7de48",
@@ -15299,7 +15712,8 @@
             935.62244
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "3d08b992-193e-42de-b75e-7f452e026ca8",
@@ -15347,7 +15761,8 @@
             1569.4724
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "881c266e-12a3-4eff-8c06-c87a3232919d",
@@ -15421,7 +15836,8 @@
             389.4724
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "e7609adf-fb8e-4d6a-94b1-94918c8c780f",
@@ -15469,7 +15885,8 @@
             1569.4724
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1b693afe-2bdc-484e-a6b6-960c9776fe93",
@@ -15535,7 +15952,8 @@
             508.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c4332fb1-7272-4bcd-85bf-cc5ed8f19149",
@@ -15564,7 +15982,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "80769139-6bc9-4fe6-8937-338cd5bb4929",
@@ -15593,7 +16012,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "be74ad11-884b-4b3a-86f9-147e0d2eb005",
@@ -15622,7 +16042,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "83b42998-892b-42fd-a6e4-cbbec48f6a66",
@@ -15651,7 +16072,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cfc75d84-2d48-483e-b1e2-1fa343e0d7ae",
@@ -15680,7 +16102,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f4604e2b-9030-48f3-b35a-347000f70eff",
@@ -15709,7 +16132,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d9f144c8-c526-4b5c-890b-616f8b6ab7de",
@@ -15738,7 +16162,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "39965886-4fa1-4fe8-939b-9c04e6381575",
@@ -15767,7 +16192,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "84955ca0-b9a9-4b39-92fc-9004cb832c59",
@@ -15796,7 +16222,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "050eb8a6-9cba-434e-a20d-0aabd8ea8b0f",
@@ -15825,7 +16252,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0d814e2e-6b99-425e-b274-a0653364556e",
@@ -15854,7 +16282,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "47b51b62-62a9-41c6-bb66-71af88201e33",
@@ -15883,7 +16312,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dc99763d-aa5d-4a6a-b064-932012aca7f7",
@@ -15912,7 +16342,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "95ae3c05-92a7-45b2-96b9-302deb7418d6",
@@ -15941,7 +16372,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "54252945-1447-4e0f-99fa-88cfcde5a950",
@@ -15970,7 +16402,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp15",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a819989e-106c-405e-baf8-a587c7bbf57a",
@@ -15999,7 +16432,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp16",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "607bdab9-f708-4231-865c-6c23b22fb7d3",
@@ -16028,7 +16462,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp17",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2208331c-cf6b-4fd7-8fa9-8490d14b5262",
@@ -16057,7 +16492,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp18",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "241e00e3-2f77-4e13-91b5-701a5cce7653",
@@ -16086,7 +16522,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp19",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0c19c28c-c98c-43bf-b88f-bac2b743b6d3",
@@ -16115,7 +16552,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp20",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f38c88fc-e132-4cd7-a1ad-b073840fa47a",
@@ -16144,7 +16582,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp21",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5937d9bb-dda6-422a-93c2-b7f955fe59ab",
@@ -16173,7 +16612,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp22",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c09e99b6-e491-4562-b029-05efe0418a00",
@@ -16202,7 +16642,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp23",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d08fd05c-138d-4b8f-9f55-b80537034bab",
@@ -16231,7 +16672,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp24",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "eff4bcef-1df2-4064-b412-a0d18bdcb8a9",
@@ -16260,7 +16702,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp25",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d52fe125-a457-407a-ba1e-760ac3fd7106",
@@ -16289,7 +16732,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "046d1f91-99f5-44af-8f24-0ee98a4f9d38",
@@ -16318,7 +16762,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "caab66bc-3932-4fb0-9908-38757824cca0",
@@ -16347,7 +16792,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "4950ac5f-6e88-4089-9fa2-cc6b4951b7ae",
@@ -16376,7 +16822,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "619d7e6e-b806-4f89-ae7a-2ae6ff0588ce",
@@ -16405,7 +16852,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0f1a7ad6-8470-4533-ae30-2343cfbd80ea",
@@ -16434,7 +16882,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6e6b085d-6f8e-4000-95c8-07724987c478",
@@ -16463,7 +16912,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a4871dc4-027f-4884-a0e5-b11e3c486fba",
@@ -16492,7 +16942,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a159e0b3-4f4f-4858-928f-7a8a8506e9a4",
@@ -16521,7 +16972,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c46937e1-1097-4a5b-905a-1502ec4ce805",
@@ -16550,7 +17002,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "06d828c1-ebb4-4c20-b678-1a7655308038",
@@ -16579,7 +17032,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "94900639-20ff-4ed6-9604-8505bb177c10",
@@ -16608,7 +17062,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "25e979ce-6e94-474e-8607-de0e438eb739",
@@ -16637,7 +17092,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9e017a51-4b8d-4c1e-afac-43505557c11a",
@@ -16666,7 +17122,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2dc6ff3a-9578-4de7-9c0e-b7d6691e200d",
@@ -16695,7 +17152,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "eb06d905-0649-4a7d-bf05-4c1f494ea94d",
@@ -16724,7 +17182,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1332252f-9b0f-48f6-8475-b82450047902",
@@ -16753,7 +17212,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9b80a5ed-a7b3-4b77-b171-71a71e5ae7ec",
@@ -16782,7 +17242,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "59a0e68e-a538-42ff-9c6c-e0618c77cdcf",
@@ -16811,7 +17272,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fa868952-b7ad-4eb6-8470-075bd83c43f7",
@@ -16840,7 +17302,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9fbd4841-d652-462c-9903-acaa99507cee",
@@ -16869,7 +17332,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dc7ea9a4-bf9f-4781-869c-3e1cd3638f78",
@@ -16898,7 +17362,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "69df9f26-6e74-498a-85da-1d17e02f2437",
@@ -16927,7 +17392,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5d5988d1-0c0a-471a-9082-df4aeaf66213",
@@ -16956,7 +17422,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8176dcf6-4096-44a6-a67f-93ac1d6e4223",
@@ -16985,7 +17452,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "50b40ab3-edda-4434-965d-436d4b6cfa4d",
@@ -17014,7 +17482,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "35b90498-4f6c-4eee-8a22-36e268f8e75e",
@@ -17043,7 +17512,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "31ecbc63-d2e2-4b15-b5d7-9ef9fe616580",
@@ -17072,7 +17542,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d31b493f-389c-4c07-bf37-ba34abcf1e91",
@@ -17101,7 +17572,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "c927baea-de6f-4854-bc90-25b7350a09f1",
@@ -17183,7 +17655,8 @@
             13.3984375
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4d00eb57-b007-4ffc-b7a3-2ebbfc8d3ccd",
@@ -17231,7 +17704,8 @@
             1569.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "55fd62a8-3fc4-47ec-a4d8-6cf919bce1b9",
@@ -17279,7 +17753,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c2864c21-c300-4fc0-a178-904b78234515",
@@ -17327,7 +17802,8 @@
             936.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d72a0bf0-0fa0-45be-a331-f0f648cb9f99",
@@ -17375,7 +17851,8 @@
             1570.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "67e49b0a-beb0-4128-a69e-b0c61c792734",
@@ -17449,7 +17926,8 @@
             479.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "128b0f63-43a8-4e36-b179-f2fc70ea720b",
@@ -17497,7 +17975,8 @@
             1569.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "49905ff9-e8fb-4893-9a8d-55886b1c8a7b",
@@ -17545,7 +18024,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "697b4c60-8a93-4d3f-a538-e40131b4e5b4",
@@ -17593,7 +18073,8 @@
             936.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "6f49d2f3-9789-426c-88a8-4cc5f8c2b164",
@@ -17641,7 +18122,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d6a1c6ae-6c5e-45ca-beec-7e7e19eb2b0d",
@@ -17689,7 +18171,8 @@
             1570.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "cba252dc-b30d-4c67-b126-9c4192a4a9cc",
@@ -17737,7 +18220,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "c74b7153-3ede-4e4a-9610-079a6f520252",
@@ -17785,7 +18269,8 @@
             1570.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1407be1b-ee71-4c5f-b9ee-bac7c93b5d57",
@@ -17833,7 +18318,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "4a61d4c0-6ca3-4bb1-a16e-17161af45979",
@@ -17881,7 +18367,8 @@
             1569.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d777f39c-418b-45da-88cf-319a3ab4852b",
@@ -17929,7 +18416,8 @@
             654.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "8833b395-fd64-405a-8a27-a72d7b9d44c2",
@@ -17977,7 +18465,8 @@
             1571.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "8cd4a507-1783-4b67-b852-7dffbeb14094",
@@ -18025,7 +18514,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "a3c2c97b-1ce3-43fa-9a54-8c63600ecaca",
@@ -18073,7 +18563,8 @@
             1569.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "08e7857d-194c-4561-9de6-df30690ad0af",
@@ -18121,7 +18612,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9f882b95-f140-42fc-9cea-6121228d0581",
@@ -18169,7 +18661,8 @@
             934.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "07d326a8-e5da-44fb-891c-1b32d054c81e",
@@ -18217,7 +18710,8 @@
             655.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "7c143ada-5d29-43f6-84c2-7b8516e26558",
@@ -18265,7 +18759,8 @@
             1570.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "5990d883-68d8-4649-b526-24c57aa9bc68",
@@ -18313,7 +18808,8 @@
             653.39844
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "38287b5e-7af7-4fca-b224-fb5eff6cc3e1",
@@ -18361,7 +18857,8 @@
             1568.3984
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "9ae0927d-f7f9-477b-b58b-612531b08a13",
@@ -18390,7 +18887,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d65de502-7c49-48c6-b941-63f2696894fd",
@@ -18419,7 +18917,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7fd5612c-3ff5-4bf2-95bd-4f32dd94162b",
@@ -18448,7 +18947,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "fe5f6fe4-8c69-4137-b95f-c10928e08673",
@@ -18477,7 +18977,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7484e523-25a5-405b-87fd-2b5480a43b66",
@@ -18506,7 +19007,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8b1df8d6-45a0-4754-afd5-6a55a7c51ee8",
@@ -18535,7 +19037,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b35e2185-2064-496c-a388-9e26d4bbea31",
@@ -18671,7 +19174,8 @@
             13.170197
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "373042eb-80dd-4f89-a060-bfbf8bdb8e92",
@@ -18745,7 +19249,8 @@
             13.806419
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "17c6ab63-7c3f-4389-851f-aed9ee177f2e",
@@ -18819,7 +19324,8 @@
             383.8815
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "32e99731-e983-497a-b0ee-6b98a26859db",
@@ -18848,7 +19354,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "bf387c4f-e22d-4603-b034-0401a88d70a8",
@@ -18877,7 +19384,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "67ca5ec6-5587-4ed7-bd2c-976fc3bacded",
@@ -18906,7 +19414,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6e3458d8-d50b-4c38-ab83-9bba9f11c8b4",
@@ -18935,7 +19444,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d5e68610-66d7-4da9-812a-ea73f78fc59f",
@@ -18964,7 +19474,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6dca1ab1-70b9-4078-a8bf-4499642bcdf0",
@@ -18993,7 +19504,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b49137bc-1323-430d-bb97-d97217f61de0",
@@ -19022,7 +19534,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b46cc804-90c4-479e-ac1d-bc60115759c0",
@@ -19051,7 +19564,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "795d109f-c900-41ed-a05e-4a8a188b6bd6",
@@ -19080,7 +19594,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "85e002f5-bc04-43af-bd19-c5a97fc0ae27",
@@ -19109,7 +19624,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "0c60ec0d-c117-4990-bd61-3e748808ed77",
@@ -19138,7 +19654,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "1f071239-7f27-4cee-8931-576b9e2150c6",
@@ -19167,7 +19684,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d6e2bde0-0793-438e-bf5d-0122d55e385a",
@@ -19196,7 +19714,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "10fff2fe-503b-46b2-973b-d04cf09dbcac",
@@ -19225,7 +19744,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ac1900bf-5e70-41a8-903a-2b7c4beee381",
@@ -19254,7 +19774,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6d441922-23b3-439d-b323-28cb37ecb17d",
@@ -19283,7 +19804,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "32e2a10e-3be2-45d7-8fab-b20636d87301",
@@ -19312,7 +19834,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "a087160d-a086-4e3b-b737-3195edc9d4ff",
@@ -19341,7 +19864,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8c5dfa65-68fe-45cc-9c9e-d4846fced429",
@@ -19389,7 +19913,8 @@
             1405.3157
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "0732cc4e-a486-4d86-aa09-f5569dff559b",
@@ -19437,7 +19962,8 @@
             115.467354
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "90de7599-a5fc-48dd-a678-cccf803e0dfa",
@@ -19485,7 +20011,8 @@
             671.82556
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "16113cba-3e4d-42b3-8726-8fec82e71e90",
@@ -19541,7 +20068,8 @@
             7.87558
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "6c078c3c-6eaa-4aaf-91c0-c85d51e29510",
@@ -19589,7 +20117,8 @@
             8.462219
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "431bce04-7594-47a9-ac0b-381767d9f049",
@@ -19637,7 +20166,8 @@
             7.6612587
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "af44f115-b9f5-4ea3-9757-9c3447695bde",
@@ -19685,7 +20215,8 @@
             1028.7198
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d73e9ee1-04ce-4e4c-9633-7cd603b70f2b",
@@ -19733,7 +20264,8 @@
             2534.0212
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "72f4413e-68b8-441b-9123-9fad4054b4b2",
@@ -19762,7 +20294,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "acecfd48-3ed6-4149-815b-aad0b5bbda87",
@@ -19791,7 +20324,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "718e8617-1b00-41c1-aa0b-388c990e909a",
@@ -19820,7 +20354,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp2",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7498a423-17c5-40e3-9a6d-6f30c3625632",
@@ -19849,7 +20384,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp3",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "004dcdcf-b84a-4de8-b38a-37dda77fd204",
@@ -19878,7 +20414,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp4",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b3ce9e3f-35cf-4e24-99f9-2800e025222c",
@@ -19907,7 +20444,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp5",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2f05b1f7-683f-425b-84f0-0f397b77ef9b",
@@ -19936,7 +20474,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp6",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "d72ec082-2226-4b75-b991-cabb02174f6a",
@@ -19965,7 +20504,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp7",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ea15d030-6627-4226-8a9f-9329d8bb414d",
@@ -19994,7 +20534,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp8",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "76ed7975-c93e-4d7e-8d1c-a3229eaa2488",
@@ -20023,7 +20564,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp9",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "19748150-4628-46ed-b6f1-15c3a8a28c38",
@@ -20052,7 +20594,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp10",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "016a0333-9d03-4f65-bf46-546eb92a7b5d",
@@ -20081,7 +20624,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp11",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "e7c50201-04c9-4653-99c1-5c9087214b87",
@@ -20110,7 +20654,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp12",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7d876bd2-fcdf-4e96-9fb0-7b093f7a8838",
@@ -20139,7 +20684,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp14",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "7cf44648-5759-49da-8447-9de0eaa18887",
@@ -20168,7 +20714,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp15",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "ff690a61-a609-410c-9773-d85995335735",
@@ -20197,7 +20744,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp16",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "dce987b2-e520-495c-92a0-b0dcca9effe7",
@@ -20226,7 +20774,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "f7aac488-4ba3-4d25-867d-9e9bcaa48438",
@@ -20255,7 +20804,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "3ff07d96-87bc-4e94-af1c-ded54e0008ca",
@@ -20284,7 +20834,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "80f45f4c-2772-4cdf-ae50-aa23b62b3738",
@@ -20313,7 +20864,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9e533269-0121-4870-80b5-7220ba26c969",
@@ -20342,7 +20894,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6b81d28e-08bc-4a9c-bbc7-ab83683bfe1a",
@@ -20371,7 +20924,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "251d43e9-883c-4709-a7f4-2fcab55d791c",
@@ -20400,7 +20954,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "08e94b42-84f1-4c28-bddd-fd15f03369c8",
@@ -20429,7 +20984,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "df65c98e-767d-41aa-b1b5-3284cd52afbe",
@@ -20458,7 +21014,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "42d55a4d-38e8-4ddf-965d-01f32e6256dc",
@@ -20487,7 +21044,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6ee975e2-8259-4640-8d65-6deda5c5507d",
@@ -20516,7 +21074,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8c73629a-827d-43c1-a1a0-7a517dbaeafe",
@@ -20545,7 +21104,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "2441138e-ee5a-48be-87d6-4b0f5a340b41",
@@ -20574,7 +21134,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "be31eae5-b02b-40e9-93b1-02aeb357056a",
@@ -20603,7 +21164,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b42fc3b0-2ae8-4963-a48f-2a5e97be6492",
@@ -20632,7 +21194,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "41bfe7bc-253b-44fa-8e39-a6fd337c8ca4",
@@ -20661,7 +21224,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "6a4483f3-a7ff-4f14-a4bf-f515e731a4aa",
@@ -20690,7 +21254,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "cd5e8e7d-af81-4449-9801-dbe6260d68ea",
@@ -20719,7 +21284,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "9bf320a5-6b73-45d4-ad2a-50a1b8e121ce",
@@ -20748,7 +21314,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "8199a194-f2f8-4a02-a719-635a43fd0d7c",
@@ -20777,7 +21344,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "508a9d90-9a77-4f64-b9b7-f77610acc761",
@@ -20806,7 +21374,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "bb61c1ab-0d09-4c59-bfcb-0b4de335570a",
@@ -20854,7 +21423,8 @@
             1566.3793
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "e169a872-9eba-4b36-9661-604a6c458197",
@@ -20928,7 +21498,8 @@
             653.54456
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "bba6c08a-0ea4-47a3-a5fb-f4852d016265",
@@ -20976,7 +21547,8 @@
             935.6357
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "668c7b2d-7d07-4000-b728-e2d783865822",
@@ -21024,7 +21596,8 @@
             652.9046
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "3f6e6eae-695d-4325-9769-a880f9ace6fa",
@@ -21090,7 +21663,8 @@
             653.8159
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "690145ae-2a95-4d57-af57-d278546e4da0",
@@ -21138,7 +21712,8 @@
             1567.6987
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "06eacb6e-3d91-46e6-92ef-0783d458efc7",
@@ -21186,7 +21761,8 @@
             653.8159
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "d2d19224-a595-455a-997f-b05ebff102d8",
@@ -21234,7 +21810,8 @@
             1567.6987
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "21a61181-1852-466b-81bc-8311b24fcbfc",
@@ -21282,7 +21859,8 @@
             934.31616
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "1edb94a5-859a-44c9-b59a-ed9803d09591",
@@ -21330,7 +21908,8 @@
             935.63574
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "65db7ec3-ca4b-4daf-85c0-e5db11c73a92",
@@ -21378,7 +21957,8 @@
             653.8159
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "3928695b-58c7-4c54-808c-417d61ee4c7c",
@@ -21444,7 +22024,8 @@
             144.81573
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "93ff28ab-485e-4f52-8aed-ab5a377f3083",
@@ -21492,7 +22073,8 @@
             12.815681
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "8bdc9bfe-8984-414a-ad34-a035468fa6c6",
@@ -21540,7 +22122,8 @@
             13.815689
           ]
         ]
-      ]
+      ],
+      "IconPath": null
     },
     {
       "Id": "eb734884-91d1-48e1-87e7-6c8dcc5ca205",
@@ -21569,7 +22152,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "5c36f5a0-0458-4121-92a5-5e28a0235e3c",
@@ -21598,7 +22182,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp1",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     },
     {
       "Id": "b9b0bd2e-6c07-4372-b98a-c79cbee5a9d1",
@@ -21627,7 +22212,8 @@
       "IsCategoryHidden": false,
       "DisplayName": "wp13",
       "Boundary": null,
-      "Boundaries": null
+      "Boundaries": null,
+      "IconPath": null
     }
   ],
   "Edges": [

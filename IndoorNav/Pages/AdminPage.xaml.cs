@@ -74,6 +74,33 @@ public partial class AdminPage : ContentPage
         }
     }
 
+    // Выбор файла иконки для нескольких выделенных точек (режим мультивыбора)
+    private async void OnPickIconForSelectionClicked(object sender, EventArgs e)
+    {
+        if (!Vm.HasMultiSelection) return;
+        try
+        {
+            var result = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Выберите иконку для всех выбранных точек",
+                FileTypes   = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.WinUI,   new[] { ".png", ".jpg", ".jpeg", ".webp", ".bmp" } },
+                    { DevicePlatform.Android, new[] { "image/*" } },
+                    { DevicePlatform.iOS,     new[] { "public.image" } },
+                }),
+            });
+            if (result == null) return;
+            AdminCanvas.ClearIconCache();
+            Vm.SetIconForSelection(result.FullPath);
+            AdminCanvas.InvalidateSurface();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Ошибка", $"Не удалось открыть файл:\n{ex.Message}", "ОК");
+        }
+    }
+
     // Кнопка связи выбранной точки — предложить удалить с подтверждением
     private async void OnEdgeButtonClicked(object sender, EventArgs e)
     {
