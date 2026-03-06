@@ -46,6 +46,30 @@ public partial class AdminPage : ContentPage
     private async void OnExitAdminClicked(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("..");
 
+    /// <summary>
+    /// Копирует файл иконки в Resources/Raw/Icons/ проекта и возвращает
+    /// относительный путь «Icons/filename». Если не удаётся — возвращает исходный путь.
+    /// </summary>
+    private static string NormalizeIconPath(string fullPath)
+    {
+        try
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
+                dir = dir.Parent;
+            if (dir == null) return fullPath;
+
+            var iconsDir = Path.Combine(dir.FullName, "Resources", "Raw", "Icons");
+            Directory.CreateDirectory(iconsDir);
+            var fileName = Path.GetFileName(fullPath);
+            var dest = Path.Combine(iconsDir, fileName);
+            if (!File.Exists(dest))
+                File.Copy(fullPath, dest);
+            return "Icons/" + fileName;
+        }
+        catch { return fullPath; }
+    }
+
     // Выбор файла иконки для вершины графа
     private async void OnPickNodeIconClicked(object sender, EventArgs e)
     {
@@ -65,7 +89,7 @@ public partial class AdminPage : ContentPage
             if (result == null) return;
             // Очищаем кеш растровых иконок, чтобы новый файл (даже с тем же путём) перезагрузился
             AdminCanvas.ClearIconCache();
-            Vm.SelectedNodeIconPath = result.FullPath;
+            Vm.SelectedNodeIconPath = NormalizeIconPath(result.FullPath);
             AdminCanvas.InvalidateSurface();
         }
         catch (Exception ex)
@@ -92,7 +116,7 @@ public partial class AdminPage : ContentPage
             });
             if (result == null) return;
             AdminCanvas.ClearIconCache();
-            Vm.SetIconForSelection(result.FullPath);
+            Vm.SetIconForSelection(NormalizeIconPath(result.FullPath));
             AdminCanvas.InvalidateSurface();
         }
         catch (Exception ex)

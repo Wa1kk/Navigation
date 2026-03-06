@@ -1,4 +1,4 @@
-{
+﻿{
   "Nodes": [
     {
       "Id": "49c8b595-a8f3-4957-9519-4a2acdea35ee",
@@ -65,7 +65,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-log-in-3596092.png"
+      "IconPath": "Icons/free-icon-log-in-3596092.png"
     },
     {
       "Id": "c9b186ac-5eda-4a88-aa59-47dcb33bbee3",
@@ -122,7 +122,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-microphone-483039.png"
+      "IconPath": "Icons/free-icon-microphone-483039.png"
     },
     {
       "Id": "aa65cdf9-8917-4d4e-ab82-cb120feb6eeb",
@@ -171,7 +171,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-hanger-4399105.png"
+      "IconPath": "Icons/free-icon-hanger-4399105.png"
     },
     {
       "Id": "bca1b6e2-086f-42ee-9724-aabd6b69e4e1",
@@ -220,7 +220,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "5feb57be-8861-4da1-8bbc-1e7d956a9953",
@@ -269,7 +269,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "f0e84a67-5add-47d1-be95-7fb1e4a19148",
@@ -416,7 +416,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "c86284aa-09e0-4bac-8caf-aca380c6d42a",
@@ -465,7 +465,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "935ad992-f0e7-49da-b2ab-89d08bedb5a7",
@@ -813,7 +813,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "89aa3ab2-d0b3-44f8-a948-8f3fa0d5170d",
@@ -862,7 +862,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "82ab3ee7-6941-4bc6-aaca-b068be46e311",
@@ -978,7 +978,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "68fe1db4-0b89-4bdb-ad51-b91221195baa",
@@ -1027,7 +1027,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "9ce41e6a-d2d3-494c-a67e-a7864e9f861c",
@@ -1132,7 +1132,7 @@
       "DisplayName": "\u041E\u0433\u043D\u0435\u0442\u0443\u0448\u0438\u0442\u0435\u043B\u044C",
       "Boundary": null,
       "Boundaries": null,
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-fire-extinguisher-4084240.png"
+      "IconPath": "Icons/free-icon-fire-extinguisher-4084240.png"
     },
     {
       "Id": "a1ff7d5f-4730-4c85-8075-0a3f66c7cae7",
@@ -1162,7 +1162,7 @@
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
       "Boundaries": null,
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
+      "IconPath": "Icons/free-icon-exit-2779163.png"
     },
     {
       "Id": "704c1a38-08d9-4bb3-b107-70214e8762da",
@@ -1192,7 +1192,7 @@
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
       "Boundaries": null,
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
+      "IconPath": "Icons/free-icon-exit-2779163.png"
     },
     {
       "Id": "f98b020f-3331-458c-9213-51556f733a85",
@@ -1283,7 +1283,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-log-in-3596092.png"
+      "IconPath": "Icons/free-icon-log-in-3596092.png"
     },
     {
       "Id": "e3543ee1-b1da-4a75-b7f7-64d002315957",
@@ -1332,7 +1332,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-hanger-4399105.png"
+      "IconPath": "Icons/free-icon-hanger-4399105.png"
     },
     {
       "Id": "b05098f1-5b0b-4042-b0aa-8d864975892d",
@@ -1399,7 +1399,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-security-guard-8118479.png"
+      "IconPath": "Icons/free-icon-security-guard-8118479.png"
     },
     {
       "Id": "be38797f-bd39-4bd0-a48b-bf05af82fa3e",
@@ -1466,7 +1466,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
+      "IconPath": "Icons/free-icon-female-sign-18061393.png"
     },
     {
       "Id": "b7a16e32-e50c-4fb1-b405-4f72215ee76f",
@@ -1515,7 +1515,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "3021cca7-c941-4719-b144-4e9835eaceb9",
@@ -1564,7 +1564,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "a7531843-3ce2-44f0-8f22-32930b73f10c",
@@ -1613,7 +1613,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "e7d57dbd-482b-4d26-867b-93145630b61b",
@@ -1662,7 +1662,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "3d75bcd6-3dd1-42d2-b2f5-6d8e7818f683",
@@ -1711,7 +1711,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "0e893001-ad26-4035-b52c-0d07c52c0eb1",
@@ -1760,7 +1760,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "398880ab-c92a-480d-b6bf-6ebe5c12e987",
@@ -1809,7 +1809,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "1edb969f-404a-4edf-a4b2-e4c351214c92",
@@ -1858,7 +1858,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "51eccd32-0738-4cbe-84d6-314b6a73c0f8",
@@ -1907,7 +1907,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "79e20f14-12bb-4fa3-ad8c-a44c7db90823",
@@ -1956,7 +1956,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "c0995142-5623-4a8a-bac2-29fc6606e4d2",
@@ -2384,7 +2384,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
+      "IconPath": "Icons/free-icon-male-7874202.png"
     },
     {
       "Id": "16b41e56-b9b6-4071-a2a8-753ae2efb3e3",
@@ -4852,7 +4852,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
+      "IconPath": "Icons/free-icon-female-sign-18061393.png"
     },
     {
       "Id": "f7ae263d-78c3-4008-97e3-37fe996f3ffc",
@@ -6334,7 +6334,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
+      "IconPath": "Icons/free-icon-male-7874202.png"
     },
     {
       "Id": "05a09860-4e36-4291-ac76-45ac2fb37de2",
@@ -6401,7 +6401,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-female-sign-18061393.png"
+      "IconPath": "Icons/free-icon-female-sign-18061393.png"
     },
     {
       "Id": "30d95842-5655-4e4b-8b80-0e3702694813",
@@ -6828,7 +6828,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-male-7874202.png"
+      "IconPath": "Icons/free-icon-male-7874202.png"
     },
     {
       "Id": "4658ac9c-2925-4215-be8f-24c81b429fc3",
@@ -7805,7 +7805,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "47857f10-1e32-471b-b1ab-2e9af2cf004b",
@@ -7854,7 +7854,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "02030619-d689-4807-a0a6-d23f45435da9",
@@ -7903,7 +7903,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "ea853c8d-f24f-43ba-aa2d-f526820d1d36",
@@ -7952,7 +7952,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-stair-7170845.png"
+      "IconPath": "Icons/free-icon-stair-7170845.png"
     },
     {
       "Id": "e9aff541-d2ea-451d-812e-53721f58ac03",
@@ -8019,7 +8019,7 @@
           ]
         ]
       ],
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-security-guard-8118479.png"
+      "IconPath": "Icons/free-icon-security-guard-8118479.png"
     },
     {
       "Id": "749b46c5-3e47-4833-83b1-8ec443756ea5",
@@ -12965,7 +12965,7 @@
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
       "Boundaries": null,
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
+      "IconPath": "Icons/free-icon-exit-2779163.png"
     },
     {
       "Id": "628f871c-e33e-4c02-874b-3484ea3f91d6",
@@ -12995,7 +12995,7 @@
       "DisplayName": "\u042D\u0432\u0430\u043A. \u0432\u044B\u0445\u043E\u0434",
       "Boundary": null,
       "Boundaries": null,
-      "IconPath": "C:\\Users\\User\\Desktop\\dip\\Navigation\\IndoorNav\\Resources\\Icons\\free-icon-exit-2779163.png"
+      "IconPath": "Icons/free-icon-exit-2779163.png"
     },
     {
       "Id": "656498cb-5711-40bf-872c-9b8832fae983",

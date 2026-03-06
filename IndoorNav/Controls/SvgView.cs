@@ -375,9 +375,22 @@ public class SvgView : SKCanvasView
         {
             if (System.IO.Path.IsPathRooted(path))
             {
-                // Абсолютный путь с диска (FilePicker)
-                var bytes = await Task.Run(() => System.IO.File.ReadAllBytes(path)).ConfigureAwait(false);
-                bmp = SKBitmap.Decode(bytes);
+                if (System.IO.File.Exists(path))
+                {
+                    // Абсолютный путь с диска (FilePicker)
+                    var bytes = await Task.Run(() => System.IO.File.ReadAllBytes(path)).ConfigureAwait(false);
+                    bmp = SKBitmap.Decode(bytes);
+                }
+                else
+                {
+                    // Файл не найден по абсолютному пути (другой ПК) —
+                    // пробуем загрузить из бандла по имени файла
+                    var bundlePath = "Icons/" + System.IO.Path.GetFileName(path);
+                    using var s  = await FileSystem.OpenAppPackageFileAsync(bundlePath).ConfigureAwait(false);
+                    using var ms = new System.IO.MemoryStream();
+                    await s.CopyToAsync(ms).ConfigureAwait(false);
+                    bmp = SKBitmap.Decode(ms.ToArray());
+                }
             }
             else
             {
