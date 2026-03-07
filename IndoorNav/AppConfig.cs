@@ -28,7 +28,14 @@ public static class AppConfig
     public const string GithubToken = "";
 
     // ──────────────────────────────────────────────────────────
-    public static bool CanFetch   => !string.IsNullOrWhiteSpace(GistRawUrl);
-    public static bool CanPublish => !string.IsNullOrWhiteSpace(GistId) &&
-                                     !string.IsNullOrWhiteSpace(GithubToken);
+    // URL сервера ЧС-оповещений (Tools/EmergencyServer).
+    // Пример локально: "http://localhost:5180"
+    // Пример удалённо: "https://your-server.example.com"
+    public const string ServerBaseUrl = "http://localhost:5180";
+
+    // ──────────────────────────────────────────────────────────
+    public static bool CanFetch     => !string.IsNullOrWhiteSpace(GistRawUrl);
+    public static bool CanPublish   => !string.IsNullOrWhiteSpace(GistId) &&
+                                       !string.IsNullOrWhiteSpace(GithubToken);
+    public static bool CanUseServer => !string.IsNullOrWhiteSpace(ServerBaseUrl);
 }

@@ -184,6 +184,7 @@
                                       HighlightStartNode="{Binding StartNode}"
                                       ShowFireExtinguishers="{Binding ShowFireExtinguishers}"
                                       QrAnchorNodeIds="{Binding QrAnchorNodeIds}"
+                                      PendingQrNode="{Binding PendingQrNode}"
                                       BlockedNodeIds="{Binding BlockedNodeIds}"
                                       ShowRouteWaypoints="{Binding IsBlockingMode}"
                                       ShowGraph="True"
@@ -493,6 +494,44 @@
                                     <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- QR anchor "Вы тут" banner (появляется после сканирования QR-кода) -->
+                    <Border HorizontalOptions="Fill"
+                            VerticalOptions="End"
+                            Margin="12,0,12,16"
+                            Padding="16,14"
+                            StrokeShape="RoundRectangle 16"
+                            BackgroundColor="White"
+                            StrokeThickness="0"
+                            IsVisible="{Binding HasPendingQr}"
+                            ZIndex="18">
+                        <Border.Shadow>
+                            <Shadow Brush="Black" Offset="0,4" Radius="16" Opacity="0.18" />
+                        </Border.Shadow>
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="&#x1F4CD;"
+                                   FontSize="22" VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Вы здесь"
+                                       FontSize="13" FontAttributes="Bold" TextColor="#0F172A" />
+                                <Label Text="{Binding PendingQrNodeName}"
+                                       FontSize="12" TextColor="#64748B"
+                                       LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="2"
+                                    Text="Начать отсюда"
+                                    Command="{Binding ConfirmQrStartCommand}"
+                                    BackgroundColor="#0E7490" TextColor="White"
+                                    FontSize="12" CornerRadius="10"
+                                    HeightRequest="38" Padding="12,0" />
+                            <Button Grid.Column="3"
+                                    Text="&#x2715;"
+                                    Command="{Binding DismissQrBannerCommand}"
+                                    BackgroundColor="Transparent" TextColor="#94A3B8"
+                                    FontSize="16" WidthRequest="38" HeightRequest="38"
+                                    Padding="0" />
                         </Grid>
                     </Border>
 
@@ -952,6 +991,57 @@
                 </VerticalStackLayout>
             </Border>
 
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             FULL-SCREEN EMERGENCY NOTIFICATION OVERLAY
+             Appears when server pushes ЧС alert; spams every 4 s until confirmed.
+             ═══════════════════════════════════════ -->
+        <Grid Grid.ColumnSpan="2"
+              IsVisible="{Binding IsEmergencyNotificationVisible}"
+              BackgroundColor="#CC000000"
+              ZIndex="200">
+            <Border HorizontalOptions="Center" VerticalOptions="Center"
+                    BackgroundColor="#B91C1C"
+                    Padding="28,24"
+                    StrokeShape="RoundRectangle 20"
+                    StrokeThickness="0"
+                    MaximumWidthRequest="400">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,6" Radius="20" Opacity="0.5" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                    <Label Text="🚨"
+                           FontSize="52"
+                           HorizontalOptions="Center" />
+                    <Label Text="ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ"
+                           FontSize="20" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="Немедленно покиньте здание!"
+                           FontSize="15"
+                           TextColor="#FCA5A5"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="Следуйте по маршруту эвакуации.&#x0A;Не пользуйтесь лифтами."
+                           FontSize="13"
+                           TextColor="#FEE2E2"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap" />
+                    <Button Text="✔  Понял, эвакуируюсь"
+                            Command="{Binding ConfirmEmergencyNotificationCommand}"
+                            BackgroundColor="White"
+                            TextColor="#B91C1C"
+                            FontAttributes="Bold"
+                            FontSize="15"
+                            CornerRadius="12"
+                            HeightRequest="50"
+                            HorizontalOptions="Fill"
+                            Margin="0,8,0,0" />
+                </VerticalStackLayout>
+            </Border>
         </Grid>
 
     </Grid>

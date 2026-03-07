@@ -1,3 +1,5 @@
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using IndoorNav.Models;
 
@@ -195,6 +197,91 @@ public class EmergencyService
         }
         path.Reverse();
         return path;
+    }
+
+    // ── Server polling ────────────────────────────────────────────────────────────
+
+    private record EmergencyStatusResponse(string[] ActiveBuildingIds);
+
+    /// <summary>
+    /// Polls GET /emergency/status every 30 s and syncs local state.
+    /// Call once on app startup; pass a CancellationToken to stop.
+    /// </summary>
+    public async Task StartServerPollingAsync(CancellationToken ct)
+    {
+        if (!AppConfig.CanUseServer) return;
+
+        using var http  = new HttpClient { BaseAddress = new Uri(AppConfig.ServerBaseUrl), Timeout = TimeSpan.FromSeconds(8) };
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+
+        // Immediate first check
+        await SyncWithServerAsync(http);
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(ct))
+                await SyncWithServerAsync(http);
+        }
+        catch (OperationCanceledException) { }
+    }
+
+    private async Task SyncWithServerAsync(HttpClient http)
+    {
+        try
+        {
+            var dto = await http.GetFromJsonAsync<EmergencyStatusResponse>("/emergency/status");
+            if (dto == null) return;
+
+            var serverActive = new HashSet<string>(dto.ActiveBuildingIds, StringComparer.OrdinalIgnoreCase);
+
+            // Activate buildings the server says are active but local doesn't know yet
+            foreach (var id in serverActive.Except(_activeBuildings.ToList(), StringComparer.OrdinalIgnoreCase))
+                Activate(id);
+
+            // Deactivate buildings the server says are no longer active
+            foreach (var id in _activeBuildings.Except(serverActive, StringComparer.OrdinalIgnoreCase).ToList())
+                Deactivate(id);
+        }
+        catch { /* network error — keep current local state */ }
+    }
+
+    /// <summary>
+    /// Calls POST /emergency/activate/{buildingId} on the server (fire-and-forget).
+    /// Used by AdminViewModel so other clients learn about the change within 30 s.
+    /// </summary>
+    public async Task NotifyServerActivateAsync(string buildingId)
+    {
+        if (!AppConfig.CanUseServer) return;
+        try
+        {
+            using var http = new HttpClient { BaseAddress = new Uri(AppConfig.ServerBaseUrl), Timeout = TimeSpan.FromSeconds(5) };
+            await http.PostAsync($"/emergency/activate/{Uri.EscapeDataString(buildingId)}", null);
+        }
+        catch { /* best-effort */ }
+    }
+
+    /// <summary>Calls POST /emergency/deactivate/{buildingId} on the server (fire-and-forget).</summary>
+    public async Task NotifyServerDeactivateAsync(string buildingId)
+    {
+        if (!AppConfig.CanUseServer) return;
+        try
+        {
+            using var http = new HttpClient { BaseAddress = new Uri(AppConfig.ServerBaseUrl), Timeout = TimeSpan.FromSeconds(5) };
+            await http.PostAsync($"/emergency/deactivate/{Uri.EscapeDataString(buildingId)}", null);
+        }
+        catch { /* best-effort */ }
+    }
+
+    /// <summary>Calls POST /emergency/deactivate-all on the server (fire-and-forget).</summary>
+    public async Task NotifyServerDeactivateAllAsync()
+    {
+        if (!AppConfig.CanUseServer) return;
+        try
+        {
+            using var http = new HttpClient { BaseAddress = new Uri(AppConfig.ServerBaseUrl), Timeout = TimeSpan.FromSeconds(5) };
+            await http.PostAsync("/emergency/deactivate-all", null);
+        }
+        catch { /* best-effort */ }
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────────

@@ -906,18 +906,31 @@ public class AdminViewModel : INotifyPropertyChanged
         ToggleEmergencyCommand = new Command<string>(buildingId =>
         {
             if (_emergencyService.IsActiveForBuilding(buildingId))
+            {
                 _emergencyService.Deactivate(buildingId);
+                _ = _emergencyService.NotifyServerDeactivateAsync(buildingId);
+            }
             else
+            {
                 _emergencyService.Activate(buildingId);
+                _ = _emergencyService.NotifyServerActivateAsync(buildingId);
+            }
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
         });
         ToggleAllEmergencyCommand = new Command(() =>
         {
             if (_emergencyService.IsEmergencyActive)
+            {
                 _emergencyService.DeactivateAll();
+                _ = _emergencyService.NotifyServerDeactivateAllAsync();
+            }
             else
+            {
                 _emergencyService.ActivateAll(Buildings.Select(b => b.Id));
+                foreach (var b in Buildings)
+                    _ = _emergencyService.NotifyServerActivateAsync(b.Id);
+            }
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
         });
@@ -1517,6 +1530,10 @@ public class AdminViewModel : INotifyPropertyChanged
                 };
                 qrNode.Name = $"QR-{qrNode.Id[..8]}";
                 _graphService.AddNode(qrNode);
+
+                // Если узел попал на ребро — разрезать его
+                TrySnapQrNodeToEdge(qrNode);
+
                 RefreshOverlay();
                 CurrentAction = AdminAction.None;
                 StatusText    = $"Добавлен QR-якорь: {qrNode.Name}";
@@ -1777,6 +1794,66 @@ public class AdminViewModel : INotifyPropertyChanged
         arg.node.X = arg.svgPos.X;
         arg.node.Y = arg.svgPos.Y;
         StatusText = $"{arg.node.Name}: ({arg.svgPos.X:F0}, {arg.svgPos.Y:F0})";
+    }
+
+    /// <summary>
+    /// Если QR-якорь размещён вблизи ребра графа (на том же этаже),
+    /// разрезает это ребро: удаляет старое и добавляет два новых через qrNode.
+    /// </summary>
+    private void TrySnapQrNodeToEdge(NavNode qrNode, float threshold = 20f)
+    {
+        var graph = _graphService.Graph;
+        var edges = graph.Edges.ToList(); // snapshot — будем модифицировать
+
+        NavEdge? bestEdge = null;
+        float bestDist = threshold;
+
+        foreach (var edge in edges)
+        {
+            var from = graph.GetNode(edge.FromId);
+            var to   = graph.GetNode(edge.ToId);
+            if (from == null || to == null) continue;
+            // Только рёбра на том же здании и этаже
+            if (from.BuildingId != qrNode.BuildingId || to.BuildingId != qrNode.BuildingId) continue;
+            if (from.FloorNumber != qrNode.FloorNumber || to.FloorNumber != qrNode.FloorNumber) continue;
+            // Не учитываем рёбра, уже связанные с этим узлом
+            if (edge.FromId == qrNode.Id || edge.ToId == qrNode.Id) continue;
+
+            float dist = PointToSegmentDistance(
+                qrNode.X, qrNode.Y,
+                from.X, from.Y, to.X, to.Y,
+                out float t);
+
+            if (dist < bestDist && t >= 0f && t <= 1f)
+            {
+                bestDist = dist;
+                bestEdge = edge;
+            }
+        }
+
+        if (bestEdge == null) return;
+
+        _graphService.RemoveEdge(bestEdge.FromId, bestEdge.ToId);
+        _graphService.AddEdge(bestEdge.FromId, qrNode.Id);
+        _graphService.AddEdge(qrNode.Id, bestEdge.ToId);
+
+        StatusText += " (вставлен в ребро)";
+    }
+
+    private static float PointToSegmentDistance(
+        float px, float py, float ax, float ay, float bx, float by, out float t)
+    {
+        float dx = bx - ax, dy = by - ay;
+        float lenSq = dx * dx + dy * dy;
+        if (lenSq < 0.0001f)
+        {
+            t = 0f;
+            return MathF.Sqrt((px - ax) * (px - ax) + (py - ay) * (py - ay));
+        }
+        t = ((px - ax) * dx + (py - ay) * dy) / lenSq;
+        float projX = ax + t * dx;
+        float projY = ay + t * dy;
+        return MathF.Sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
     }
 
     private async Task ShowQrCodeAsync()

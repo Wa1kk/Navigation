@@ -18,6 +18,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly EmergencyService _emergencyService;
     private readonly ScheduleService _scheduleService;
     private readonly DepartmentService _departmentService;
+    private readonly QrService _qrService;
 
     private Building? _selectedBuilding;
     private Floor? _selectedFloor;
@@ -43,10 +44,37 @@ public class MainViewModel : INotifyPropertyChanged
     private ObservableCollection<string> _qrAnchorNodeIds = new();
     public IEnumerable<string> QrAnchorNodeIds => _qrAnchorNodeIds;
 
+    // --- Pending QR anchor ("Вы тут" banner) ---
+    private NavNode? _pendingQrNode;
+    public NavNode? PendingQrNode
+    {
+        get => _pendingQrNode;
+        set
+        {
+            _pendingQrNode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasPendingQr));
+            OnPropertyChanged(nameof(PendingQrNodeName));
+        }
+    }
+    public bool   HasPendingQr     => _pendingQrNode != null;
+    public string PendingQrNodeName => _pendingQrNode?.Name ?? string.Empty;
+
     // --- ЧС: blocked-node rerouting ---
     private readonly HashSet<string> _blockedNodeIds = new();
     private bool _isBlockingMode;
     private NavNode? _pendingBlockNode;
+
+    // --- ЧС: server polling & spam notification ---
+    private CancellationTokenSource? _pollingCts;
+    private CancellationTokenSource? _emergencySpamCts;
+    /// <summary>True while the full-screen emergency alert overlay is visible.</summary>
+    private bool _isEmergencyNotificationVisible;
+    public bool IsEmergencyNotificationVisible
+    {
+        get => _isEmergencyNotificationVisible;
+        private set { _isEmergencyNotificationVisible = value; OnPropertyChanged(); }
+    }
 
     // --- Пошаговые инструкции ---
     private readonly List<RouteStep> _routeStepsList = new();
@@ -441,6 +469,8 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand BuildEmergencyRouteCommand { get; }
     public ICommand ChangeGroupCommand          { get; }
     public ICommand ScanQrCommand               { get; }
+    public ICommand ConfirmQrStartCommand        { get; }
+    public ICommand DismissQrBannerCommand       { get; }
     public ICommand MarkRouteBlockedCommand     { get; }
     public ICommand CancelBlockingModeCommand   { get; }
     public ICommand ConfirmBlockNodeCommand     { get; }
@@ -451,16 +481,19 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SelectBuildingPickerCommand  { get; }
     public ICommand SelectFloorCommand           { get; }
     public ICommand ToggleSidebarCommand         { get; }
+    /// <summary>User acknowledges the emergency alert — stops spam loop, shows location picker.</summary>
+    public ICommand ConfirmEmergencyNotificationCommand { get; }
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
-    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService, DepartmentService departmentService)
+    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService, DepartmentService departmentService, QrService qrService)
     {
         _graphService       = graphService;
         _authService        = authService;
         _emergencyService   = emergencyService;
         _scheduleService    = scheduleService;
         _departmentService  = departmentService;
+        _qrService          = qrService;
 
         // Subscribe to emergency state changes
         _emergencyService.EmergencyChanged += OnEmergencyChanged;
@@ -614,27 +647,63 @@ public class MainViewModel : INotifyPropertyChanged
         ScanQrCommand = new Command(async () =>
         {
 #if ANDROID || IOS
-            // On mobile: open the camera QR scanner modal page
+            // На мобильных — открыть QrScanPage (камера + галерея)
             var page = IPlatformApplication.Current?.Services.GetService<IndoorNav.Pages.QrScanPage>();
             if (page != null)
                 await Shell.Current.Navigation.PushModalAsync(page);
 #else
-            // On Windows: manual text entry fallback
-            var content = await Shell.Current.DisplayPromptAsync(
-                "QR-код",
-                "Введите или вставьте содержимое QR-метки:",
-                placeholder: "indoornav://node/...");
-            if (string.IsNullOrWhiteSpace(content)) return;
-
-            var nodeId = DeepLinkService.ParseUri(content.Trim());
-            if (nodeId == null)
+            // На Windows/Desktop — выбрать изображение с QR-кодом через FilePicker
+            try
             {
-                await Shell.Current.DisplayAlert("QR", "Нераспознанный формат QR-кода.", "ОК");
-                return;
+                var picked = await FilePicker.PickAsync(new PickOptions
+                {
+                    PickerTitle = "Выберите изображение с QR-кодом",
+                    FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                    {
+                        { DevicePlatform.WinUI,       new[] { ".png", ".jpg", ".jpeg", ".bmp" } },
+                        { DevicePlatform.MacCatalyst, new[] { "public.image" } },
+                    })
+                });
+                if (picked == null) return;
+
+                byte[] bytes;
+                using (var fs = await picked.OpenReadAsync())
+                using (var ms = new System.IO.MemoryStream())
+                {
+                    await fs.CopyToAsync(ms);
+                    bytes = ms.ToArray();
+                }
+
+                var text = _qrService.DecodeFromBytes(bytes);
+                if (text == null)
+                {
+                    await Shell.Current.DisplayAlert("QR", "QR-код не найден в изображении.", "ОК");
+                    return;
+                }
+
+                var nodeId = DeepLinkService.ParseUri(text);
+                if (nodeId == null)
+                {
+                    await Shell.Current.DisplayAlert("QR", "Нераспознанный формат QR-кода.", "ОК");
+                    return;
+                }
+                HandleDeepLinkNode(nodeId);
             }
-            HandleDeepLinkNode(nodeId);
+            catch
+            {
+                await Shell.Current.DisplayAlert("QR", "Не удалось загрузить изображение.", "ОК");
+            }
 #endif
         });
+
+        ConfirmQrStartCommand = new Command(() =>
+        {
+            if (_pendingQrNode == null) return;
+            StartNode = _pendingQrNode;
+            PendingQrNode = null;
+        });
+
+        DismissQrBannerCommand = new Command(() => PendingQrNode = null);
 
         MarkRouteBlockedCommand = new Command(() =>
         {
@@ -709,6 +778,20 @@ public class MainViewModel : INotifyPropertyChanged
         });
         ToggleSidebarCommand = new Command(() => IsSidebarExpanded = !IsSidebarExpanded);
 
+        ConfirmEmergencyNotificationCommand = new Command(() =>
+        {
+            StopEmergencySpam();
+            // Proceed to the normal "pick your location" ЧС flow
+            var scheduleNode = TryAutoSelectBuildingFromSchedule();
+            IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
+            if (scheduleNode != null && _isEmergencyActive)
+            {
+                StartNode = scheduleNode;
+                EmergencyAutoLocationName = scheduleNode.DisplayName;
+            }
+            ShowEmergencyConfirmation = _isEmergencyActive;
+        });
+
         // Subscribe to deep-link and in-app scan results
         DeepLinkService.NodeRequested += HandleDeepLinkNode;
 
@@ -728,9 +811,17 @@ public class MainViewModel : INotifyPropertyChanged
             var node = _graphService.Graph.Nodes.FirstOrDefault(n => n.Id == nodeId);
             if (node == null) return;
 
-            StartNode = node;
+            // Переключить здание при необходимости
+            var building = Buildings.FirstOrDefault(b => b.Id == node.BuildingId);
+            if (building != null && building != _selectedBuilding)
+                SelectedBuilding = building;
+
+            // Переключить этаж
             var floor = _selectedBuilding?.Floors.FirstOrDefault(f => f.Number == node.FloorNumber);
             if (floor != null) SelectedFloor = floor;
+
+            // Показать «Вы тут» баннер вместо немедленной установки маршрута
+            PendingQrNode = node;
         });
     }
 
@@ -746,6 +837,10 @@ public class MainViewModel : INotifyPropertyChanged
             await _scheduleService.LoadAsync();
             await _departmentService.LoadAsync();
             await _emergencyService.LoadAsync();
+
+            // Start background polling of the emergency server (every 30 s)
+            _pollingCts = new CancellationTokenSource();
+            _ = _emergencyService.StartServerPollingAsync(_pollingCts.Token);
 
             var tasks = BuildingConfig.Select(cfg => DiscoverBuildingAsync(cfg.Id, cfg.Name, cfg.Address, _graphService));
             var buildings = await Task.WhenAll(tasks);
@@ -1290,6 +1385,7 @@ public class MainViewModel : INotifyPropertyChanged
             IsBlockingMode = false;
             PendingBlockNode = null;
             OnPropertyChanged(nameof(BlockedNodeIds));
+            StopEmergencySpam();
             if (!_emergencyService.IsEmergencyActive)
             {
                 ShowEmergencyConfirmation = false;
@@ -1299,27 +1395,51 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
-        // ЧС активирован — переключаемся на здание аудитории из расписания, показываем подтверждение
+        // ЧС активирован — показываем полноэкранный алерт (спам до подтверждения)
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            // Переключаем здание по расписанию (независимо от того, на каком здании был пользователь)
-            var scheduleNode = TryAutoSelectBuildingFromSchedule();
-            // После возможного переключения здания обновляем IsEmergencyActive
-            IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
-            ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
-            ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
-
-            if (scheduleNode != null && _isEmergencyActive)
-            {
-                StartNode = scheduleNode;
-                EmergencyAutoLocationName = scheduleNode.DisplayName;
-                ShowEmergencyConfirmation = true;
-            }
-            else
-            {
-                ShowEmergencyConfirmation = false;
-            }
+            StartEmergencySpam();
         });
+    }
+
+    // ── Emergency spam loop ────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Shows the full-screen emergency overlay and pulses it every 4 s until
+    /// <see cref="StopEmergencySpam"/> is called (by user pressing "Подтверждаю").
+    /// </summary>
+    private void StartEmergencySpam()
+    {
+        // Don't start a second loop if one is already running
+        if (_emergencySpamCts != null && !_emergencySpamCts.IsCancellationRequested) return;
+
+        _emergencySpamCts?.Dispose();
+        _emergencySpamCts = new CancellationTokenSource();
+        var ct = _emergencySpamCts.Token;
+
+        IsEmergencyNotificationVisible = true;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(4), ct);
+                    MainThread.BeginInvokeOnMainThread(()
+                        => IsEmergencyNotificationVisible = true);
+                }
+            }
+            catch (OperationCanceledException) { }
+        }, ct);
+    }
+
+    private void StopEmergencySpam()
+    {
+        _emergencySpamCts?.Cancel();
+        _emergencySpamCts?.Dispose();
+        _emergencySpamCts = null;
+        IsEmergencyNotificationVisible = false;
     }
 
     private void ExecuteBuildEmergencyRoute()
