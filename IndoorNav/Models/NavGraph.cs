@@ -90,6 +90,8 @@ public class NavGraph
         if (startId == endId)
             return GetNode(startId) is { } n ? [n] : [];
 
+        if (GetNode(startId) == null || GetNode(endId) == null) return [];
+
         var dist   = new Dictionary<string, float>();
         var prev   = new Dictionary<string, string?>();
         var queue  = new SortedSet<(float dist, string id)>(
