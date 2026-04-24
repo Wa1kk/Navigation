@@ -1,16 +1,23 @@
 using System.Text.Json;
 using IndoorNav.Models;
+using Microsoft.Maui.Storage;
 
 namespace IndoorNav.Services;
 
 public class NavGraphService
 {
     /// <summary>
-    /// Получает путь к папке проекта, поднимаясь вверх по дереву директорий
-    /// пока не находит IndoorNav.csproj из AppContext.BaseDirectory.
+    /// Получает путь к файлу navgraph.json. На iOS/Android используется AppDataDirectory,
+    /// на Desktop пытается найти файл в проекте.
     /// </summary>
-    private static string GetProjectRootPath()
+    private static string GetNavGraphPath()
     {
+#if IOS || ANDROID
+        // На мобильных платформах используем AppDataDirectory (безопасное место для данных)
+        var appDataDir = FileSystem.AppDataDirectory;
+        return Path.Combine(appDataDir, "navgraph.json");
+#else
+        // На Desktop пытаемся найти файл в Resources/Raw
         var basePath = AppContext.BaseDirectory;
         var dir = new DirectoryInfo(basePath);
         
@@ -20,11 +27,12 @@ public class NavGraphService
             dir = dir.Parent;
         }
         
-        return dir?.FullName ?? basePath;
+        if (dir == null) dir = new DirectoryInfo(basePath);
+        return Path.Combine(dir.FullName, "Resources", "Raw", "navgraph.json");
+#endif
     }
 
-    private static readonly string FilePath =
-        Path.Combine(GetProjectRootPath(), "Resources", "Raw", "navgraph.json");
+    private static readonly string FilePath = GetNavGraphPath();
 
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -44,6 +52,27 @@ public class NavGraphService
                 var localJson = await File.ReadAllTextAsync(FilePath);
                 _graph = JsonSerializer.Deserialize<NavGraph>(localJson, JsonOpts) ?? new NavGraph();
                 MigrateWaypoints();
+            }
+            else
+            {
+#if IOS || ANDROID
+                // На мобильных устройствах попытаемся загрузить из бандла
+                try
+                {
+                    using var stream = await FileSystem.OpenAppPackageFileAsync("navgraph.json");
+                    using var reader = new StreamReader(stream);
+                    var bundledJson = await reader.ReadToEndAsync();
+                    _graph = JsonSerializer.Deserialize<NavGraph>(bundledJson, JsonOpts) ?? new NavGraph();
+                    MigrateWaypoints();
+                    
+                    // Сохраняем локально для последующего использования
+                    await SaveAsync();
+                }
+                catch
+                {
+                    _graph = new NavGraph();
+                }
+#endif
             }
         }
         catch (Exception ex)

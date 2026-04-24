@@ -29,6 +29,16 @@ public partial class MainPage : ContentPage
                     MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToNode(node, 2.5f));
             });
         }
+        else if (e.PropertyName == nameof(MainViewModel.PendingQrNode) && _vm.PendingQrNode != null)
+        {
+            // QR отсканирован — приближаемся к точке и показываем «Вы тут»
+            Dispatcher.Dispatch(() =>
+            {
+                var node = _vm.PendingQrNode;
+                if (node != null)
+                    MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToNode(node, 3.0f));
+            });
+        }
         else if (e.PropertyName == nameof(MainViewModel.HasRoute) && _vm.HasRoute)
         {
             // Откладываем на следующую итерацию главного потока — к этому моменту

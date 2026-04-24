@@ -206,6 +206,7 @@ public class MainViewModel : INotifyPropertyChanged
     public bool IsAdminUser   => _authService?.CurrentRole == UserRole.Admin;
     public bool IsStudentUser  => _authService?.CurrentRole == UserRole.Student;
     public bool ShowMobileAdminButton => IsAdminUser && DeviceInfo.Idiom == DeviceIdiom.Phone;
+    public bool ShowMobileLogoutButton => !IsAdminUser && DeviceInfo.Idiom == DeviceIdiom.Phone;
     public string CurrentUserName => _authService?.CurrentUser?.DisplayName ?? "Гость";
 
     private bool _isEmergencyActive;
@@ -1355,6 +1356,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             OnPropertyChanged(nameof(IsAdminUser));
             OnPropertyChanged(nameof(ShowMobileAdminButton));
+            OnPropertyChanged(nameof(ShowMobileLogoutButton));
             OnPropertyChanged(nameof(IsStudentUser));
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
@@ -1387,6 +1389,7 @@ public class MainViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(IsAdminUser));
         OnPropertyChanged(nameof(ShowMobileAdminButton));
+        OnPropertyChanged(nameof(ShowMobileLogoutButton));
         ((Command)GoToAdminCommand).ChangeCanExecute();
         ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
         ((Command)MarkRouteBlockedCommand).ChangeCanExecute();

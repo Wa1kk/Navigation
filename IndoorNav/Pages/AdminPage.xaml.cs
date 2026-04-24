@@ -1,6 +1,8 @@
 using IndoorNav.Models;
 using IndoorNav.ViewModels;
 using SkiaSharp;
+using Microsoft.Maui;
+using Microsoft.Maui.Storage;
 
 namespace IndoorNav.Pages;
 
@@ -47,27 +49,45 @@ public partial class AdminPage : ContentPage
         => await Shell.Current.GoToAsync("..");
 
     /// <summary>
-    /// Копирует файл иконки в Resources/Raw/Icons/ проекта и возвращает
-    /// относительный путь «Icons/filename». Если не удаётся — возвращает исходный путь.
+    /// Нормализует путь иконки для разных платформ.
+    /// На Desktop копирует файл в Resources/Raw/Icons/ проекта.
+    /// На iOS/Android сохраняет в AppDataDirectory и возвращает относительный путь.
     /// </summary>
     private static string NormalizeIconPath(string fullPath)
     {
         try
         {
+            var fileName = Path.GetFileName(fullPath);
+            
+#if IOS || ANDROID
+            // На мобильных платформах сохраняем в AppDataDirectory
+            var iconsDir = Path.Combine(FileSystem.AppDataDirectory, "Icons");
+            Directory.CreateDirectory(iconsDir);
+            var dest = Path.Combine(iconsDir, fileName);
+            if (File.Exists(fullPath))
+                File.Copy(fullPath, dest, overwrite: true);
+            // Возвращаем путь относительно AppDataDirectory
+            return "Icons/" + fileName;
+#else
+            // На Desktop используем Resources/Raw/Icons
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
                 dir = dir.Parent;
-            if (dir == null) return fullPath;
+            if (dir == null) return "Icons/" + fileName;
 
-            var iconsDir = Path.Combine(dir.FullName, "Resources", "Raw", "Icons");
-            Directory.CreateDirectory(iconsDir);
-            var fileName = Path.GetFileName(fullPath);
-            var dest = Path.Combine(iconsDir, fileName);
-            if (!File.Exists(dest))
-                File.Copy(fullPath, dest);
+            var projectIconsDir = Path.Combine(dir.FullName, "Resources", "Raw", "Icons");
+            Directory.CreateDirectory(projectIconsDir);
+            var destPath = Path.Combine(projectIconsDir, fileName);
+            if (File.Exists(fullPath) && !File.Exists(destPath))
+                File.Copy(fullPath, destPath);
             return "Icons/" + fileName;
+#endif
         }
-        catch { return fullPath; }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"NormalizeIconPath error: {ex.Message}");
+            return fullPath;
+        }
     }
 
     // Выбор файла иконки для вершины графа

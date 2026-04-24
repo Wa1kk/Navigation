@@ -3,32 +3,54 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="IndoorNav.Pages.QrScanPage"
              Shell.NavBarIsVisible="False"
-             BackgroundColor="Black">
+             BackgroundColor="#1E293B">
+    <Grid RowDefinitions="*,Auto">
 
-    <Grid>
-        <!-- Camera view added here programmatically on Android / iOS -->
-        <ContentView x:Name="CameraHolder" HorizontalOptions="Fill" VerticalOptions="Fill" />
+        <!-- Illustration + text -->
+        <VerticalStackLayout Grid.Row="0"
+                             HorizontalOptions="Center" VerticalOptions="Center"
+                             Spacing="20" Margin="32,0">
+            <Border WidthRequest="120" HeightRequest="120"
+                    HorizontalOptions="Center"
+                    StrokeShape="RoundRectangle 18"
+                    BackgroundColor="#334155" StrokeThickness="0">
+                <Label Text="QR" FontSize="40" FontAttributes="Bold" TextColor="#94A3B8"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Label Text="Сканирование QR-кода"
+                   TextColor="White" FontSize="20" FontAttributes="Bold"
+                   HorizontalOptions="Center" />
+            <Label Text="Сфотографируйте QR-код на стенде или выберите фото из галереи"
+                   TextColor="#94A3B8" FontSize="14"
+                   HorizontalTextAlignment="Center" HorizontalOptions="Center"
+                   LineBreakMode="WordWrap" />
+        </VerticalStackLayout>
 
-        <!-- Viewfinder frame overlay -->
-        <Border WidthRequest="240" HeightRequest="240"
-                HorizontalOptions="Center" VerticalOptions="Center"
-                BackgroundColor="Transparent"
-                Stroke="#00BCD4" StrokeThickness="3"
-                StrokeShape="RoundRectangle 14" />
-
-        <!-- Hint -->
-        <Label Text="Наведите камеру на QR-код"
-               TextColor="#CCCCCC" FontSize="15"
-               HorizontalOptions="Center" VerticalOptions="Center"
-               Margin="0,170,0,0" />
+        <!-- Action buttons -->
+        <VerticalStackLayout Grid.Row="1" Spacing="12" Padding="24,0,24,52">
+            <Button Text="Сфотографировать QR"
+                    Clicked="OnCapturePhotoClicked"
+                    BackgroundColor="#0E7490" TextColor="White"
+                    FontSize="15" FontAttributes="Bold"
+                    HeightRequest="52" CornerRadius="14" />
+            <Button Text="Выбрать из галереи"
+                    Clicked="OnPickFromGalleryClicked"
+                    BackgroundColor="#334155" TextColor="#E2E8F0"
+                    FontSize="15" HeightRequest="52" CornerRadius="14" />
+            <Button Text="Отмена"
+                    Clicked="OnCloseClicked"
+                    BackgroundColor="Transparent" TextColor="#94A3B8"
+                    FontSize="14" HeightRequest="44" />
+        </VerticalStackLayout>
 
         <!-- Close button -->
         <Button Text="✕"
                 Clicked="OnCloseClicked"
                 HorizontalOptions="Start" VerticalOptions="Start"
                 Margin="16,44,0,0"
-                BackgroundColor="#80000000" TextColor="White"
+                BackgroundColor="#80334155" TextColor="White"
                 CornerRadius="22" WidthRequest="44" HeightRequest="44"
                 FontSize="18" Padding="0" />
+
     </Grid>
 </ContentPage>

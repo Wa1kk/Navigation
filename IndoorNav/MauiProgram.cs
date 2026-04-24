@@ -4,7 +4,8 @@ using IndoorNav.Services;
 using IndoorNav.ViewModels;
 using IndoorNav.Pages;
 using IndoorNav.Controls;
-#if ANDROID || IOS
+#if ANDROID 
+using ZXing.Net.Maui;
 using ZXing.Net.Maui.Controls;
 #endif
 
@@ -18,7 +19,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
-#if ANDROID || IOS
+#if ANDROID
             .UseBarcodeReader()
 #endif
             .ConfigureMauiHandlers(handlers =>

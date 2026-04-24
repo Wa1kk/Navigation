@@ -1,4 +1,4 @@
-﻿{
+{
   "Nodes": [
     {
       "Id": "49c8b595-a8f3-4957-9519-4a2acdea35ee",
@@ -1290,8 +1290,8 @@
       "Name": "\u0413\u0430\u0440\u0434\u0435\u0440\u043E\u0431",
       "BuildingId": "BuildingA",
       "FloorNumber": 1,
-      "X": 2105.5916,
-      "Y": 297.0126,
+      "X": 2028.4706,
+      "Y": 290.30783,
       "IsTransition": false,
       "IsElevator": false,
       "TransitionGroupId": "",
@@ -1406,8 +1406,8 @@
       "Name": "\u0422\u0443\u0430\u043B\u0435\u0442",
       "BuildingId": "BuildingA",
       "FloorNumber": 1,
-      "X": 997,
-      "Y": 2259,
+      "X": 949.64087,
+      "Y": 2287.0918,
       "IsTransition": false,
       "IsElevator": false,
       "TransitionGroupId": "",
@@ -2324,8 +2324,8 @@
       "Name": "\u0422\u0443\u0430\u043B\u0435\u0442",
       "BuildingId": "BuildingA",
       "FloorNumber": 1,
-      "X": 4687,
-      "Y": 1755,
+      "X": 4737.5366,
+      "Y": 1734.4602,
       "IsTransition": false,
       "IsElevator": false,
       "TransitionGroupId": "",
@@ -22214,6 +22214,36 @@
       "Boundary": null,
       "Boundaries": null,
       "IconPath": null
+    },
+    {
+      "Id": "721b5c49-f38a-460f-ba6b-ebfd889e57e8",
+      "Name": "QR-721b5c49",
+      "BuildingId": "BuildingA",
+      "FloorNumber": 1,
+      "X": 2108.1245,
+      "Y": 811.6898,
+      "IsTransition": false,
+      "IsElevator": false,
+      "TransitionGroupId": "",
+      "IsQrAnchor": true,
+      "IsExit": false,
+      "IsFireExtinguisher": false,
+      "IsEvacuationExit": false,
+      "IsHidden": false,
+      "IsLabelHidden": true,
+      "NodeRadiusScale": 1,
+      "LabelScale": 1,
+      "NodeColorHex": "00BCD4",
+      "IsRoom": false,
+      "IsWaypoint": false,
+      "InnerLabel": "\uD83D\uDCF1",
+      "SearchTags": "",
+      "Category": "",
+      "IsCategoryHidden": false,
+      "DisplayName": "QR-721b5c49",
+      "Boundary": null,
+      "Boundaries": null,
+      "IconPath": "Icons/free-icon-qr-code-scan-6339846.png"
     }
   ],
   "Edges": [
@@ -22275,18 +22305,6 @@
       "FromId": "0e8415ce-1cbf-4044-8c13-69029134e73c",
       "ToId": "26f6bb88-34bd-4be9-8b86-68529c2ed05c",
       "Weight": 325.93265,
-      "IsCrossFloor": false
-    },
-    {
-      "FromId": "0e8415ce-1cbf-4044-8c13-69029134e73c",
-      "ToId": "ce294852-f851-45de-9036-3ef37269c1f8",
-      "Weight": 764.61945,
-      "IsCrossFloor": false
-    },
-    {
-      "FromId": "ce294852-f851-45de-9036-3ef37269c1f8",
-      "ToId": "0e8415ce-1cbf-4044-8c13-69029134e73c",
-      "Weight": 764.61945,
       "IsCrossFloor": false
     },
     {
@@ -29427,6 +29445,30 @@
       "FromId": "5c36f5a0-0458-4121-92a5-5e28a0235e3c",
       "ToId": "7cf44648-5759-49da-8447-9de0eaa18887",
       "Weight": 136,
+      "IsCrossFloor": false
+    },
+    {
+      "FromId": "0e8415ce-1cbf-4044-8c13-69029134e73c",
+      "ToId": "721b5c49-f38a-460f-ba6b-ebfd889e57e8",
+      "Weight": 356.12463,
+      "IsCrossFloor": false
+    },
+    {
+      "FromId": "721b5c49-f38a-460f-ba6b-ebfd889e57e8",
+      "ToId": "0e8415ce-1cbf-4044-8c13-69029134e73c",
+      "Weight": 356.12463,
+      "IsCrossFloor": false
+    },
+    {
+      "FromId": "721b5c49-f38a-460f-ba6b-ebfd889e57e8",
+      "ToId": "ce294852-f851-45de-9036-3ef37269c1f8",
+      "Weight": 410.8756,
+      "IsCrossFloor": false
+    },
+    {
+      "FromId": "ce294852-f851-45de-9036-3ef37269c1f8",
+      "ToId": "721b5c49-f38a-460f-ba6b-ebfd889e57e8",
+      "Weight": 410.8756,
       "IsCrossFloor": false
     }
   ]

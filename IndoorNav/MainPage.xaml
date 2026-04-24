@@ -586,6 +586,34 @@
                                     Padding="0" FontSize="16"
                                     ToolTipProperties.Text="Отсканировать QR-код" />
                         </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8"
+                              IsVisible="{Binding ShowMobileAdminButton}">
+                            <Button Grid.Column="0"
+                                    Text="Выйти"
+                                    Command="{Binding LogoutCommand}"
+                                    BackgroundColor="#1E293B"
+                                    TextColor="#F87171"
+                                    FontSize="14"
+                                    HeightRequest="44"
+                                    CornerRadius="10" />
+                            <Button Grid.Column="1"
+                                    Text="Админка"
+                                    Command="{Binding GoToAdminCommand}"
+                                    BackgroundColor="#1E293B"
+                                    TextColor="#93C5FD"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    HeightRequest="44"
+                                    CornerRadius="10" />
+                        </Grid>
+                        <Button Text="Выйти"
+                                Command="{Binding LogoutCommand}"
+                                IsVisible="{Binding ShowMobileLogoutButton}"
+                                BackgroundColor="#1E293B"
+                                TextColor="#F87171"
+                                FontSize="14"
+                                HeightRequest="44"
+                                CornerRadius="10" />
                         <!-- ДО — скрыто в режиме ЧС -->
                         <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
                             <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
@@ -723,18 +751,6 @@
                 </Border>
 
                 </VerticalStackLayout>
-
-                <!-- Phone admin entry: outside ShowSearchPanel so it stays visible after routes/QR flow -->
-                <Button Text="⚙ Режим администратора карты"
-                        Command="{Binding GoToAdminCommand}"
-                        IsVisible="{Binding ShowMobileAdminButton}"
-                        BackgroundColor="#1E293B"
-                        TextColor="#93C5FD"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        HeightRequest="46"
-                        CornerRadius="10"
-                        Margin="{OnIdiom Phone='0,0,0,0', Default='0'}" />
 
                 <!-- Route step card -->
                 <Border Padding="0"
