@@ -68,13 +68,15 @@
                             Stroke="#E2E8F0" StrokeThickness="1"
                             Padding="14,0"
                             IsVisible="{Binding ShowUsernameField}">
-                        <Entry Placeholder="Логин"
+                        <Entry x:Name="UsernameEntry"
+                               Placeholder="Логин"
                                Text="{Binding Username, Mode=TwoWay}"
                                PlaceholderColor="#94A3B8"
                                TextColor="#0F172A" FontSize="14"
                                BackgroundColor="Transparent"
                                HeightRequest="50"
-                               ReturnType="Next" />
+                               ReturnType="Next"
+                               Completed="OnUsernameCompleted" />
                     </Border>
 
                     <!-- Password -->
@@ -82,7 +84,8 @@
                             StrokeShape="RoundRectangle 10"
                             Stroke="#E2E8F0" StrokeThickness="1"
                             Padding="14,0">
-                        <Entry Placeholder="Пароль"
+                        <Entry x:Name="PasswordEntry"
+                               Placeholder="Пароль"
                                Text="{Binding Password, Mode=TwoWay}"
                                IsPassword="True"
                                PlaceholderColor="#94A3B8"
@@ -90,7 +93,7 @@
                                BackgroundColor="Transparent"
                                HeightRequest="50"
                                ReturnType="Done"
-                               ReturnCommand="{Binding LoginCommand}" />
+                               Completed="OnPasswordCompleted" />
                     </Border>
                 </VerticalStackLayout>
 

@@ -151,7 +151,6 @@ public class LoginViewModel : INotifyPropertyChanged
                 if (user == null)
                 {
                     ErrorMessage = "Неверный логин или пароль";
-                    Password = string.Empty;
                     return;
                 }
                 NavigateToMain();

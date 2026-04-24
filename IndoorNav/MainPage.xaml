@@ -23,6 +23,14 @@
             <ColumnDefinition Width="0" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+        <Grid.Padding>
+            <OnPlatform x:TypeArguments="Thickness">
+                <On Platform="iOS" Value="0,40,0,0" />
+                <On Platform="Android" Value="0,0,0,0" />
+                <On Platform="WinUI" Value="0,0,0,0" />
+                <On Platform="macOS" Value="0,0,0,0" />
+            </OnPlatform>
+        </Grid.Padding>
 
         <!-- ═══════════════════════════════════════
              SIDEBAR  (deep navy)
@@ -160,8 +168,38 @@
              ═══════════════════════════════════════ -->
         <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,*,Auto">
 
-            <!-- Top row placeholder (no desktop top bar) -->
-            <Grid Grid.Row="0" HeightRequest="0" />
+            <!-- Emergency / blocking-mode banner (above the map card, auto-height → 0 when hidden) -->
+            <Grid Grid.Row="0">
+
+                <!-- Emergency banner -->
+                <Border HorizontalOptions="Fill"
+                        BackgroundColor="#DC2626" Padding="14,10"
+                        StrokeThickness="0"
+                        IsVisible="{Binding IsEmergencyBannerVisible}">
+                    <Label Text="{Binding EmergencyMessage}"
+                           TextColor="White" FontAttributes="Bold"
+                           FontSize="13" HorizontalTextAlignment="Center" />
+                </Border>
+
+                <!-- Blocking-mode hint banner (mutually exclusive with emergency banner) -->
+                <Border HorizontalOptions="Fill"
+                        BackgroundColor="#DC2626" Padding="14,10"
+                        StrokeThickness="0"
+                        IsVisible="{Binding IsBlockingMode}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Label Grid.Column="0"
+                               Text="⛔ Нажмите на точку маршрута, где проход закрыт"
+                               FontSize="13" TextColor="White" FontAttributes="Bold"
+                               VerticalOptions="Center" LineBreakMode="WordWrap" />
+                        <Button Grid.Column="1"
+                                Text="Отмена"
+                                Command="{Binding CancelBlockingModeCommand}"
+                                BackgroundColor="#991B1B" TextColor="#FCA5A5"
+                                FontSize="12" HeightRequest="34" CornerRadius="8" Padding="10,0" />
+                    </Grid>
+                </Border>
+
+            </Grid>
 
             <!-- Canvas card -->
             <Border Grid.Row="1"
@@ -187,6 +225,7 @@
                                       PendingQrNode="{Binding PendingQrNode}"
                                       BlockedNodeIds="{Binding BlockedNodeIds}"
                                       ShowRouteWaypoints="{Binding IsBlockingMode}"
+                                      MaxZoomLevel="{Binding MapMaxZoom}"
                                       ShowGraph="True"
                                       HorizontalOptions="Fill" VerticalOptions="Fill" />
 
@@ -214,35 +253,7 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Emergency banner (top overlay) -->
-                    <Border HorizontalOptions="Fill" VerticalOptions="Start"
-                            BackgroundColor="#DC2626" Padding="14,10"
-                            StrokeThickness="0"
-                            IsVisible="{Binding IsEmergencyBannerVisible}"
-                            ZIndex="20">
-                        <Label Text="{Binding EmergencyMessage}"
-                               TextColor="White" FontAttributes="Bold"
-                               FontSize="13" HorizontalTextAlignment="Center" />
-                    </Border>
-
-                    <!-- Blocking-mode hint banner — replaces the emergency banner in the same slot -->
-                    <Border HorizontalOptions="Fill" VerticalOptions="Start"
-                            BackgroundColor="#DC2626" Padding="14,10"
-                            StrokeThickness="0"
-                            IsVisible="{Binding IsBlockingMode}"
-                            ZIndex="20">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                            <Label Grid.Column="0"
-                                   Text="⛔ Нажмите на точку маршрута, где проход закрыт"
-                                   FontSize="13" TextColor="White" FontAttributes="Bold"
-                                   VerticalOptions="Center" LineBreakMode="WordWrap" />
-                            <Button Grid.Column="1"
-                                    Text="Отмена"
-                                    Command="{Binding CancelBlockingModeCommand}"
-                                    BackgroundColor="#991B1B" TextColor="#FCA5A5"
-                                    FontSize="12" HeightRequest="34" CornerRadius="8" Padding="10,0" />
-                        </Grid>
-                    </Border>
+                    <!-- Emergency / blocking banners moved out of the card to Row 0 above it -->
 
                     <!-- Confirmation overlay: shown after user taps a route node -->
                     <Border HorizontalOptions="Center" VerticalOptions="Center"
@@ -370,10 +381,11 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                        <!-- Floor selector (right side of map) -->
+                        <!-- Floor selector (right side of map) - with scroll support -->
                         <Border HorizontalOptions="End" VerticalOptions="Start"
                                 Margin="0,14,14,0" Padding="5,6"
-                                WidthRequest="46"
+                                WidthRequest="50"
+                                MaximumHeightRequest="380"
                                 StrokeShape="RoundRectangle 23"
                                 BackgroundColor="White"
                                 StrokeThickness="0"
@@ -382,11 +394,14 @@
                             <Border.Shadow>
                                 <Shadow Brush="Black" Offset="0,2" Radius="8" Opacity="0.12" />
                             </Border.Shadow>
-                            <VerticalStackLayout Spacing="2" HorizontalOptions="Center"
-                                                 BindableLayout.ItemsSource="{Binding FloorSelectorItems}">
-                                <BindableLayout.ItemTemplate>
+                            <CollectionView ItemsSource="{Binding FloorSelectorItems}"
+                                           SelectionMode="None"
+                                           VerticalOptions="Start"
+                                           HorizontalOptions="Center">
+                                <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="vm:FloorSelectorVm">
                                         <Border WidthRequest="36" HeightRequest="36"
+                                                Margin="0,1"
                                                 StrokeShape="RoundRectangle 18"
                                                 StrokeThickness="0"
                                                 BackgroundColor="{Binding CircleColor}"
@@ -402,8 +417,8 @@
                                             </Border.GestureRecognizers>
                                         </Border>
                                     </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
                         </Border>
 
                     <!-- Sidebar handle (desktop): small tab on the left edge to reopen sidebar -->
@@ -708,6 +723,18 @@
                 </Border>
 
                 </VerticalStackLayout>
+
+                <!-- Phone admin entry: outside ShowSearchPanel so it stays visible after routes/QR flow -->
+                <Button Text="⚙ Режим администратора карты"
+                        Command="{Binding GoToAdminCommand}"
+                        IsVisible="{Binding ShowMobileAdminButton}"
+                        BackgroundColor="#1E293B"
+                        TextColor="#93C5FD"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="46"
+                        CornerRadius="10"
+                        Margin="{OnIdiom Phone='0,0,0,0', Default='0'}" />
 
                 <!-- Route step card -->
                 <Border Padding="0"

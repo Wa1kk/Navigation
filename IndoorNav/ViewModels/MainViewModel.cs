@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using IndoorNav.Models;
 using IndoorNav.Services;
+using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
 
 namespace IndoorNav.ViewModels;
@@ -106,6 +107,7 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(Floors));
             OnPropertyChanged(nameof(SelectedBuildingAddress));
+            OnPropertyChanged(nameof(MapMaxZoom));
             // Предпочитаем 1-й этаж, иначе первый доступный
             SelectedFloor = value?.Floors.FirstOrDefault(f => f.Number == 1)
                          ?? value?.Floors.FirstOrDefault();
@@ -203,6 +205,7 @@ public class MainViewModel : INotifyPropertyChanged
     // ── Auth / Emergency ──────────────────────────────────────────────────────
     public bool IsAdminUser   => _authService?.CurrentRole == UserRole.Admin;
     public bool IsStudentUser  => _authService?.CurrentRole == UserRole.Student;
+    public bool ShowMobileAdminButton => IsAdminUser && DeviceInfo.Idiom == DeviceIdiom.Phone;
     public string CurrentUserName => _authService?.CurrentUser?.DisplayName ?? "Гость";
 
     private bool _isEmergencyActive;
@@ -218,6 +221,14 @@ public class MainViewModel : INotifyPropertyChanged
     public bool ShowFireExtinguishers => _isEmergencyActive;
     /// <summary>Инверсия для скрытия поля ДО в обычном режиме.</summary>
     public bool IsNormalMode => !_isEmergencyActive;
+
+    /// <summary>Максимальный зум для текущего здания.</summary>
+    public float MapMaxZoom => _selectedBuilding?.Id switch
+    {
+        "BuildingA" => 1.6f,
+        "BuildingB" => 1.8f,
+        _           => 1.8f,
+    };
 
     // ── Emergency confirmation UX ────────────────────────────────────────────
     private bool _showEmergencyConfirmation;
@@ -1343,6 +1354,7 @@ public class MainViewModel : INotifyPropertyChanged
         MainThread.BeginInvokeOnMainThread(() =>
         {
             OnPropertyChanged(nameof(IsAdminUser));
+            OnPropertyChanged(nameof(ShowMobileAdminButton));
             OnPropertyChanged(nameof(IsStudentUser));
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
@@ -1374,6 +1386,7 @@ public class MainViewModel : INotifyPropertyChanged
         IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
 
         OnPropertyChanged(nameof(IsAdminUser));
+        OnPropertyChanged(nameof(ShowMobileAdminButton));
         ((Command)GoToAdminCommand).ChangeCanExecute();
         ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
         ((Command)MarkRouteBlockedCommand).ChangeCanExecute();

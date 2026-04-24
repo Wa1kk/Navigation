@@ -84,6 +84,8 @@ public class AdminViewModel : INotifyPropertyChanged
             if (_selectedBuilding == value) return;
             _selectedBuilding = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyActive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyInactive));
             OnPropertyChanged(nameof(Floors));
             SelectedFloor = value?.Floors.FirstOrDefault(f => f.Number == 1)
                          ?? value?.Floors.FirstOrDefault();
@@ -234,6 +236,9 @@ public class AdminViewModel : INotifyPropertyChanged
 
     public bool IsEmergencyActive   => _emergencyService.IsEmergencyActive;
     public bool IsEmergencyInactive => !_emergencyService.IsEmergencyActive;
+    public bool IsSelectedBuildingEmergencyActive =>
+        _emergencyService.IsActiveForBuilding(SelectedBuilding?.Id);
+    public bool IsSelectedBuildingEmergencyInactive => !IsSelectedBuildingEmergencyActive;
 
     public ObservableCollection<BuildingEmergencyVm> BuildingEmergencies { get; } = new();
 
@@ -281,6 +286,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command SetEvacuationExitModeCommand    { get; }
     public Command SetFireExtinguisherModeCommand { get; }
     public Command<string> ToggleEmergencyCommand   { get; }
+    public Command ToggleSelectedBuildingEmergencyCommand { get; }
     public Command ToggleAllEmergencyCommand       { get; }
     public Command AddStudentCommand              { get; }
     public Command<StudentRowVm> RemoveStudentCommand { get; }
@@ -734,6 +740,8 @@ public class AdminViewModel : INotifyPropertyChanged
                     vm.IsActive = _emergencyService.IsActiveForBuilding(vm.BuildingId);
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyActive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyInactive));
         };
 
         CanvasTappedCommand   = new Command<SKPoint>(OnCanvasTapped);
@@ -905,6 +913,8 @@ public class AdminViewModel : INotifyPropertyChanged
         }, () => !string.IsNullOrWhiteSpace(_qrCurrentUrl));
         ToggleEmergencyCommand = new Command<string>(buildingId =>
         {
+            if (string.IsNullOrWhiteSpace(buildingId)) return;
+
             if (_emergencyService.IsActiveForBuilding(buildingId))
             {
                 _emergencyService.Deactivate(buildingId);
@@ -917,6 +927,15 @@ public class AdminViewModel : INotifyPropertyChanged
             }
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyActive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyInactive));
+        });
+        ToggleSelectedBuildingEmergencyCommand = new Command(() =>
+        {
+            var buildingId = SelectedBuilding?.Id;
+            if (string.IsNullOrWhiteSpace(buildingId)) return;
+
+            ToggleEmergencyCommand.Execute(buildingId);
         });
         ToggleAllEmergencyCommand = new Command(() =>
         {
@@ -933,6 +952,8 @@ public class AdminViewModel : INotifyPropertyChanged
             }
             OnPropertyChanged(nameof(IsEmergencyActive));
             OnPropertyChanged(nameof(IsEmergencyInactive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyActive));
+            OnPropertyChanged(nameof(IsSelectedBuildingEmergencyInactive));
         });
 
         // Tab switching

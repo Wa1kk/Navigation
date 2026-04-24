@@ -39,7 +39,18 @@ public class AuthService
         return dir?.FullName ?? basePath;
     }
 
-    private string FilePath => Path.Combine(GetProjectRootPath(), "Resources", "Raw", UsersFileName);
+    private static string ProjectRawPath =>
+        Path.Combine(GetProjectRootPath(), "Resources", "Raw", UsersFileName);
+
+    private static string LocalPath =>
+        Path.Combine(FileSystem.AppDataDirectory, UsersFileName);
+
+    private static string FilePath =>
+#if IOS || ANDROID
+        LocalPath;
+#else
+        ProjectRawPath;
+#endif
 
     // ── Initialisation ───────────────────────────────────────────────────────────
 
@@ -66,6 +77,29 @@ public class AuthService
                 _users = JsonSerializer.Deserialize<List<AuthUser>>(json, JsonOpts) ?? new();
             }
             catch { _users = new(); }
+        }
+
+        var bundledUsers = await LoadBundledUsersAsync();
+
+        if (_users.Count == 0 && bundledUsers.Count > 0)
+        {
+            _users = bundledUsers;
+            await SaveUsersAsync();
+        }
+        else if (bundledUsers.Count > 0)
+        {
+            var merged = false;
+            foreach (var bundled in bundledUsers)
+            {
+                if (_users.Any(u => u.Id == bundled.Id || u.Username.Equals(bundled.Username, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+
+                _users.Add(bundled);
+                merged = true;
+            }
+
+            if (merged)
+                await SaveUsersAsync();
         }
 
         // Ensure there is always a default admin account
@@ -96,6 +130,32 @@ public class AuthService
         }
     }
 
+    private static async Task<List<AuthUser>> LoadBundledUsersAsync()
+    {
+        try
+        {
+            using var stream = await FileSystem.OpenAppPackageFileAsync(UsersFileName);
+            using var reader = new StreamReader(stream);
+            var json = await reader.ReadToEndAsync();
+            return JsonSerializer.Deserialize<List<AuthUser>>(json, JsonOpts) ?? new();
+        }
+        catch
+        {
+            if (!File.Exists(ProjectRawPath))
+                return new();
+
+            try
+            {
+                var json = await File.ReadAllTextAsync(ProjectRawPath);
+                return JsonSerializer.Deserialize<List<AuthUser>>(json, JsonOpts) ?? new();
+            }
+            catch
+            {
+                return new();
+            }
+        }
+    }
+
     private async Task SaveUsersAsync()
     {
         var json = JsonSerializer.Serialize(_users, JsonOpts);
@@ -115,11 +175,35 @@ public class AuthService
     public async Task<AuthUser?> LoginAsync(string username, string password)
     {
         await InitAsync();
+        username = username.Trim();
+        password = password.TrimEnd('\r', '\n');
+
         var user = _users.FirstOrDefault(u =>
             string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase)
             && u.PasswordHash == Hash(password));
 
-        if (user == null) return null;
+        if (user == null)
+        {
+            user = (await LoadBundledUsersAsync()).FirstOrDefault(u =>
+                string.Equals(u.Username, username, StringComparison.OrdinalIgnoreCase)
+                && u.PasswordHash == Hash(password));
+
+            if (user == null) return null;
+
+            var local = _users.FirstOrDefault(u =>
+                u.Id == user.Id || u.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase));
+            if (local == null)
+                _users.Add(user);
+            else
+            {
+                local.PasswordHash = user.PasswordHash;
+                local.Role         = user.Role;
+                local.GroupId      = user.GroupId;
+                local.DisplayName  = user.DisplayName;
+            }
+            await SaveUsersAsync();
+        }
+
         SetCurrentUser(user);
         return user;
     }

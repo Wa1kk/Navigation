@@ -19,6 +19,14 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
+        <Grid.Padding>
+            <OnPlatform x:TypeArguments="Thickness">
+                <On Platform="iOS" Value="0,40,0,0" />
+                <On Platform="Android" Value="0,0,0,0" />
+                <On Platform="WinUI" Value="0,0,0,0" />
+                <On Platform="macOS" Value="0,0,0,0" />
+            </OnPlatform>
+        </Grid.Padding>
 
         <!-- ═══════════════════════════════════════
              TOP TAB BAR
@@ -713,6 +721,26 @@
                                 BackgroundColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#7F1D1D|#1E293B'}"
                                 TextColor="{Binding IsEvacuationExitMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='White|#94A3B8'}"
                                 FontSize="12" WidthRequest="82" HeightRequest="46" CornerRadius="8" />
+                        <Button Text="⚠ ЧС"
+                                Command="{Binding ToggleSelectedBuildingEmergencyCommand}"
+                                IsVisible="{Binding IsSelectedBuildingEmergencyInactive}"
+                                BackgroundColor="#7F1D1D"
+                                TextColor="#FCA5A5"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                WidthRequest="82"
+                                HeightRequest="46"
+                                CornerRadius="8" />
+                        <Button Text="🔴 ЧС"
+                                Command="{Binding ToggleSelectedBuildingEmergencyCommand}"
+                                IsVisible="{Binding IsSelectedBuildingEmergencyActive}"
+                                BackgroundColor="#DC2626"
+                                TextColor="White"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                WidthRequest="82"
+                                HeightRequest="46"
+                                CornerRadius="8" />
                         <Button Text="••• Проч."
                                 Command="{Binding SetOtherModeCommand}"
                                 BackgroundColor="{Binding IsOtherMode, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#B45309|#1E293B'}"
