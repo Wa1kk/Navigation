@@ -1818,6 +1818,7 @@ public class SvgView : SKCanvasView
     private const float NodeHitRadius = 24f;
     private const float BoundaryVertexHitRadius = 20f;
     private readonly Dictionary<long, SKPoint> _activePointers = new();
+    private bool _wasPinching;
 
     /// <summary>Переводит экранный тап (e.Location) в SVG-координаты.</summary>
     private SKPoint ToSvg(SKPoint screen)
@@ -1904,6 +1905,7 @@ public class SvgView : SKCanvasView
         {
             case SKTouchAction.Pressed:
                 _activePointers[e.Id] = e.Location;
+                if (_activePointers.Count >= 2) _wasPinching = true;
                 _didDrag = false;
                 _draggingBoundaryPolyIdx   = -1;
                 _draggingBoundaryVertexIdx = -1;
@@ -1980,7 +1982,7 @@ public class SvgView : SKCanvasView
                 break;
 
             case SKTouchAction.Released:
-                if (_activePointers.ContainsKey(e.Id) && !_didDrag)
+                if (_activePointers.ContainsKey(e.Id) && !_didDrag && !_wasPinching)
                 {
                     if (IsAdminMode && _draggingBoundaryVertexIdx >= 0)
                     {
@@ -2002,6 +2004,7 @@ public class SvgView : SKCanvasView
                     _draggingNode = null;
                     _draggingBoundaryPolyIdx   = -1;
                     _draggingBoundaryVertexIdx = -1;
+                    _wasPinching = false;
                     StopPanRender();
                     InvalidateSurface(); // последний кадр по остановке
                 }
@@ -2012,6 +2015,7 @@ public class SvgView : SKCanvasView
                 _draggingNode = null;
                 _draggingBoundaryPolyIdx   = -1;
                 _draggingBoundaryVertexIdx = -1;
+                _wasPinching = false;
                 StopPanRender();
                 break;
         }

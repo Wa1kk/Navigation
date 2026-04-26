@@ -203,8 +203,9 @@ public class MainViewModel : INotifyPropertyChanged
     public bool HasLoadError => !string.IsNullOrEmpty(_loadError);
 
     // ── Auth / Emergency ──────────────────────────────────────────────────────
-    public bool IsAdminUser   => _authService?.CurrentRole == UserRole.Admin;
-    public bool IsStudentUser  => _authService?.CurrentRole == UserRole.Student;
+    public bool IsAdminUser    => _authService?.CurrentRole == UserRole.Admin;
+    public bool IsStudentUser   => _authService?.CurrentRole == UserRole.Student;
+    public bool IsLoggedInUser  => IsAdminUser || IsStudentUser;
     public bool ShowMobileUserMenuButton => DeviceInfo.Idiom == DeviceIdiom.Phone;
     private bool _isUserMenuOpen;
     public bool IsUserMenuOpen
@@ -1368,6 +1369,7 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsAdminUser));
             OnPropertyChanged(nameof(ShowMobileUserMenuButton));
             OnPropertyChanged(nameof(IsStudentUser));
+            OnPropertyChanged(nameof(IsLoggedInUser));
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
 

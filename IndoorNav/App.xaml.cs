@@ -31,6 +31,10 @@ public partial class App : Application
     {
         var window = new Window(_loginPage);
 
+#if IOS
+        window.BackgroundColor = Color.FromArgb("#F1F5F9");
+#endif
+
         // Initialise auth async; if an active session exists, skip straight to the main shell
         _ = Task.Run(async () =>
         {

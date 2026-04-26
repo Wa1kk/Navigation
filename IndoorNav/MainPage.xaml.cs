@@ -55,6 +55,14 @@ public partial class MainPage : ContentPage
                 _ = HideBuildingPickerAsync();
         }
 
+        if (e.PropertyName == nameof(MainViewModel.IsUserMenuOpen))
+        {
+            if (_vm.IsUserMenuOpen)
+                _ = ShowUserMenuAsync();
+            else
+                _ = HideUserMenuAsync();
+        }
+
         if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
         {
             SetSidebarExpanded(_vm.IsSidebarExpanded);
@@ -88,6 +96,36 @@ public partial class MainPage : ContentPage
         BuildingPickerSheet.IsVisible = false;
         BuildingPickerBackdrop.IsVisible = false;
         BuildingPickerSheet.TranslationY = 0;
+    }
+
+    // ── User menu animation (Liquid Glass) ──────────────────────────────────
+
+    private async Task ShowUserMenuAsync()
+    {
+        UserMenuBackdrop.Opacity = 0;
+        UserMenuBackdrop.IsVisible = true;
+        UserMenuCard.Scale = 0.85;
+        UserMenuCard.Opacity = 0;
+        UserMenuCard.IsVisible = true;
+
+        await Task.WhenAll(
+            UserMenuBackdrop.FadeTo(1, 200, Easing.Linear),
+            UserMenuCard.ScaleTo(1, 280, Easing.SpringOut),
+            UserMenuCard.FadeTo(1, 200, Easing.Linear)
+        );
+    }
+
+    private async Task HideUserMenuAsync()
+    {
+        await Task.WhenAll(
+            UserMenuBackdrop.FadeTo(0, 160, Easing.Linear),
+            UserMenuCard.ScaleTo(0.85, 160, Easing.CubicIn),
+            UserMenuCard.FadeTo(0, 120, Easing.Linear)
+        );
+        UserMenuCard.IsVisible = false;
+        UserMenuBackdrop.IsVisible = false;
+        UserMenuCard.Scale = 1;
+        UserMenuCard.Opacity = 1;
     }
 
     // ── Sidebar toggle (Desktop only) ───────────────────────────────────────

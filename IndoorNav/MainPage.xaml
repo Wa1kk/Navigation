@@ -25,7 +25,7 @@
         </Grid.ColumnDefinitions>
         <Grid.Padding>
             <OnPlatform x:TypeArguments="Thickness">
-                <On Platform="iOS" Value="0,40,0,0" />
+                <On Platform="iOS" Value="0,0,0,0" />
                 <On Platform="Android" Value="0,0,0,0" />
                 <On Platform="WinUI" Value="0,0,0,0" />
                 <On Platform="macOS" Value="0,0,0,0" />
@@ -554,7 +554,7 @@
             </Border>
 
             <!-- ─── Bottom panel ─── -->
-            <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="{OnIdiom Phone='10,8,10,10', Default='0,10,0,0'}">
+            <VerticalStackLayout Grid.Row="2" Spacing="8" Margin="{OnIdiom Phone='10,4,10,4', Default='0,10,0,0'}">
 
                 <!-- Search input panels: hidden in ЧС-mode once route is built -->
                 <VerticalStackLayout IsVisible="{Binding ShowSearchPanel}" Spacing="8">
@@ -843,40 +843,67 @@
 
             </VerticalStackLayout>
 
-            <!-- ─── User menu popup (phone) ─── -->
-            <BoxView Grid.RowSpan="3"
-                     Color="#55000000"
+            <!-- ─── User menu popup (phone) — Liquid Glass ─── -->
+            <controls:BlurOverlay x:Name="UserMenuBackdrop"
+                     Grid.RowSpan="3"
+                     BackgroundColor="#99000000"
                      IsVisible="{Binding IsUserMenuOpen}">
-                <BoxView.GestureRecognizers>
+                <controls:BlurOverlay.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding CloseUserMenuCommand}" />
-                </BoxView.GestureRecognizers>
-            </BoxView>
-            <Border Grid.RowSpan="3" VerticalOptions="Center"
+                </controls:BlurOverlay.GestureRecognizers>
+            </controls:BlurOverlay>
+            <Border x:Name="UserMenuCard" Grid.RowSpan="3" VerticalOptions="Center"
                     HorizontalOptions="Center"
-                    Padding="20,18" Margin="32"
-                    StrokeShape="RoundRectangle 14"
-                    BackgroundColor="White"
-                    Stroke="#E2E8F0" StrokeThickness="1"
+                    Padding="24,22" Margin="32"
+                    StrokeShape="RoundRectangle 22"
+                    BackgroundColor="#E6FFFFFF"
+                    Stroke="#B0FFFFFF" StrokeThickness="1.5"
                     MaximumWidthRequest="300"
                     IsVisible="{Binding IsUserMenuOpen}"
                     ZIndex="90">
-                <VerticalStackLayout Spacing="10">
+                <Border.Shadow>
+                    <Shadow Brush="White" Offset="0,0" Radius="18" Opacity="0.35" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="8">
                     <Label Text="Меню"
-                           FontSize="15" FontAttributes="Bold"
-                           TextColor="#0F172A" HorizontalOptions="Center" />
-                    <Button Text="⚙ Администратор"
-                            Command="{Binding GoToAdminCommand}"
-                            IsVisible="{Binding IsAdminUser}"
-                            BackgroundColor="#1E293B" TextColor="#93C5FD"
-                            FontSize="14" HeightRequest="44" CornerRadius="10" />
-                    <Button Text="🔑 Изменить пароль"
-                            Command="{Binding ChangePasswordCommand}"
-                            BackgroundColor="#1E293B" TextColor="#FCD34D"
-                            FontSize="14" HeightRequest="44" CornerRadius="10" />
-                    <Button Text="Выйти"
-                            Command="{Binding LogoutCommand}"
-                            BackgroundColor="#1E293B" TextColor="#F87171"
-                            FontSize="14" HeightRequest="44" CornerRadius="10" />
+                           FontSize="17" FontAttributes="Bold"
+                           TextColor="#1E293B" HorizontalOptions="Center"
+                           Opacity="0.85" Margin="0,0,0,4" />
+                    <Border StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#18FFFFFF"
+                            Stroke="#55FFFFFF" StrokeThickness="1"
+                            IsVisible="{Binding IsAdminUser}">
+                        <Border.Shadow>
+                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
+                        </Border.Shadow>
+                        <Button Text="⚙  Администратор"
+                                Command="{Binding GoToAdminCommand}"
+                                BackgroundColor="Transparent" TextColor="#1E40AF"
+                                FontSize="15" HeightRequest="48" CornerRadius="14" />
+                    </Border>
+                    <Border StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#18FFFFFF"
+                            Stroke="#55FFFFFF" StrokeThickness="1"
+                            IsVisible="{Binding IsLoggedInUser}">
+                        <Border.Shadow>
+                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
+                        </Border.Shadow>
+                        <Button Text="🔑  Изменить пароль"
+                                Command="{Binding ChangePasswordCommand}"
+                                BackgroundColor="Transparent" TextColor="#92400E"
+                                FontSize="15" HeightRequest="48" CornerRadius="14" />
+                    </Border>
+                    <Border StrokeShape="RoundRectangle 14"
+                            BackgroundColor="#18FFFFFF"
+                            Stroke="#55FFFFFF" StrokeThickness="1">
+                        <Border.Shadow>
+                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
+                        </Border.Shadow>
+                        <Button Text="🚪  Выйти из профиля"
+                                Command="{Binding LogoutCommand}"
+                                BackgroundColor="Transparent" TextColor="#DC2626"
+                                FontSize="15" HeightRequest="48" CornerRadius="14" />
+                    </Border>
                 </VerticalStackLayout>
             </Border>
 
