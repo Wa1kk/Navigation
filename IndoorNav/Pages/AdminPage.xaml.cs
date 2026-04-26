@@ -19,6 +19,10 @@ public partial class AdminPage : ContentPage
         BindingContext = viewModel;
         _mainVm = mainViewModel;
 
+#if IOS || MACCATALYST
+        Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.Page.SetUseSafeArea(this, false);
+#endif
+
         // Подключаем события SvgView → команды ViewModel
         AdminCanvas.CanvasTapped += (_, svgPos) => Vm.CanvasTappedCommand.Execute(svgPos);
         AdminCanvas.NodeTapped   += (_, node)   => Vm.NodeTappedCommand.Execute(node);

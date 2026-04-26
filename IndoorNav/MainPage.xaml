@@ -8,7 +8,10 @@
              x:Class="IndoorNav.MainPage"
              x:DataType="vm:MainViewModel"
              Title="Навигация"
-             BackgroundColor="#F1F5F9">
+             BackgroundColor="#F1F5F9"
+             Padding="0"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
 
     <ContentPage.Resources>
         <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
@@ -166,7 +169,7 @@
         <!-- ═══════════════════════════════════════
              MAIN AREA
              ═══════════════════════════════════════ -->
-        <Grid Grid.Column="1" Padding="{OnIdiom Phone='0', Default='14'}" RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Column="1" RowDefinitions="Auto,*,Auto" Padding="{OnIdiom Phone='0', Default='14'}">
 
             <!-- Emergency / blocking-mode banner (above the map card, auto-height → 0 when hidden) -->
             <Grid Grid.Row="0">
@@ -440,76 +443,6 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleSidebarCommand}" />
                         </Border.GestureRecognizers>
-                    </Border>
-
-                    <!-- Node tap popup: dim backdrop -->
-                    <BoxView Color="#66000000"
-                             IsVisible="{Binding IsNodePopupOpen}">
-                        <BoxView.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
-                        </BoxView.GestureRecognizers>
-                    </BoxView>
-
-                    <!-- Node tap popup: modal card -->
-                    <Border HorizontalOptions="Center" VerticalOptions="Center"
-                            Padding="20,18" Margin="32"
-                            StrokeShape="RoundRectangle 14"
-                            BackgroundColor="White"
-                            Stroke="#E2E8F0" StrokeThickness="1"
-                            IsVisible="{Binding IsNodePopupOpen}">
-                        <Grid>
-                            <VerticalStackLayout Spacing="14" MinimumWidthRequest="220">
-                                <Label Text="{Binding TappedNodeName}"
-                                       FontSize="15" FontAttributes="Bold" TextColor="#0F172A"
-                                       HorizontalOptions="Center" />
-                                <Label Text="{Binding TappedNodeCategory}"
-                                       FontSize="12" TextColor="#2563EB"
-                                       HorizontalOptions="Center"
-                                       IsVisible="{Binding TappedNodeCategory, Converter={StaticResource StringNotEmptyConverter}}" />
-                                <Label Text="{Binding TappedNodeInfo}"
-                                       FontSize="12" TextColor="#64748B"
-                                       HorizontalOptions="Center" />
-                                <!-- Нормальный режим: две кнопки -->
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
-                                      IsVisible="{Binding IsNormalMode}">
-                                    <Button Grid.Column="0" Text="Отсюда"
-                                            Command="{Binding SetTappedAsStartCommand}"
-                                            BackgroundColor="#2B4EDB" TextColor="White"
-                                            BorderWidth="0"
-                                            FontSize="13" FontAttributes="Bold"
-                                            CornerRadius="22" HeightRequest="44" />
-                                    <Button Grid.Column="1" Text="Сюда"
-                                            Command="{Binding SetTappedAsEndCommand}"
-                                            BackgroundColor="#2B4EDB" TextColor="White"
-                                            BorderWidth="0"
-                                            FontSize="13" FontAttributes="Bold"
-                                            CornerRadius="22" HeightRequest="44" />
-                                </Grid>
-                                <!-- Режим ЧС: только кнопка Отсюда на всю ширину -->
-                                <Button Text="Отсюда"
-                                        Command="{Binding SetTappedAsStartCommand}"
-                                        IsVisible="{Binding IsEmergencyActive}"
-                                        BackgroundColor="#DC2626" TextColor="White"
-                                        BorderWidth="0"
-                                        FontSize="13" FontAttributes="Bold"
-                                        CornerRadius="22" HeightRequest="44" />
-                            </VerticalStackLayout>
-                            <!-- Close button top-right -->
-                            <Border BackgroundColor="#E5E7EB"
-                                    StrokeShape="RoundRectangle 12"
-                                    StrokeThickness="0"
-                                    WidthRequest="24" HeightRequest="24"
-                                    HorizontalOptions="End" VerticalOptions="Start"
-                                    Margin="0,-10,-10,0"
-                                    Padding="0">
-                                <Label Text="✕" FontSize="11" FontAttributes="Bold"
-                                       TextColor="#6B7280"
-                                       HorizontalOptions="Center" VerticalOptions="Center" />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
-                        </Grid>
                     </Border>
 
                     <!-- QR anchor "Вы тут" banner (появляется после сканирования QR-кода) -->
@@ -843,80 +776,16 @@
 
             </VerticalStackLayout>
 
-            <!-- ─── User menu popup (phone) — Liquid Glass ─── -->
-            <controls:BlurOverlay x:Name="UserMenuBackdrop"
-                     Grid.RowSpan="3"
-                     BackgroundColor="#99000000"
-                     IsVisible="{Binding IsUserMenuOpen}">
-                <controls:BlurOverlay.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding CloseUserMenuCommand}" />
-                </controls:BlurOverlay.GestureRecognizers>
-            </controls:BlurOverlay>
-            <Border x:Name="UserMenuCard" Grid.RowSpan="3" VerticalOptions="Center"
-                    HorizontalOptions="Center"
-                    Padding="24,22" Margin="32"
-                    StrokeShape="RoundRectangle 22"
-                    BackgroundColor="#E6FFFFFF"
-                    Stroke="#B0FFFFFF" StrokeThickness="1.5"
-                    MaximumWidthRequest="300"
-                    IsVisible="{Binding IsUserMenuOpen}"
-                    ZIndex="90">
-                <Border.Shadow>
-                    <Shadow Brush="White" Offset="0,0" Radius="18" Opacity="0.35" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="8">
-                    <Label Text="Меню"
-                           FontSize="17" FontAttributes="Bold"
-                           TextColor="#1E293B" HorizontalOptions="Center"
-                           Opacity="0.85" Margin="0,0,0,4" />
-                    <Border StrokeShape="RoundRectangle 14"
-                            BackgroundColor="#18FFFFFF"
-                            Stroke="#55FFFFFF" StrokeThickness="1"
-                            IsVisible="{Binding IsAdminUser}">
-                        <Border.Shadow>
-                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
-                        </Border.Shadow>
-                        <Button Text="⚙  Администратор"
-                                Command="{Binding GoToAdminCommand}"
-                                BackgroundColor="Transparent" TextColor="#1E40AF"
-                                FontSize="15" HeightRequest="48" CornerRadius="14" />
-                    </Border>
-                    <Border StrokeShape="RoundRectangle 14"
-                            BackgroundColor="#18FFFFFF"
-                            Stroke="#55FFFFFF" StrokeThickness="1"
-                            IsVisible="{Binding IsLoggedInUser}">
-                        <Border.Shadow>
-                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
-                        </Border.Shadow>
-                        <Button Text="🔑  Изменить пароль"
-                                Command="{Binding ChangePasswordCommand}"
-                                BackgroundColor="Transparent" TextColor="#92400E"
-                                FontSize="15" HeightRequest="48" CornerRadius="14" />
-                    </Border>
-                    <Border StrokeShape="RoundRectangle 14"
-                            BackgroundColor="#18FFFFFF"
-                            Stroke="#55FFFFFF" StrokeThickness="1">
-                        <Border.Shadow>
-                            <Shadow Brush="#40000000" Offset="0,2" Radius="6" Opacity="0.3" />
-                        </Border.Shadow>
-                        <Button Text="🚪  Выйти из профиля"
-                                Command="{Binding LogoutCommand}"
-                                BackgroundColor="Transparent" TextColor="#DC2626"
-                                FontSize="15" HeightRequest="48" CornerRadius="14" />
-                    </Border>
-                </VerticalStackLayout>
-            </Border>
-
             <!-- ─── Node picker overlay ─── -->
 
-            <!-- Backdrop: semi-transparent, tap to close -->
-            <BoxView Grid.RowSpan="3"
-                     Color="#55000000"
-                     IsVisible="{Binding IsPickerOpen}">
-                <BoxView.GestureRecognizers>
+            <!-- Backdrop: blur overlay, tap to close -->
+            <controls:BlurOverlay x:Name="NodePickerBackdrop"
+                                  Grid.RowSpan="3"
+                                  IsVisible="{Binding IsPickerOpen}">
+                <controls:BlurOverlay.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding ClosePickerCommand}" />
-                </BoxView.GestureRecognizers>
-            </BoxView>
+                </controls:BlurOverlay.GestureRecognizers>
+            </controls:BlurOverlay>
 
             <!-- Popup card -->
             <Border Grid.Row="1" VerticalOptions="End"
@@ -1031,10 +900,8 @@
 
             <!-- Backdrop: blur overlay, tap to close -->
             <controls:BlurOverlay x:Name="BuildingPickerBackdrop"
-                     Grid.RowSpan="3"
-                     BackgroundColor="#BB0F172A"
-                     IsVisible="False"
-                     Opacity="0">
+                                  Grid.RowSpan="3"
+                                  IsVisible="False">
                 <controls:BlurOverlay.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding CloseBuildingPickerCommand}" />
                 </controls:BlurOverlay.GestureRecognizers>
@@ -1148,6 +1015,139 @@
                 </VerticalStackLayout>
             </Border>
         </Grid>
+
+        <!-- ═══════════════════════════════════════
+             FULL-SCREEN OVERLAYS (MainGrid level — covers safe areas)
+             ═══════════════════════════════════════ -->
+
+        <!-- Node tap popup: Liquid Glass backdrop -->
+        <controls:BlurOverlay x:Name="NodePopupBackdrop"
+                              Grid.ColumnSpan="2"
+                              IsVisible="{Binding IsNodePopupOpen}">
+            <controls:BlurOverlay.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
+            </controls:BlurOverlay.GestureRecognizers>
+        </controls:BlurOverlay>
+
+        <!-- Node tap popup: Liquid Glass card -->
+        <Border x:Name="NodePopupCard" Grid.ColumnSpan="2"
+                HorizontalOptions="Center" VerticalOptions="Center"
+                Padding="24,22" Margin="32"
+                StrokeShape="RoundRectangle 22"
+                BackgroundColor="#E6FFFFFF"
+                Stroke="#B0FFFFFF" StrokeThickness="1.5"
+                MaximumWidthRequest="340"
+                IsVisible="{Binding IsNodePopupOpen}"
+                ZIndex="40">
+            <Border.Shadow>
+                <Shadow Brush="White" Offset="0,0" Radius="18" Opacity="0.35" />
+            </Border.Shadow>
+            <Grid>
+                <VerticalStackLayout Spacing="14" MinimumWidthRequest="220">
+                    <Label Text="{Binding TappedNodeName}"
+                           FontSize="17" FontAttributes="Bold" TextColor="#1E293B"
+                           HorizontalOptions="Center" Opacity="0.85" />
+                    <Label Text="{Binding TappedNodeCategory}"
+                           FontSize="13" TextColor="#2563EB"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding TappedNodeCategory, Converter={StaticResource StringNotEmptyConverter}}" />
+                    <Label Text="{Binding TappedNodeInfo}"
+                           FontSize="12" TextColor="#475569"
+                           HorizontalOptions="Center" Opacity="0.75" />
+                    <BoxView HeightRequest="1" BackgroundColor="#26000000" />
+                    <!-- Нормальный режим: две кнопки -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                          IsVisible="{Binding IsNormalMode}">
+                        <Button Grid.Column="0" Text="Отсюда"
+                                Command="{Binding SetTappedAsStartCommand}"
+                                BackgroundColor="#2B4EDB" TextColor="White"
+                                BorderWidth="0"
+                                FontSize="13" FontAttributes="Bold"
+                                CornerRadius="22" HeightRequest="44" />
+                        <Button Grid.Column="1" Text="Сюда"
+                                Command="{Binding SetTappedAsEndCommand}"
+                                BackgroundColor="#2B4EDB" TextColor="White"
+                                BorderWidth="0"
+                                FontSize="13" FontAttributes="Bold"
+                                CornerRadius="22" HeightRequest="44" />
+                    </Grid>
+                    <!-- Режим ЧС: кнопка Отсюда на всю ширину -->
+                    <Button Text="Отсюда"
+                            Command="{Binding SetTappedAsStartCommand}"
+                            IsVisible="{Binding IsEmergencyActive}"
+                            BackgroundColor="#DC2626" TextColor="White"
+                            BorderWidth="0"
+                            FontSize="13" FontAttributes="Bold"
+                            CornerRadius="22" HeightRequest="44" />
+                </VerticalStackLayout>
+                <!-- Close button top-right -->
+                <Border BackgroundColor="#30FFFFFF"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="#55FFFFFF" StrokeThickness="1"
+                        WidthRequest="28" HeightRequest="28"
+                        HorizontalOptions="End" VerticalOptions="Start"
+                        Margin="0,-12,-12,0"
+                        Padding="0">
+                    <Border.Shadow>
+                        <Shadow Brush="#30000000" Offset="0,1" Radius="4" Opacity="0.25" />
+                    </Border.Shadow>
+                    <Label Text="✕" FontSize="12" FontAttributes="Bold"
+                           TextColor="#64748B"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CloseNodePopupCommand}" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- User menu popup (phone) — Liquid Glass backdrop -->
+        <controls:BlurOverlay x:Name="UserMenuBackdrop"
+                              Grid.ColumnSpan="2"
+                              IsVisible="{Binding IsUserMenuOpen}">
+            <controls:BlurOverlay.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseUserMenuCommand}" />
+            </controls:BlurOverlay.GestureRecognizers>
+        </controls:BlurOverlay>
+
+        <!-- User menu popup (phone) — Liquid Glass card -->
+        <Border x:Name="UserMenuCard" Grid.ColumnSpan="2"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="24,22" Margin="32"
+                StrokeShape="RoundRectangle 22"
+                BackgroundColor="#E6FFFFFF"
+                Stroke="#B0FFFFFF" StrokeThickness="1.5"
+                MaximumWidthRequest="300"
+                IsVisible="{Binding IsUserMenuOpen}"
+                ZIndex="90">
+            <Border.Shadow>
+                <Shadow Brush="White" Offset="0,0" Radius="18" Opacity="0.35" />
+            </Border.Shadow>
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Меню"
+                       FontSize="17" FontAttributes="Bold"
+                       TextColor="#1E293B" HorizontalOptions="Center"
+                       Opacity="0.85" Margin="0,0,0,4" />
+                <Button Text="⚙  Администратор"
+                        Command="{Binding GoToAdminCommand}"
+                        IsVisible="{Binding IsAdminUser}"
+                        BackgroundColor="#2B4EDB" TextColor="White"
+                        BorderWidth="0"
+                        FontSize="15" HeightRequest="48" CornerRadius="22" />
+                <Button Text="🔑  Изменить пароль"
+                        Command="{Binding ChangePasswordCommand}"
+                        IsVisible="{Binding IsLoggedInUser}"
+                        BackgroundColor="#2B4EDB" TextColor="White"
+                        BorderWidth="0"
+                        FontSize="15" HeightRequest="48" CornerRadius="22" />
+                <Button Text="🚪  Выйти из профиля"
+                        Command="{Binding LogoutCommand}"
+                        BackgroundColor="#DC2626" TextColor="White"
+                        BorderWidth="0"
+                        FontSize="15" HeightRequest="48" CornerRadius="22" />
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 </ContentPage>

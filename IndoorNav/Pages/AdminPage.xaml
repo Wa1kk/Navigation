@@ -21,7 +21,7 @@
     <Grid RowDefinitions="Auto,*">
         <Grid.Padding>
             <OnPlatform x:TypeArguments="Thickness">
-                <On Platform="iOS" Value="0,40,0,0" />
+                <On Platform="iOS" Value="0,0,0,0" />
                 <On Platform="Android" Value="0,0,0,0" />
                 <On Platform="WinUI" Value="0,0,0,0" />
                 <On Platform="macOS" Value="0,0,0,0" />

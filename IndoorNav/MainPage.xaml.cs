@@ -15,6 +15,10 @@ public partial class MainPage : ContentPage
         MainCanvas.NodeTapped += OnNodeTapped;
         _vm.PropertyChanged += OnVmPropertyChanged;
         SetSidebarExpanded(_vm.IsSidebarExpanded);
+
+#if IOS || MACCATALYST
+        Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.Page.SetUseSafeArea(this, false);
+#endif
     }
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -55,6 +59,14 @@ public partial class MainPage : ContentPage
                 _ = HideBuildingPickerAsync();
         }
 
+        if (e.PropertyName == nameof(MainViewModel.IsPickerOpen))
+        {
+            if (_vm.IsPickerOpen)
+                ShowNodePickerBlur();
+            else
+                HideNodePickerBlur();
+        }
+
         if (e.PropertyName == nameof(MainViewModel.IsUserMenuOpen))
         {
             if (_vm.IsUserMenuOpen)
@@ -63,10 +75,57 @@ public partial class MainPage : ContentPage
                 _ = HideUserMenuAsync();
         }
 
+        if (e.PropertyName == nameof(MainViewModel.IsNodePopupOpen))
+        {
+            if (_vm.IsNodePopupOpen)
+                _ = ShowNodePopupAsync();
+            else
+                _ = HideNodePopupAsync();
+        }
+
         if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
         {
             SetSidebarExpanded(_vm.IsSidebarExpanded);
         }
+    }
+
+    // ── Node picker blur ─────────────────────────────────────────────────────
+
+    private void ShowNodePickerBlur()
+    {
+        NodePickerBackdrop.IsVisible = true;
+    }
+
+    private void HideNodePickerBlur()
+    {
+        NodePickerBackdrop.IsVisible = false;
+    }
+
+    // ── Node popup animation (Liquid Glass) ─────────────────────────────────
+
+    private async Task ShowNodePopupAsync()
+    {
+        NodePopupBackdrop.IsVisible = true;
+        NodePopupCard.Scale = 0.85;
+        NodePopupCard.Opacity = 0;
+        NodePopupCard.IsVisible = true;
+
+        await Task.WhenAll(
+            NodePopupCard.ScaleTo(1, 250, Easing.SpringOut),
+            NodePopupCard.FadeTo(1, 180, Easing.Linear)
+        );
+    }
+
+    private async Task HideNodePopupAsync()
+    {
+        await Task.WhenAll(
+            NodePopupCard.ScaleTo(0.85, 150, Easing.CubicIn),
+            NodePopupCard.FadeTo(0, 100, Easing.Linear)
+        );
+        NodePopupCard.IsVisible = false;
+        NodePopupBackdrop.IsVisible = false;
+        NodePopupCard.Scale = 1;
+        NodePopupCard.Opacity = 1;
     }
 
     // ── Building picker animation ────────────────────────────────────────────
@@ -74,25 +133,18 @@ public partial class MainPage : ContentPage
     private async Task ShowBuildingPickerAsync()
     {
         // Показываем backdrop + sheet одновременно — без layout thrashing
-        BuildingPickerBackdrop.Opacity = 0;
         BuildingPickerBackdrop.IsVisible = true;
         BuildingPickerSheet.TranslationY = 600;
         BuildingPickerSheet.IsVisible = true;
 
-        // Параллельные анимации: fade backdrop + slide-up sheet
-        await Task.WhenAll(
-            BuildingPickerBackdrop.FadeTo(1, 220, Easing.Linear),
-            BuildingPickerSheet.TranslateTo(0, 0, 300, Easing.CubicOut)
-        );
+        // Параллельные анимации: slide-up sheet
+        await BuildingPickerSheet.TranslateTo(0, 0, 300, Easing.CubicOut);
     }
 
     private async Task HideBuildingPickerAsync()
     {
         // Параллельно скрываем оба элемента
-        await Task.WhenAll(
-            BuildingPickerBackdrop.FadeTo(0, 180, Easing.Linear),
-            BuildingPickerSheet.TranslateTo(0, 600, 220, Easing.CubicIn)
-        );
+        await BuildingPickerSheet.TranslateTo(0, 600, 220, Easing.CubicIn);
         BuildingPickerSheet.IsVisible = false;
         BuildingPickerBackdrop.IsVisible = false;
         BuildingPickerSheet.TranslationY = 0;
@@ -102,14 +154,12 @@ public partial class MainPage : ContentPage
 
     private async Task ShowUserMenuAsync()
     {
-        UserMenuBackdrop.Opacity = 0;
         UserMenuBackdrop.IsVisible = true;
         UserMenuCard.Scale = 0.85;
         UserMenuCard.Opacity = 0;
         UserMenuCard.IsVisible = true;
 
         await Task.WhenAll(
-            UserMenuBackdrop.FadeTo(1, 200, Easing.Linear),
             UserMenuCard.ScaleTo(1, 280, Easing.SpringOut),
             UserMenuCard.FadeTo(1, 200, Easing.Linear)
         );
@@ -118,7 +168,6 @@ public partial class MainPage : ContentPage
     private async Task HideUserMenuAsync()
     {
         await Task.WhenAll(
-            UserMenuBackdrop.FadeTo(0, 160, Easing.Linear),
             UserMenuCard.ScaleTo(0.85, 160, Easing.CubicIn),
             UserMenuCard.FadeTo(0, 120, Easing.Linear)
         );

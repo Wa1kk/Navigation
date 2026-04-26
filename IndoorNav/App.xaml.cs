@@ -32,7 +32,11 @@ public partial class App : Application
         var window = new Window(_loginPage);
 
 #if IOS
-        window.BackgroundColor = Color.FromArgb("#F1F5F9");
+        // Задать цвет фона UIWindow — отображается за статус-баром и home indicator
+        Microsoft.Maui.Handlers.WindowHandler.Mapper.AppendToMapping("IOSBgColor", (handler, _) =>
+        {
+            handler.PlatformView.BackgroundColor = UIKit.UIColor.FromRGB(0xF1, 0xF5, 0xF9);
+        });
 #endif
 
         // Initialise auth async; if an active session exists, skip straight to the main shell
