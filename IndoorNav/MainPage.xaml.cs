@@ -19,7 +19,35 @@ public partial class MainPage : ContentPage
 #if IOS || MACCATALYST
         Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.Page.SetUseSafeArea(this, false);
 #endif
+        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
+    }
+
+#if IOS || MACCATALYST
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
+        ApplySafeAreaPadding();
+    }
+
+    private void ApplySafeAreaPadding()
+    {
+        if (Handler?.PlatformView is UIKit.UIView nativeView)
+        {
+            var insets = nativeView.SafeAreaInsets;
+            MainGrid.Padding = new Thickness(
+                insets.Left,
+                insets.Top,
+                insets.Right,
+                insets.Bottom);
+        }
+    }
+#endif
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {

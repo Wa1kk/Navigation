@@ -4,13 +4,24 @@ namespace IndoorNav.Controls;
 /// Полупрозрачное размытое наложение поверх контента.
 /// На iOS — UIVisualEffectView (SystemUltraThinMaterialLight) + tint.
 /// Привязывается к UIWindow для edge-to-edge покрытия.
+/// Переустанавливает blur при каждом показе (IsVisibleChanged).
 /// </summary>
 public class BlurOverlay : ContentView
 {
+    public BlurOverlay()
+    {
+        PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(IsVisible) && IsVisible)
+                ApplyNativeBlur();
+        };
+    }
+
     protected override void OnHandlerChanged()
     {
         base.OnHandlerChanged();
-        ApplyNativeBlur();
+        if (IsVisible)
+            ApplyNativeBlur();
     }
 
     private void ApplyNativeBlur()
@@ -28,36 +39,35 @@ public class BlurOverlay : ContentView
                 sub.RemoveFromSuperview();
 
         // Находим window для edge-to-edge привязки
-        var window = uiView.Window;
-        if (window != null)
-        {
-            InstallBlur(uiView, window);
-        }
-        else
-        {
-            // Window ещё не доступен — проверим после задержки
-            Microsoft.Maui.Dispatching.IDispatcherTimer? timer = null;
-            timer = Dispatcher.CreateTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(50);
-            timer.Tick += (_, _) =>
-            {
-                timer.Stop();
-                var w = uiView.Window;
-                if (w != null) InstallBlur(uiView, w);
-            };
-            timer.Start();
-        }
+        TryInstallBlur(uiView, 0);
 #endif
     }
 
 #if IOS || MACCATALYST
-    private bool _installed;
+    private void TryInstallBlur(UIKit.UIView uiView, int attempt)
+    {
+        var window = uiView.Window;
+        if (window != null)
+        {
+            InstallBlur(uiView, window);
+            return;
+        }
+
+        // Window ещё не доступен — повторим до 10 раз с интервалом 50мс
+        if (attempt >= 10) return;
+
+        var timer = Dispatcher.CreateTimer();
+        timer.Interval = TimeSpan.FromMilliseconds(50);
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            TryInstallBlur(uiView, attempt + 1);
+        };
+        timer.Start();
+    }
 
     private void InstallBlur(UIKit.UIView uiView, UIKit.UIWindow window)
     {
-        if (_installed) return;
-        _installed = true;
-
         // Blur
         var blurEffect = UIKit.UIBlurEffect.FromStyle(UIKit.UIBlurEffectStyle.SystemUltraThinMaterialLight);
         var blurView = new UIKit.UIVisualEffectView(blurEffect)

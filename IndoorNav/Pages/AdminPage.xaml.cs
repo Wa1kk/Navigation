@@ -52,6 +52,21 @@ public partial class AdminPage : ContentPage
     private async void OnExitAdminClicked(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("..");
 
+#if IOS || MACCATALYST
+    private void ApplySafeAreaPadding()
+    {
+        if (Handler?.PlatformView is UIKit.UIView nativeView)
+        {
+            var insets = nativeView.SafeAreaInsets;
+            AdminGrid.Padding = new Thickness(
+                insets.Left,
+                insets.Top,
+                insets.Right,
+                insets.Bottom);
+        }
+    }
+#endif
+
     /// <summary>
     /// Нормализует путь иконки для разных платформ.
     /// На Desktop копирует файл в Resources/Raw/Icons/ проекта.
@@ -168,6 +183,7 @@ public partial class AdminPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        Services.EdgeColorService.SetEdgeColor(this, "#0F172A");
         var srcBuilding = _mainVm.SelectedBuilding;
         var srcFloor    = _mainVm.SelectedFloor;
         if (srcBuilding == null) return;
@@ -189,6 +205,7 @@ public partial class AdminPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
         var adminBuilding = Vm.SelectedBuilding;
         var adminFloor    = Vm.SelectedFloor;
         if (adminBuilding == null) return;
@@ -210,6 +227,9 @@ public partial class AdminPage : ContentPage
     protected override void OnHandlerChanged()
     {
         base.OnHandlerChanged();
+#if IOS || MACCATALYST
+        ApplySafeAreaPadding();
+#endif
 #if WINDOWS
         if (Handler?.PlatformView is Microsoft.UI.Xaml.FrameworkElement elem)
         {

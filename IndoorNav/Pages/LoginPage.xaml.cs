@@ -8,6 +8,13 @@ public partial class LoginPage : ContentPage
     {
         InitializeComponent();
         BindingContext = vm;
+        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
     }
 
     private void OnUsernameCompleted(object? sender, EventArgs e)

@@ -9,7 +9,7 @@
              x:Name="AdminRoot"
              x:DataType="vm:AdminViewModel"
              Title="Редактор графа"
-             BackgroundColor="#F1F5F9">
+             BackgroundColor="#0F172A">
 
     <ContentPage.Resources>
         <conv:BoolToColorConverter      x:Key="BoolToColorConverter" />
@@ -18,7 +18,7 @@
         <conv:StringNotEmptyConverter   x:Key="StringNotEmptyConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid x:Name="AdminGrid" RowDefinitions="Auto,*">
         <Grid.Padding>
             <OnPlatform x:TypeArguments="Thickness">
                 <On Platform="iOS" Value="0,0,0,0" />

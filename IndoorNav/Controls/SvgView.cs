@@ -1711,7 +1711,7 @@ public class SvgView : SKCanvasView
 
     private SKMatrix FitMatrix(SKRect src, float dstW, float dstH)
     {
-        float scale = Math.Min(dstW / src.Width, dstH / src.Height) * 0.95f;
+        float scale = Math.Min(dstW / src.Width, dstH / src.Height) * 0.95f * 1.6f;
         float tx = (dstW - src.Width  * scale) / 2f - src.Left * scale;
         float ty = (dstH - src.Height * scale) / 2f - src.Top  * scale;
         _fitScale = scale; // дефолтный масштаб = минимальный зум
