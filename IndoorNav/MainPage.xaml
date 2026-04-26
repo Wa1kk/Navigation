@@ -8,7 +8,7 @@
              x:Class="IndoorNav.MainPage"
              x:DataType="vm:MainViewModel"
              Title="Навигация"
-             BackgroundColor="#F1F5F9"
+             BackgroundColor="White"
              Padding="0"
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="False">

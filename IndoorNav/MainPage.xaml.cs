@@ -19,13 +19,13 @@ public partial class MainPage : ContentPage
 #if IOS || MACCATALYST
         Microsoft.Maui.Controls.PlatformConfiguration.iOSSpecific.Page.SetUseSafeArea(this, false);
 #endif
-        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
+        Services.EdgeColorService.SetEdgeColor(this, "#FFFFFF");
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        Services.EdgeColorService.SetEdgeColor(this, "#F1F5F9");
+        Services.EdgeColorService.SetEdgeColor(this, "#FFFFFF");
     }
 
 #if IOS || MACCATALYST
