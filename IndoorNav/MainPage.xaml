@@ -586,36 +586,8 @@
                                     Padding="0" FontSize="16"
                                     ToolTipProperties.Text="Отсканировать QR-код" />
                         </Grid>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8"
-                              IsVisible="{Binding ShowMobileAdminButton}">
-                            <Button Grid.Column="0"
-                                    Text="Выйти"
-                                    Command="{Binding LogoutCommand}"
-                                    BackgroundColor="#1E293B"
-                                    TextColor="#F87171"
-                                    FontSize="14"
-                                    HeightRequest="44"
-                                    CornerRadius="10" />
-                            <Button Grid.Column="1"
-                                    Text="Админка"
-                                    Command="{Binding GoToAdminCommand}"
-                                    BackgroundColor="#1E293B"
-                                    TextColor="#93C5FD"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    HeightRequest="44"
-                                    CornerRadius="10" />
-                        </Grid>
-                        <Button Text="Выйти"
-                                Command="{Binding LogoutCommand}"
-                                IsVisible="{Binding ShowMobileLogoutButton}"
-                                BackgroundColor="#1E293B"
-                                TextColor="#F87171"
-                                FontSize="14"
-                                HeightRequest="44"
-                                CornerRadius="10" />
                         <!-- ДО — скрыто в режиме ЧС -->
-                        <Grid ColumnDefinitions="36,*" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
+                        <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
                             <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
                                    TextColor="#94A3B8" VerticalOptions="Center" />
                             <Border Grid.Column="1" Padding="12,12"
@@ -626,6 +598,32 @@
                                     <TapGestureRecognizer Command="{Binding OpenEndPickerCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
+                            <Button Grid.Column="2"
+                                    Text="👤"
+                                    Command="{Binding ToggleUserMenuCommand}"
+                                    BackgroundColor="#1E293B" TextColor="White"
+                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
+                                    Padding="0" FontSize="16"
+                                    IsVisible="{Binding ShowMobileUserMenuButton}" />
+                        </Grid>
+                        <!-- ЧС + user menu (emergency mode, phone) -->
+                        <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsEmergencyActive}">
+                            <Label Grid.Column="0" Text="ЧС" FontSize="10" CharacterSpacing="1.5"
+                                   TextColor="#DC2626" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Padding="12,12"
+                                    StrokeShape="RoundRectangle 10" Stroke="#FCA5A5" StrokeThickness="1"
+                                    BackgroundColor="#FEF2F2">
+                                <Label Text="Автоматически — ближайший выход"
+                                       FontSize="14" TextColor="#991B1B"
+                                       LineBreakMode="TailTruncation" />
+                            </Border>
+                            <Button Grid.Column="2"
+                                    Text="👤"
+                                    Command="{Binding ToggleUserMenuCommand}"
+                                    BackgroundColor="#1E293B" TextColor="White"
+                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
+                                    Padding="0" FontSize="16"
+                                    IsVisible="{Binding ShowMobileUserMenuButton}" />
                         </Grid>
                         <!-- Обычные кнопки маршрута -->
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
@@ -844,6 +842,43 @@
                 </Border>
 
             </VerticalStackLayout>
+
+            <!-- ─── User menu popup (phone) ─── -->
+            <BoxView Grid.RowSpan="3"
+                     Color="#55000000"
+                     IsVisible="{Binding IsUserMenuOpen}">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CloseUserMenuCommand}" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+            <Border Grid.RowSpan="3" VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    Padding="20,18" Margin="32"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="White"
+                    Stroke="#E2E8F0" StrokeThickness="1"
+                    MaximumWidthRequest="300"
+                    IsVisible="{Binding IsUserMenuOpen}"
+                    ZIndex="90">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Меню"
+                           FontSize="15" FontAttributes="Bold"
+                           TextColor="#0F172A" HorizontalOptions="Center" />
+                    <Button Text="⚙ Администратор"
+                            Command="{Binding GoToAdminCommand}"
+                            IsVisible="{Binding IsAdminUser}"
+                            BackgroundColor="#1E293B" TextColor="#93C5FD"
+                            FontSize="14" HeightRequest="44" CornerRadius="10" />
+                    <Button Text="🔑 Изменить пароль"
+                            Command="{Binding ChangePasswordCommand}"
+                            BackgroundColor="#1E293B" TextColor="#FCD34D"
+                            FontSize="14" HeightRequest="44" CornerRadius="10" />
+                    <Button Text="Выйти"
+                            Command="{Binding LogoutCommand}"
+                            BackgroundColor="#1E293B" TextColor="#F87171"
+                            FontSize="14" HeightRequest="44" CornerRadius="10" />
+                </VerticalStackLayout>
+            </Border>
 
             <!-- ─── Node picker overlay ─── -->
 

@@ -205,8 +205,13 @@ public class MainViewModel : INotifyPropertyChanged
     // ── Auth / Emergency ──────────────────────────────────────────────────────
     public bool IsAdminUser   => _authService?.CurrentRole == UserRole.Admin;
     public bool IsStudentUser  => _authService?.CurrentRole == UserRole.Student;
-    public bool ShowMobileAdminButton => IsAdminUser && DeviceInfo.Idiom == DeviceIdiom.Phone;
-    public bool ShowMobileLogoutButton => !IsAdminUser && DeviceInfo.Idiom == DeviceIdiom.Phone;
+    public bool ShowMobileUserMenuButton => DeviceInfo.Idiom == DeviceIdiom.Phone;
+    private bool _isUserMenuOpen;
+    public bool IsUserMenuOpen
+    {
+        get => _isUserMenuOpen;
+        set { _isUserMenuOpen = value; OnPropertyChanged(); }
+    }
     public string CurrentUserName => _authService?.CurrentUser?.DisplayName ?? "Гость";
 
     private bool _isEmergencyActive;
@@ -493,6 +498,8 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand SelectBuildingPickerCommand  { get; }
     public ICommand SelectFloorCommand           { get; }
     public ICommand ToggleSidebarCommand         { get; }
+    public ICommand ToggleUserMenuCommand        { get; }
+    public ICommand CloseUserMenuCommand         { get; }
     /// <summary>User acknowledges the emergency alert — stops spam loop, shows location picker.</summary>
     public ICommand ConfirmEmergencyNotificationCommand { get; }
 
@@ -516,10 +523,11 @@ public class MainViewModel : INotifyPropertyChanged
             () => StartNode != null && EndNode != null);
         ClearRouteCommand = new Command(ExecuteClearRoute);
         GoToAdminCommand  = new Command(async () =>
-            await Shell.Current.GoToAsync("admin"),
+            { IsUserMenuOpen = false; await Shell.Current.GoToAsync("admin"); },
             () => IsAdminUser);
         LogoutCommand = new Command(() =>
         {
+            IsUserMenuOpen = false;
             _authService.Logout();
             // Navigate back to login page
             var loginPage = IPlatformApplication.Current?.Services.GetService<IndoorNav.Pages.LoginPage>();
@@ -528,6 +536,7 @@ public class MainViewModel : INotifyPropertyChanged
         });
         ChangePasswordCommand = new Command(async () =>
         {
+            IsUserMenuOpen = false;
             var user = _authService.CurrentUser;
             if (user == null) return;
             var page = Application.Current!.Windows[0].Page!;
@@ -789,6 +798,8 @@ public class MainViewModel : INotifyPropertyChanged
             SelectedFloor = vm.Floor;
         });
         ToggleSidebarCommand = new Command(() => IsSidebarExpanded = !IsSidebarExpanded);
+        ToggleUserMenuCommand = new Command(() => IsUserMenuOpen = !IsUserMenuOpen);
+        CloseUserMenuCommand = new Command(() => IsUserMenuOpen = false);
 
         ConfirmEmergencyNotificationCommand = new Command(() =>
         {
@@ -1355,8 +1366,7 @@ public class MainViewModel : INotifyPropertyChanged
         MainThread.BeginInvokeOnMainThread(() =>
         {
             OnPropertyChanged(nameof(IsAdminUser));
-            OnPropertyChanged(nameof(ShowMobileAdminButton));
-            OnPropertyChanged(nameof(ShowMobileLogoutButton));
+            OnPropertyChanged(nameof(ShowMobileUserMenuButton));
             OnPropertyChanged(nameof(IsStudentUser));
             OnPropertyChanged(nameof(CurrentUserName));
             ((Command)GoToAdminCommand).ChangeCanExecute();
@@ -1388,8 +1398,7 @@ public class MainViewModel : INotifyPropertyChanged
         IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
 
         OnPropertyChanged(nameof(IsAdminUser));
-        OnPropertyChanged(nameof(ShowMobileAdminButton));
-        OnPropertyChanged(nameof(ShowMobileLogoutButton));
+        OnPropertyChanged(nameof(ShowMobileUserMenuButton));
         ((Command)GoToAdminCommand).ChangeCanExecute();
         ((Command)BuildEmergencyRouteCommand).ChangeCanExecute();
         ((Command)MarkRouteBlockedCommand).ChangeCanExecute();
