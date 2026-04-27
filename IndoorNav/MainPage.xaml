@@ -495,9 +495,12 @@
                 <!-- Route input bar (PHONE – vertical stack) -->
                 <Border Padding="12,12"
                         IsVisible="{OnIdiom Phone=True, Default=False}"
-                        StrokeShape="{OnIdiom Phone='RoundRectangle 0', Default='RoundRectangle 12'}"
+                        StrokeShape="RoundRectangle 16"
                         BackgroundColor="White"
-                        Stroke="#E2E8F0" StrokeThickness="{OnIdiom Phone=0, Default=1}">
+                        Stroke="#E2E8F0" StrokeThickness="0">
+                    <Border.Shadow>
+                        <Shadow Brush="#1A000000" Offset="0,2" Radius="8" Opacity="1" />
+                    </Border.Shadow>
                     <VerticalStackLayout Spacing="10">
                         <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0" Text="ОТ" FontSize="10" CharacterSpacing="1.5"
