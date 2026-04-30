@@ -4,7 +4,7 @@ using IndoorNav.Services;
 using IndoorNav.ViewModels;
 using IndoorNav.Pages;
 using IndoorNav.Controls;
-#if ANDROID 
+#if ANDROID || IOS
 using ZXing.Net.Maui;
 using ZXing.Net.Maui.Controls;
 #endif
@@ -19,7 +19,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
-#if ANDROID
+#if ANDROID || IOS
             .UseBarcodeReader()
 #endif
             .ConfigureMauiHandlers(handlers =>
@@ -48,6 +48,7 @@ public static class MauiProgram
         builder.Services.AddTransient<LoginViewModel>();
 
         // Pages
+        builder.Services.AddSingleton<SplashPage>();
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddTransient<AdminPage>();
         builder.Services.AddTransient<LoginPage>();

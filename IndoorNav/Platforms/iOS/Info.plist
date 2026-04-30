@@ -34,7 +34,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.companyname.indoornav</string>
+			<string>com.and3rrr.test</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>indoornav</string>
@@ -45,5 +45,9 @@
 	<!-- Camera permission for in-app QR scanning -->
 	<key>NSCameraUsageDescription</key>
 	<string>Для сканирования QR-кодов навигационных точек</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Для сохранения QR-кодов навигационных точек в Фото</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Для выбора изображения с QR-кодом из галереи</string>
 </dict>
 </plist>

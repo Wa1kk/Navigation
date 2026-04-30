@@ -8,6 +8,11 @@ namespace IndoorNav.Controls;
 /// </summary>
 public class BlurOverlay : ContentView
 {
+    private const int TintTag = 99;
+    private const int FillTag = 100;
+
+    public bool UseBlur { get; set; } = true;
+
     public BlurOverlay()
     {
         PropertyChanged += (s, e) =>
@@ -35,7 +40,7 @@ public class BlurOverlay : ContentView
 
         // Удаляем старые blur/tint subviews
         foreach (var sub in uiView.Subviews)
-            if (sub is UIKit.UIVisualEffectView || sub.Tag == 99)
+            if (sub is UIKit.UIVisualEffectView || sub.Tag == TintTag || sub.Tag == FillTag)
                 sub.RemoveFromSuperview();
 
         // Находим window для edge-to-edge привязки
@@ -68,6 +73,12 @@ public class BlurOverlay : ContentView
 
     private void InstallBlur(UIKit.UIView uiView, UIKit.UIWindow window)
     {
+        if (!UseBlur)
+        {
+            InstallFill(uiView, window);
+            return;
+        }
+
         // Blur
         var blurEffect = UIKit.UIBlurEffect.FromStyle(UIKit.UIBlurEffectStyle.SystemUltraThinMaterialLight);
         var blurView = new UIKit.UIVisualEffectView(blurEffect)
@@ -87,7 +98,7 @@ public class BlurOverlay : ContentView
         {
             TranslatesAutoresizingMaskIntoConstraints = false,
             BackgroundColor = UIKit.UIColor.FromRGBA(0, 0, 0, 0x33),
-            Tag = 99
+            Tag = TintTag
         };
         uiView.InsertSubview(tintView, 1);
 
@@ -95,6 +106,28 @@ public class BlurOverlay : ContentView
         tintView.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
         tintView.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
         tintView.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+    }
+
+    private void InstallFill(UIKit.UIView uiView, UIKit.UIWindow window)
+    {
+        var color = BackgroundColor ?? Colors.White;
+        var fillView = new UIKit.UIView
+        {
+            TranslatesAutoresizingMaskIntoConstraints = false,
+            BackgroundColor = UIKit.UIColor.FromRGBA(
+                (nfloat)color.Red,
+                (nfloat)color.Green,
+                (nfloat)color.Blue,
+                (nfloat)color.Alpha),
+            Tag = FillTag,
+            UserInteractionEnabled = false
+        };
+        uiView.InsertSubview(fillView, 0);
+
+        fillView.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+        fillView.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+        fillView.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+        fillView.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
     }
 #endif
 }

@@ -74,6 +74,9 @@ public class NavNode
         ? Name
         : $"{Name} {SearchTags}";
 
+    /// <summary>Краткая метка этажа для отображения в пикере (напр. "1 эт.").</summary>
+    public string FloorLabel => $"этаж {FloorNumber}";
+
     /// <summary>
     /// Устаревшее поле (один полигон). Хранится только для миграции старых данных — не используйте напрямую.
     /// </summary>

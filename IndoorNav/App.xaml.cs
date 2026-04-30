@@ -6,12 +6,14 @@ namespace IndoorNav;
 public partial class App : Application
 {
     private readonly AuthService _authService;
+    private readonly SplashPage  _splashPage;
     private readonly LoginPage   _loginPage;
 
-    public App(AuthService authService, LoginPage loginPage)
+    public App(AuthService authService, SplashPage splashPage, LoginPage loginPage)
     {
         InitializeComponent();
         _authService = authService;
+        _splashPage  = splashPage;
         _loginPage   = loginPage;
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
@@ -29,21 +31,25 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        var window = new Window(_loginPage);
+        var window = new Window(_splashPage);
 
-        // Initialise auth async; if an active session exists, skip straight to the main shell
         _ = Task.Run(async () =>
         {
             await _authService.InitAsync();
-            if (_authService.IsLoggedIn)
+
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
+                if (_authService.IsLoggedIn)
                 {
                     var shell = IPlatformApplication.Current!.Services
                         .GetRequiredService<AppShell>();
                     window.Page = shell;
-                });
-            }
+                }
+                else
+                {
+                    window.Page = _loginPage;
+                }
+            });
         });
 
         return window;

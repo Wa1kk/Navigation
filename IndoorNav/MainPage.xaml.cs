@@ -117,16 +117,176 @@ public partial class MainPage : ContentPage
         }
     }
 
-    // ── Node picker blur ─────────────────────────────────────────────────────
+    // ── Node picker animated bottom sheet ────────────────────────────────────
+    //
+    // PickerSheet is at bottom of screen (VerticalOptions="End").
+    // TranslationY = 0   → sheet at bottom (handle + search visible)
+    // TranslationY < 0   → sheet slides UP (more results visible)
+
+    private double ScreenHeight => this.Window?.Height ?? 800;
+
+    // Resting state: sheet at bottom, only handle + search bar visible
+    private const double PickerRestY = 0;
+    // Keyboard state: search bar just above keyboard (~25% up)
+    private double GetPickerKeyboardY() => -(ScreenHeight * 0.16);
+    // Full state: sheet near top, all results visible
+    private double GetPickerFullY() => -(ScreenHeight * 0.80);
+    private const double PickerResultsKeyboardHeight = 132;
+    private const double PickerResultsExpandedHeight = 420;
+    private bool _pickerKeyboardOpen;
 
     private void ShowNodePickerBlur()
     {
         NodePickerBackdrop.IsVisible = true;
+        SetSafeAreaColor(Colors.White);
+        // Position sheet below screen, make visible, animate to bottom
+        PickerSheet.TranslationY = ScreenHeight;
+        PickerSheet.IsVisible = true;
+        _ = PickerSheet.TranslateTo(0, PickerRestY, 280, Easing.SinOut);
     }
 
     private void HideNodePickerBlur()
     {
+        // Clear search text
+        _vm.PickerSearchText = string.Empty;
+
+        // Animate out downward past screen bottom, then hide
+        _ = PickerSheet.TranslateTo(0, ScreenHeight, 220, Easing.SinIn)
+            .ContinueWith(_ =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    PickerSheet.IsVisible = false;
+                    PickerSheet.TranslationY = 0;
+                    SetSafeAreaColor(null);
+                });
+            });
         NodePickerBackdrop.IsVisible = false;
+        PickerSearchEntry.Unfocus();
+#if IOS || MACCATALYST
+        UIKit.UIApplication.SharedApplication.SendAction(
+            new ObjCRuntime.Selector("resignFirstResponder"),
+            null, null, null);
+#endif
+    }
+
+    private void OnPickerSearchFocused(object? sender, FocusEventArgs e)
+    {
+        if (!e.IsFocused) return;
+        _pickerKeyboardOpen = true;
+        // Show 2–3 results above keyboard, rest scrolls
+        PickerResultsScroll.MaximumHeightRequest = PickerResultsKeyboardHeight;
+        // Slide up so search bar is above keyboard
+        _ = PickerSheet.TranslateTo(0, GetPickerKeyboardY(), 250, Easing.SinOut);
+    }
+
+    private void OnPickerSearchUnfocused(object? sender, FocusEventArgs e)
+    {
+        if (e.IsFocused) return;
+        if (!_vm.IsPickerOpen) return;
+        _pickerKeyboardOpen = false;
+        // Keep sheet at the same Y; extend list downward into the freed keyboard space.
+        PickerResultsScroll.MaximumHeightRequest = PickerResultsExpandedHeight;
+        _ = PickerSheet.TranslateTo(0, PickerRestY, 220, Easing.SinOut);
+    }
+
+    private double _pickerSheetStartY;
+    private bool _pickerSheetDragging;
+
+    private void OnPickerSheetPan(object? sender, PanUpdatedEventArgs e)
+    {
+        var fullY = GetPickerFullY();
+
+        switch (e.StatusType)
+        {
+            case GestureStatus.Started:
+                _pickerSheetStartY = PickerSheet.TranslationY;
+                _pickerSheetDragging = true;
+                break;
+
+            case GestureStatus.Running:
+                if (!_pickerSheetDragging) break;
+                var newY = _pickerSheetStartY + e.TotalY;
+                // If keyboard is open, don't allow dragging below keyboard position.
+                var bottomLimit = _pickerKeyboardOpen ? GetPickerKeyboardY() : PickerRestY;
+                PickerSheet.TranslationY = Math.Clamp(newY, fullY, bottomLimit);
+                break;
+
+            case GestureStatus.Completed:
+            case GestureStatus.Canceled:
+                _pickerSheetDragging = false;
+                var currentY = PickerSheet.TranslationY;
+
+                var keyboardY = GetPickerKeyboardY();
+                if (_pickerKeyboardOpen)
+                {
+                    _ = PickerSheet.TranslateTo(0, keyboardY, 200, Easing.SinOut);
+                }
+                // Two zones: near bottom (0) → dismiss, otherwise → snap to rest
+                else if (currentY > -80)
+                {
+                    // Dragged near bottom → dismiss
+                    _vm.IsPickerOpen = false;
+                }
+                else
+                {
+                    // Snap to rest position at bottom
+                    _ = PickerSheet.TranslateTo(0, PickerRestY, 200, Easing.SinOut);
+                }
+                break;
+        }
+    }
+
+    // ── Native iOS safe area color overlay ──────────────────────────────────
+    // Adds a UIView pinned to UIWindow (like BlurOverlay) to cover
+    // the home indicator and dynamic island zones with a solid color.
+
+    private const int SafeAreaOverlayTag = 888;
+
+    /// <summary>
+    /// Sets a solid color in the iOS safe area zones (home indicator + dynamic island).
+    /// Pass null to remove the overlay.
+    /// </summary>
+    private void SetSafeAreaColor(Color? color)
+    {
+#if IOS || MACCATALYST
+        var window = this.Window?.Handler?.PlatformView as UIKit.UIWindow;
+        if (window == null) return;
+
+        // Remove existing overlay
+        foreach (var v in window.Subviews)
+            if (v.Tag == SafeAreaOverlayTag)
+                v.RemoveFromSuperview();
+
+        if (color == null) return;
+
+        var nativeColor = UIKit.UIColor.FromRGBA(
+            (nfloat)color.Red,
+            (nfloat)color.Green,
+            (nfloat)color.Blue,
+            (nfloat)color.Alpha);
+
+        var overlay = new UIKit.UIView
+        {
+            Tag = SafeAreaOverlayTag,
+            TranslatesAutoresizingMaskIntoConstraints = false,
+            BackgroundColor = nativeColor,
+            UserInteractionEnabled = false
+        };
+        window.AddSubview(overlay);
+
+        // Pin to window bottom edge — covers home indicator safe area
+        overlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+        overlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+        overlay.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+
+        // Height = bottom safe area inset (home indicator height ~34pt)
+        var bottomInset = window.SafeAreaInsets.Bottom;
+        if (bottomInset > 0)
+            overlay.HeightAnchor.ConstraintEqualTo(bottomInset).Active = true;
+        else
+            overlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+#endif
     }
 
     // ── Node popup animation (Liquid Glass) ─────────────────────────────────
@@ -161,21 +321,29 @@ public partial class MainPage : ContentPage
     private async Task ShowBuildingPickerAsync()
     {
         // Показываем backdrop + sheet одновременно — без layout thrashing
+        SetSafeAreaColor(Colors.White);
         BuildingPickerBackdrop.IsVisible = true;
-        BuildingPickerSheet.TranslationY = 600;
+        BuildingPickerSheet.Opacity = 0;
+        BuildingPickerSheet.TranslationY = -24;
         BuildingPickerSheet.IsVisible = true;
 
         // Параллельные анимации: slide-up sheet
-        await BuildingPickerSheet.TranslateTo(0, 0, 300, Easing.CubicOut);
+        await Task.WhenAll(
+            BuildingPickerSheet.FadeTo(1, 160, Easing.Linear),
+            BuildingPickerSheet.TranslateTo(0, 0, 220, Easing.CubicOut));
     }
 
     private async Task HideBuildingPickerAsync()
     {
         // Параллельно скрываем оба элемента
-        await BuildingPickerSheet.TranslateTo(0, 600, 220, Easing.CubicIn);
+        await Task.WhenAll(
+            BuildingPickerSheet.FadeTo(0, 120, Easing.Linear),
+            BuildingPickerSheet.TranslateTo(0, -24, 180, Easing.CubicIn));
         BuildingPickerSheet.IsVisible = false;
         BuildingPickerBackdrop.IsVisible = false;
         BuildingPickerSheet.TranslationY = 0;
+        BuildingPickerSheet.Opacity = 1;
+        SetSafeAreaColor(null);
     }
 
     // ── User menu animation (Liquid Glass) ──────────────────────────────────
@@ -284,10 +452,19 @@ public partial class MainPage : ContentPage
     private void ApplyStepZoom()
     {
         var step = _vm.CurrentStep;
-        if (step?.FocusRect is { } rect)
-            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToFitRect(rect.MinX, rect.MinY, rect.MaxX, rect.MaxY));
-        else if (step?.FocusNode is { } node)
-            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToSvgPoint(node.X, node.Y));
+        if (step == null) { MainCanvas.ApplyOrQueueZoom(null); return; }
+
+        // Для шагов-переходов (лестница/лифт) и шагов «идти до лестницы» — отдаляем на 15%
+        bool isTransition = step.FocusNode != null;
+        bool walkToTransition = step.FocusRect != null && step.Text != null
+            && (step.Text.Contains("лестниц", StringComparison.OrdinalIgnoreCase)
+                || step.Text.Contains("лифт", StringComparison.OrdinalIgnoreCase));
+        float zoomOut = (isTransition || walkToTransition) ? 1.15f : 1f;
+
+        if (step.FocusRect is { } rect)
+            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToFitRect(rect.MinX, rect.MinY, rect.MaxX, rect.MaxY, zoomOut));
+        else if (step.FocusNode is { } node)
+            MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToSvgPoint(node.X, node.Y, zoomOut));
         else
             MainCanvas.ApplyOrQueueZoom(null);
     }

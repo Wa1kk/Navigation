@@ -1,25 +1,41 @@
 using IndoorNav.Services;
+using ZXing.Net.Maui;
 
 namespace IndoorNav.Pages;
 
 public partial class QrScanPage : ContentPage
 {
     private readonly QrService _qrService;
+    private bool _isProcessing;
 
     public QrScanPage(QrService qrService)
     {
         InitializeComponent();
         _qrService = qrService;
+        CameraScanner.Options = new BarcodeReaderOptions
+        {
+            Formats = BarcodeFormats.TwoDimensional,
+            AutoRotate = true,
+            Multiple = false,
+            TryHarder = true
+        };
     }
 
-    private async Task ProcessImageAsync(byte[] bytes)
+    protected override void OnAppearing()
     {
-        var text = _qrService.DecodeFromBytes(bytes);
-        if (text == null)
-        {
-            await DisplayAlert("QR", "QR-код не найден в изображении.", "ОК");
-            return;
-        }
+        base.OnAppearing();
+        _isProcessing = false;
+        CameraScanner.IsDetecting = true;
+    }
+
+    protected override void OnDisappearing()
+    {
+        CameraScanner.IsDetecting = false;
+        base.OnDisappearing();
+    }
+
+    private async Task ProcessQrTextAsync(string? text)
+    {
         var nodeId = DeepLinkService.ParseUri(text);
         if (nodeId == null)
         {
@@ -30,44 +46,41 @@ public partial class QrScanPage : ContentPage
         await Navigation.PopModalAsync();
     }
 
-    private async void OnCapturePhotoClicked(object? sender, EventArgs e)
+    private async Task ProcessImageAsync(byte[] bytes)
     {
-        try
+        var text = _qrService.DecodeFromBytes(bytes);
+        if (text == null)
         {
-            if (!MediaPicker.Default.IsCaptureSupported)
-            {
-                await DisplayAlert("QR", "Камера недоступна на этом устройстве.", "ОК");
-                return;
-            }
-            var photo = await MediaPicker.Default.CapturePhotoAsync();
-            if (photo == null) return;
-            byte[] bytes;
-            using var stream = await photo.OpenReadAsync();
-            using var ms     = new MemoryStream();
-            await stream.CopyToAsync(ms);
-            bytes = ms.ToArray();
-            await ProcessImageAsync(bytes);
+            await DisplayAlert("QR", "QR-код не найден в изображении.", "ОК");
+            return;
         }
-        catch (Exception ex)
-        {
-            await DisplayAlert("QR", $"Не удалось открыть камеру: {ex.Message}", "ОК");
-        }
+        await ProcessQrTextAsync(text);
+    }
+
+    private void OnBarcodesDetected(object? sender, BarcodeDetectionEventArgs e)
+    {
+        if (_isProcessing) return;
+        var value = e.Results?.FirstOrDefault()?.Value;
+        if (string.IsNullOrWhiteSpace(value)) return;
+
+        _isProcessing = true;
+        CameraScanner.IsDetecting = false;
+        MainThread.BeginInvokeOnMainThread(async () => await ProcessQrTextAsync(value));
+    }
+
+    private void OnRestartScanClicked(object? sender, EventArgs e)
+    {
+        _isProcessing = false;
+        CameraScanner.IsDetecting = true;
     }
 
     private async void OnPickFromGalleryClicked(object? sender, EventArgs e)
     {
         try
         {
-            var result = await FilePicker.PickAsync(new PickOptions
+            var result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                PickerTitle = "Выберите изображение с QR-кодом",
-                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-                {
-                    { DevicePlatform.Android,    new[] { "image/png", "image/jpeg", "image/bmp" } },
-                    { DevicePlatform.iOS,         new[] { "public.image" } },
-                    { DevicePlatform.WinUI,       new[] { ".png", ".jpg", ".jpeg" } },
-                    { DevicePlatform.MacCatalyst, new[] { "public.image" } },
-                })
+                Title = "Выберите изображение с QR-кодом"
             });
             if (result == null) return;
             byte[] bytes;

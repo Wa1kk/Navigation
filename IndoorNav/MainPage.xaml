@@ -368,8 +368,8 @@
 
                     <!-- Address pill (top-left overlay) — tap opens building picker -->
                     <Border HorizontalOptions="Start" VerticalOptions="Start"
-                            Margin="12,12,12,12" Padding="14,10"
-                            StrokeShape="RoundRectangle 22"
+                            Margin="12,12,12,12" Padding="12,8"
+                            StrokeShape="RoundRectangle 18"
                             BackgroundColor="White"
                             StrokeThickness="0"
                             IsVisible="{Binding SelectedFloor, Converter={StaticResource NullToBoolConverter}}">
@@ -377,8 +377,8 @@
                             <Shadow Brush="Black" Offset="0,2" Radius="8" Opacity="0.12" />
                         </Border.Shadow>
                         <Label Text="{Binding SelectedBuildingAddress}"
-                               FontSize="13" FontAttributes="Bold"
-                               TextColor="#0F172A" VerticalOptions="Center" />
+                               FontSize="11" FontAttributes="Bold"
+                               TextColor="#64748B" VerticalOptions="Center" />
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding OpenBuildingPickerCommand}" />
                         </Border.GestureRecognizers>
@@ -386,10 +386,10 @@
 
                         <!-- Floor selector (right side of map) - with scroll support -->
                         <Border HorizontalOptions="End" VerticalOptions="Start"
-                                Margin="0,14,14,0" Padding="5,6"
-                                WidthRequest="50"
-                                MaximumHeightRequest="380"
-                                StrokeShape="RoundRectangle 23"
+                                Margin="0,14,14,0" Padding="3,4"
+                                WidthRequest="36"
+                                MaximumHeightRequest="360"
+                                StrokeShape="RoundRectangle 16"
                                 BackgroundColor="White"
                                 StrokeThickness="0"
                                 IsVisible="{Binding SelectedBuilding, Converter={StaticResource NullToBoolConverter}}"
@@ -403,14 +403,14 @@
                                            HorizontalOptions="Center">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="vm:FloorSelectorVm">
-                                        <Border WidthRequest="36" HeightRequest="36"
+                                        <Border WidthRequest="24" HeightRequest="24"
                                                 Margin="0,1"
-                                                StrokeShape="RoundRectangle 18"
+                                                StrokeShape="RoundRectangle 12"
                                                 StrokeThickness="0"
                                                 BackgroundColor="{Binding CircleColor}"
                                                 HorizontalOptions="Center">
                                             <Label Text="{Binding Display}"
-                                                   FontSize="13" FontAttributes="Bold"
+                                                   FontSize="11" FontAttributes="Bold"
                                                    TextColor="{Binding TextColor}"
                                                    HorizontalTextAlignment="Center"
                                                    HorizontalOptions="Center"
@@ -506,7 +506,10 @@
                             <Label Grid.Column="0" Text="ОТ" FontSize="10" CharacterSpacing="1.5"
                                    TextColor="#94A3B8" VerticalOptions="Center" />
                             <Border Grid.Column="1" Padding="12,12"
-                                    StrokeShape="RoundRectangle 10" Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                    StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="White">
+                                <Border.Shadow>
+                                    <Shadow Brush="#18000000" Offset="0,1" Radius="4" Opacity="1" />
+                                </Border.Shadow>
                                 <Label Text="{Binding StartNodeDisplay}" FontSize="14" TextColor="#334155"
                                        LineBreakMode="TailTruncation" />
                                 <Border.GestureRecognizers>
@@ -527,7 +530,10 @@
                             <Label Grid.Column="0" Text="ДО" FontSize="10" CharacterSpacing="1.5"
                                    TextColor="#94A3B8" VerticalOptions="Center" />
                             <Border Grid.Column="1" Padding="12,12"
-                                    StrokeShape="RoundRectangle 10" Stroke="#E2E8F0" BackgroundColor="#F8FAFC">
+                                    StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="White">
+                                <Border.Shadow>
+                                    <Shadow Brush="#18000000" Offset="0,1" Radius="4" Opacity="1" />
+                                </Border.Shadow>
                                 <Label Text="{Binding EndNodeDisplay}" FontSize="14" TextColor="#334155"
                                        LineBreakMode="TailTruncation" />
                                 <Border.GestureRecognizers>
@@ -781,7 +787,7 @@
 
             <!-- ─── Node picker overlay ─── -->
 
-            <!-- Backdrop: blur overlay, tap to close -->
+            <!-- Backdrop: blur overlay on entire screen (layer 1) -->
             <controls:BlurOverlay x:Name="NodePickerBackdrop"
                                   Grid.RowSpan="3"
                                   IsVisible="{Binding IsPickerOpen}">
@@ -790,109 +796,124 @@
                 </controls:BlurOverlay.GestureRecognizers>
             </controls:BlurOverlay>
 
-            <!-- Popup card -->
-            <Border Grid.Row="1" VerticalOptions="End"
-                    Padding="0"
-                    StrokeShape="RoundRectangle 14"
+            <!-- Bottom sheet: white bg, content at bottom -->
+            <Border x:Name="PickerSheet" Grid.RowSpan="3"
+                    VerticalOptions="End" HorizontalOptions="Fill"
+                    Padding="0,0,0,300"
+                    StrokeShape="RoundRectangle 16,16,0,0"
                     BackgroundColor="White"
-                    Stroke="#E2E8F0" StrokeThickness="1"
-                    IsVisible="{Binding IsPickerOpen}">
-                <Grid RowDefinitions="Auto,Auto,Auto,Auto,*">
+                    StrokeThickness="0"
+                    IsVisible="False">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,-4" Radius="16" Opacity="0.12" />
+                </Border.Shadow>
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="0">
 
-                    <!-- Header -->
-                    <Grid Grid.Row="0" Padding="16,10,8,10" ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0"
-                               Text="{Binding PickerTitle}"
-                               FontSize="14" FontAttributes="Bold"
-                               TextColor="#0F172A" VerticalOptions="Center" />
-                        <Button Grid.Column="1"
-                                Text="✕"
-                                Command="{Binding ClosePickerCommand}"
-                                BackgroundColor="Transparent" TextColor="#64748B"
-                                FontSize="15" HeightRequest="34" WidthRequest="34"
-                                Padding="0" />
-                    </Grid>
-
-                    <!-- Divider -->
-                    <BoxView Grid.Row="1" BackgroundColor="#E2E8F0" HeightRequest="1" />
+                    <!-- Drag handle -->
+                    <Border Grid.Row="0" Padding="0,10,0,6" StrokeThickness="0" BackgroundColor="Transparent">
+                        <BoxView WidthRequest="36" HeightRequest="4"
+                                 Color="#CBD5E1" CornerRadius="2"
+                                 HorizontalOptions="Center" />
+                        <Border.GestureRecognizers>
+                            <PanGestureRecognizer PanUpdated="OnPickerSheetPan" />
+                        </Border.GestureRecognizers>
+                    </Border>
 
                     <!-- Search bar -->
-                    <Border Grid.Row="2" Padding="12,8"
-                            BackgroundColor="#F8FAFC" StrokeThickness="0">
+                    <Border Grid.Row="1" Margin="12,0,12,8" Padding="12,0"
+                            StrokeShape="RoundRectangle 10"
+                            Stroke="#E2E8F0" StrokeThickness="1"
+                            BackgroundColor="#F8FAFC">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Label Grid.Column="0" Text="🔍"
                                    FontSize="14" VerticalOptions="Center"
                                    TextColor="#94A3B8" />
-                            <Entry Grid.Column="1"
+                            <Entry x:Name="PickerSearchEntry" Grid.Column="1"
                                    Text="{Binding PickerSearchText, Mode=TwoWay}"
-                                   Placeholder="Поиск аудитории..."
+                                   Placeholder="Введите кабинет..."
                                    PlaceholderColor="#94A3B8"
-                                   FontSize="13" TextColor="#1E293B"
+                                   FontSize="14" TextColor="#1E293B"
                                    BackgroundColor="Transparent"
                                    ClearButtonVisibility="WhileEditing"
-                                   ReturnType="Search" />
+                                   ReturnType="Search"
+                                   Focused="OnPickerSearchFocused"
+                                   Unfocused="OnPickerSearchUnfocused" />
                         </Grid>
                     </Border>
 
-                    <!-- Divider -->
-                    <BoxView Grid.Row="3" BackgroundColor="#E2E8F0" HeightRequest="1" />
+                    <!-- Results / recent / not-found area -->
+                    <ScrollView x:Name="PickerResultsScroll" Grid.Row="2" MaximumHeightRequest="132">
+                        <VerticalStackLayout Spacing="0">
 
-                    <!-- Collapsible floor groups -->
-                    <ScrollView Grid.Row="4" MaximumHeightRequest="280">
-                        <VerticalStackLayout Spacing="0"
-                                             BindableLayout.ItemsSource="{Binding NodesByFloor}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:FloorNodeGroup">
-                                    <VerticalStackLayout Spacing="0">
+                            <!-- Recent nodes (shown when not searching) -->
+                            <VerticalStackLayout Spacing="0"
+                                                 IsVisible="{Binding HasRecentNodes}"
+                                                 x:Name="RecentSection">
+                                <Label Text="Недавние"
+                                       FontSize="11" FontAttributes="Bold"
+                                       TextColor="#94A3B8" CharacterSpacing="0.8"
+                                       Margin="16,4,16,6" />
+                                <VerticalStackLayout Spacing="0"
+                                                     BindableLayout.ItemsSource="{Binding RecentPickerNodes}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="{x:Null}">
+                                            <Border Padding="16,10,16,10"
+                                                    BackgroundColor="Transparent"
+                                                    StrokeThickness="0">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <Label Grid.Column="0" Text="{Binding DisplayName}"
+                                                           FontSize="14" TextColor="#64748B" />
+                                                    <Label Grid.Column="1" Text="{Binding FloorLabel}"
+                                                           FontSize="12" TextColor="#2563EB"
+                                                           FontAttributes="Bold"
+                                                           VerticalOptions="Center" />
+                                                </Grid>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPickerNodeCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Border.GestureRecognizers>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                                <BoxView BackgroundColor="#F1F5F9" HeightRequest="1" Margin="16,4,16,4" />
+                            </VerticalStackLayout>
 
-                                        <!-- Floor header row — tap to expand / collapse -->
+                            <!-- Search results -->
+                            <VerticalStackLayout Spacing="0"
+                                                 BindableLayout.ItemsSource="{Binding PickerFloorNodes}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Null}">
                                         <Border Padding="16,10,16,10"
-                                                BackgroundColor="#F8FAFC"
+                                                BackgroundColor="Transparent"
                                                 StrokeThickness="0">
                                             <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0"
-                                                       Text="{Binding FloorName}"
-                                                       FontSize="11" FontAttributes="Bold"
-                                                       CharacterSpacing="1.2"
-                                                       TextColor="#64748B"
-                                                       VerticalOptions="Center" />
-                                                <Label Grid.Column="1"
-                                                       Text="{Binding ChevronText}"
-                                                       FontSize="11" TextColor="#94A3B8"
+                                                <Label Grid.Column="0" Text="{Binding DisplayName}"
+                                                       FontSize="14" TextColor="#64748B" />
+                                                <Label Grid.Column="1" Text="{Binding FloorLabel}"
+                                                       FontSize="12" TextColor="#2563EB"
+                                                       FontAttributes="Bold"
                                                        VerticalOptions="Center" />
                                             </Grid>
                                             <Border.GestureRecognizers>
                                                 <TapGestureRecognizer
-                                                    Command="{Binding ToggleExpandCommand}" />
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPickerNodeCommand}"
+                                                    CommandParameter="{Binding .}" />
                                             </Border.GestureRecognizers>
                                         </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
 
-                                        <!-- Node items — shown only when floor is expanded -->
-                                        <VerticalStackLayout Spacing="0"
-                                                             BindableLayout.ItemsSource="{Binding VisibleNodes}">
-                                            <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="{x:Null}">
-                                                    <Border Padding="22,11,16,11"
-                                                            BackgroundColor="Transparent"
-                                                            StrokeThickness="0">
-                                                        <Label Text="{Binding DisplayName}"
-                                                               FontSize="14" TextColor="#1E293B" />
-                                                        <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectPickerNodeCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </Border.GestureRecognizers>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </BindableLayout.ItemTemplate>
-                                        </VerticalStackLayout>
+                            <!-- Not found message -->
+                            <VerticalStackLayout IsVisible="{Binding PickerNotFound}"
+                                                 Padding="16,20,16,20">
+                                <Label Text="Кабинет не найден"
+                                       FontSize="14" TextColor="#94A3B8"
+                                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
 
-                                        <!-- Thin separator between floors -->
-                                        <BoxView BackgroundColor="#F1F5F9" HeightRequest="1" />
-
-                                    </VerticalStackLayout>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
                     </ScrollView>
 
@@ -904,57 +925,87 @@
             <!-- Backdrop: blur overlay, tap to close -->
             <controls:BlurOverlay x:Name="BuildingPickerBackdrop"
                                   Grid.RowSpan="3"
+                                  BackgroundColor="White"
+                                  UseBlur="False"
+                                  ZIndex="150"
                                   IsVisible="False">
                 <controls:BlurOverlay.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding CloseBuildingPickerCommand}" />
                 </controls:BlurOverlay.GestureRecognizers>
             </controls:BlurOverlay>
 
-            <!-- Bottom sheet -->
-            <Border x:Name="BuildingPickerSheet"
-                    Grid.RowSpan="3" VerticalOptions="End"
-                    StrokeShape="RoundRectangle 20,20,0,0"
-                    BackgroundColor="White" Padding="0,0,0,24"
-                    IsVisible="False">
-                <VerticalStackLayout Spacing="0">
-                    <!-- Drag handle -->
-                    <BoxView WidthRequest="40" HeightRequest="4" CornerRadius="2"
-                             BackgroundColor="#D1D5DB"
-                             HorizontalOptions="Center" Margin="0,12,0,0" />
-                    <!-- Header -->
-                    <Grid Padding="20,12,12,12" ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0"
-                               Text="Выбор корпуса"
-                               FontSize="17" FontAttributes="Bold"
-                               TextColor="#0F172A" VerticalOptions="Center" />
-                        <Button Grid.Column="1" Text="&#x2715;"
+            <Grid x:Name="BuildingPickerSheet"
+                  Grid.RowSpan="3"
+                  RowDefinitions="Auto,Auto,*"
+                  BackgroundColor="White"
+                  Padding="0"
+                  ZIndex="151"
+                  IsVisible="False">
+                <Grid Grid.Row="0" Padding="18,16,18,8" ColumnDefinitions="Auto,*">
+                        <Button Grid.Column="0" Text="&lt; Назад"
                                 Command="{Binding CloseBuildingPickerCommand}"
-                                BackgroundColor="Transparent" TextColor="#64748B"
-                                FontSize="15" HeightRequest="36" WidthRequest="36"
-                                Padding="0" />
-                    </Grid>
-                    <!-- Separator -->
-                    <BoxView BackgroundColor="#E2E8F0" HeightRequest="1" Margin="0,0,0,4" />
-                    <!-- Building list -->
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding BuildingPickerItems}">
+                                BackgroundColor="Transparent" TextColor="#2563EB"
+                                FontSize="16" HeightRequest="42"
+                                Padding="0,0,16,0" />
+                        <Label Grid.Column="1"
+                               Text="Корпуса"
+                               FontSize="16" FontAttributes="Bold"
+                               TextColor="#0F172A"
+                               VerticalOptions="Center"
+                               HorizontalTextAlignment="End" />
+                </Grid>
+
+                <VerticalStackLayout Grid.Row="1" Padding="24,10,24,18" Spacing="7">
+                    <Label Text="Выберите корпус"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="#0F172A" />
+                    <Label Text="После выбора откроется карта здания и список аудиторий."
+                           FontSize="14"
+                           TextColor="#64748B"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+
+                <ScrollView Grid.Row="2" Padding="16,0,16,24">
+                    <VerticalStackLayout Spacing="10"
+                                         BindableLayout.ItemsSource="{Binding BuildingPickerItems}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:BuildingPickerItemVm">
-                                <Border Padding="20,16" Margin="0,0,0,1"
+                                <Border Padding="18,16"
+                                        Margin="0"
                                         BackgroundColor="{Binding RowBgColor}"
-                                        StrokeThickness="0">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                                        Stroke="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#2563EB|#E2E8F0'}"
+                                        StrokeShape="RoundRectangle 20"
+                                        StrokeThickness="1">
+                                    <Border.Shadow>
+                                        <Shadow Brush="#0F172A" Offset="0,4" Radius="14" Opacity="0.06" />
+                                    </Border.Shadow>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="5">
                                             <Label Text="{Binding Building.Name}"
-                                                   FontSize="16" FontAttributes="Bold"
+                                                   FontSize="17"
+                                                   FontAttributes="Bold"
                                                    TextColor="#0F172A" />
                                             <Label Text="{Binding Building.Address}"
-                                                   FontSize="13" TextColor="#64748B" />
+                                                   FontSize="13"
+                                                   TextColor="#64748B"
+                                                   LineBreakMode="TailTruncation" />
                                         </VerticalStackLayout>
-                                        <Label Grid.Column="1" Text="&#x2713;"
-                                               FontSize="20" FontAttributes="Bold"
-                                               TextColor="#2563EB"
-                                               VerticalOptions="Center"
-                                               IsVisible="{Binding IsSelected}" />
+                                        <Border Grid.Column="1"
+                                                HeightRequest="32"
+                                                WidthRequest="32"
+                                                StrokeShape="RoundRectangle 16"
+                                                StrokeThickness="0"
+                                                BackgroundColor="#2563EB"
+                                                VerticalOptions="Center"
+                                                IsVisible="{Binding IsSelected}">
+                                            <Label Text="&#x2713;"
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="White"
+                                                   HorizontalOptions="Center"
+                                                   VerticalOptions="Center" />
+                                        </Border>
                                     </Grid>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding TapCommand}" />
@@ -963,8 +1014,8 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
+                </ScrollView>
+            </Grid>
 
         </Grid>
 

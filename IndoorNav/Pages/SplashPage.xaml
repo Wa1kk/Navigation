@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="IndoorNav.Pages.SplashPage"
+             Title=""
+             BackgroundColor="#0F172A"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="*,Auto,*" VerticalOptions="Fill">
+        <VerticalStackLayout Grid.Row="1" Spacing="8" VerticalOptions="Center" HorizontalOptions="Center">
+            <Label Text="IndoorNav"
+                   FontSize="32" FontAttributes="Bold" TextColor="White"
+                   HorizontalOptions="Center" />
+            <Label Text="Навигация по зданиям"
+                   FontSize="13" TextColor="#94A3B8"
+                   HorizontalOptions="Center" Margin="0,0,0,24" />
+            <ActivityIndicator IsRunning="True"
+                               Color="#2563EB"
+                               WidthRequest="32" HeightRequest="32"
+                               HorizontalOptions="Center" />
+        </VerticalStackLayout>
+    </Grid>
+
+</ContentPage>

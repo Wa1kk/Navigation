@@ -293,8 +293,8 @@ public class SvgView : SKCanvasView
 
         // Приближённая карта должна свободно ходить по экрану, но не исчезать полностью.
         // Чем больше карта относительно экрана, тем меньше требуемая видимая доля.
-        float minVisibleW = MathF.Min(r.Width  * 0.35f, _canvasW * 0.35f);
-        float minVisibleH = MathF.Min(r.Height * 0.35f, _canvasH * 0.35f);
+        float minVisibleW = MathF.Min(r.Width  * 0.28f, _canvasW * 0.28f);
+        float minVisibleH = MathF.Min(r.Height * 0.28f, _canvasH * 0.28f);
 
         float dx = 0f, dy = 0f;
 
@@ -1204,7 +1204,8 @@ public class SvgView : SKCanvasView
         }
 
         float r        = 15f / sc;   // ← РАДИУС ТОЧЕК В ЭКРАННЫХ ПИКСЕЛЯХ (меняйте здесь)
-        float fontSize = 14f / sc;
+        float fontBase  = DeviceInfo.Current.Idiom == DeviceIdiom.Phone ? 18f : 14f;
+        float fontSize = fontBase / sc;
 
         using var fillNorm  = new SKPaint { Color = new SKColor(33, 150, 243),  IsAntialias = true };
         using var fillSel   = new SKPaint { Color = new SKColor(255, 152, 0),   IsAntialias = true };
@@ -1365,7 +1366,7 @@ public class SvgView : SKCanvasView
         if (!(!IsAdminMode && (node.IsLabelHidden || node.IsFireExtinguisher)))
         {
             float lblOpacity = (IsAdminMode && node.IsLabelHidden) ? 0.35f : 1f;
-            float lblSize = (IsAdminMode ? 15f : 18f) / sc * (node.LabelScale > 0.01f ? node.LabelScale : 1f);
+            float lblSize = (IsAdminMode ? 15f : (DeviceInfo.Current.Idiom == DeviceIdiom.Phone ? 22f : 18f)) / sc * (node.LabelScale > 0.01f ? node.LabelScale : 1f);
             using var namePaint = new SKPaint { Color = new SKColor(20, 20, 20, (byte)(255 * lblOpacity)), IsAntialias = true };
             using var nameFont  = new SKFont(SKTypeface.Default, lblSize);
             var nameStr = node.Name;
@@ -1460,7 +1461,7 @@ public class SvgView : SKCanvasView
 
         // Таблетка «Вы тут»
         string label    = "Вы тут";
-        float  lblSize  = 11f / sc;
+        float  lblSize  = (DeviceInfo.Current.Idiom == DeviceIdiom.Phone ? 14f : 11f) / sc;
         using var lblFont = new SKFont(SKTypeface.Default, lblSize);
         using var mP      = new SKPaint { IsAntialias = true };
         float lblW    = lblFont.MeasureText(label, mP);
@@ -1573,9 +1574,9 @@ public class SvgView : SKCanvasView
         using var sfill   = new SKPaint { Color = new SKColor(33,  150, 243),   IsAntialias = true }; // старт — синий
         using var efill   = new SKPaint { Color = new SKColor(244,  67,  54),   IsAntialias = true }; // финиш — красный
         using var rstroke = new SKPaint { Color = SKColors.White, StrokeWidth = 2.5f / sc, IsStroke = true, IsAntialias = true };
-        using var stepFont = new SKFont(SKTypeface.Default, 13f / sc);
+        using var stepFont = new SKFont(SKTypeface.Default, (DeviceInfo.Current.Idiom == DeviceIdiom.Phone ? 16f : 13f) / sc);
         using var stepTxt  = new SKPaint { Color = SKColors.White, IsAntialias = true };
-        float routeLblSize = 16f / sc;
+        float routeLblSize = (DeviceInfo.Current.Idiom == DeviceIdiom.Phone ? 20f : 16f) / sc;
         using var lblFont  = new SKFont(SKTypeface.Default, routeLblSize);
         using var lblPaint = new SKPaint { Color = new SKColor(20, 20, 20), IsAntialias = true };
 
@@ -1711,7 +1712,7 @@ public class SvgView : SKCanvasView
 
     private SKMatrix FitMatrix(SKRect src, float dstW, float dstH)
     {
-        float scale = Math.Min(dstW / src.Width, dstH / src.Height) * 0.95f * 1.6f;
+        float scale = Math.Min(dstW / src.Width, dstH / src.Height) * 0.95f * 1.8f;
         float tx = (dstW - src.Width  * scale) / 2f - src.Left * scale;
         float ty = (dstH - src.Height * scale) / 2f - src.Top  * scale;
         _fitScale = scale; // дефолтный масштаб = минимальный зум
@@ -1769,7 +1770,8 @@ public class SvgView : SKCanvasView
     }
 
     /// <summary>Программно центрирует и приближает указанную SVG-точку (без ограничения MaxZoom).</summary>
-    public void ZoomToSvgPoint(float svgX, float svgY)
+    /// <param name="zoomOutFactor">>1 чтобы отдалить (напр. 1.15 = на 15% дальше).</param>
+    public void ZoomToSvgPoint(float svgX, float svgY, float zoomOutFactor = 1f)
     {
         if (_canvasW <= 0 || _canvasH <= 0) return;
 
@@ -1777,7 +1779,7 @@ public class SvgView : SKCanvasView
         float svgH = _svgBounds.Height > 0 ? _svgBounds.Height : 600f;
 
         // Показываем окно ~38% от меньшей из сторон SVG вокруг узла
-        float window = Math.Min(svgW, svgH) * 0.38f;
+        float window = Math.Min(svgW, svgH) * 0.38f * zoomOutFactor;
         float scale  = Math.Min(_canvasW, _canvasH) / window;
 
         float tx = _canvasW / 2f - svgX * scale;
@@ -1787,7 +1789,8 @@ public class SvgView : SKCanvasView
     }
 
     /// <summary>Зумирует карту на указанную SVG-область с равномерным отступом (20%).</summary>
-    public void ZoomToFitRect(float minX, float minY, float maxX, float maxY)
+    /// <param name="zoomOutFactor">>1 чтобы отдалить (напр. 1.15 = на 15% дальше).</param>
+    public void ZoomToFitRect(float minX, float minY, float maxX, float maxY, float zoomOutFactor = 1f)
     {
         if (_canvasW <= 0 || _canvasH <= 0) return;
 
@@ -1796,7 +1799,7 @@ public class SvgView : SKCanvasView
         if (w < 1f && h < 1f) return;
 
         // Отступ 20% от большей из сторон, минимум 40 единиц SVG
-        float padding = Math.Max(w, h) * 0.20f + 40f;
+        float padding = (Math.Max(w, h) * 0.20f + 40f) * zoomOutFactor;
         float pMinX = minX - padding;
         float pMinY = minY - padding;
         float pMaxX = maxX + padding;
@@ -1819,6 +1822,8 @@ public class SvgView : SKCanvasView
     private const float BoundaryVertexHitRadius = 20f;
     private readonly Dictionary<long, SKPoint> _activePointers = new();
     private bool _wasPinching;
+    private bool _wasRotating;
+    private float _prevAngle;
 
     /// <summary>Переводит экранный тап (e.Location) в SVG-координаты.</summary>
     private SKPoint ToSvg(SKPoint screen)
@@ -1969,20 +1974,36 @@ public class SvgView : SKCanvasView
                     var otherKey = _activePointers.Keys.First(k => k != e.Id);
                     var prevDist = Distance(prev, _activePointers[otherKey]);
 
-                    // Pinch-zoom
+                    // Pinch-zoom (dampened by 30% for smoother control)
                     if (prevDist > 0)
                     {
-                        float s = curDist / prevDist;
+                        float rawS = curDist / prevDist;
+                        float s = 1f + (rawS - 1f) * 0.7f;
                         var pivot = MidPoint(pts[0], pts[1]);
                         ApplyZoom(s, pivot);
                     }
+
+                    // Two-finger rotation
+                    float curAngle = MathF.Atan2(pts[1].Y - pts[0].Y, pts[1].X - pts[0].X);
+                    if (_wasRotating)
+                    {
+                        float deltaAngle = curAngle - _prevAngle;
+                        // Normalize to [-π, π]
+                        if (deltaAngle > MathF.PI) deltaAngle -= 2f * MathF.PI;
+                        if (deltaAngle < -MathF.PI) deltaAngle += 2f * MathF.PI;
+                        float deltaDeg = deltaAngle * (180f / MathF.PI);
+                        var pivot = MidPoint(pts[0], pts[1]);
+                        ApplyRotation(deltaDeg, pivot);
+                    }
+                    _wasRotating = true;
+                    _prevAngle = curAngle;
 
                     _panDirty = true;
                 }
                 break;
 
             case SKTouchAction.Released:
-                if (_activePointers.ContainsKey(e.Id) && !_didDrag && !_wasPinching)
+                if (_activePointers.ContainsKey(e.Id) && !_didDrag && !_wasPinching && !_wasRotating)
                 {
                     if (IsAdminMode && _draggingBoundaryVertexIdx >= 0)
                     {
@@ -2005,6 +2026,7 @@ public class SvgView : SKCanvasView
                     _draggingBoundaryPolyIdx   = -1;
                     _draggingBoundaryVertexIdx = -1;
                     _wasPinching = false;
+                    _wasRotating = false;
                     StopPanRender();
                     InvalidateSurface(); // последний кадр по остановке
                 }
@@ -2016,6 +2038,7 @@ public class SvgView : SKCanvasView
                 _draggingBoundaryPolyIdx   = -1;
                 _draggingBoundaryVertexIdx = -1;
                 _wasPinching = false;
+                _wasRotating = false;
                 StopPanRender();
                 break;
         }

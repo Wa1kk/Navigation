@@ -38,11 +38,14 @@ public class FloorNodeGroup : INotifyPropertyChanged
         }
     }
 
-    /// <summary>▼ when expanded, ▶ when collapsed — used by the header row.</summary>
-    public string ChevronText => _isExpanded ? "▼" : "▶";
+    /// <summary>▾ when expanded, ∨ when collapsed — both point down, filled vs outline.</summary>
+    public string ChevronText => _isExpanded ? "▾" : "∨";
 
     /// <summary>Toggles <see cref="IsExpanded"/>. Bound to the header row tap.</summary>
     public ICommand ToggleExpandCommand { get; }
+
+    /// <summary>Command to select this floor tab — set by the parent ViewModel.</summary>
+    public ICommand? SelectFloorCommand { get; set; }
 
     public FloorNodeGroup(string floorName, IEnumerable<NavNode> nodes, bool isExpanded = false)
     {

@@ -1,35 +1,45 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
              x:Class="IndoorNav.Pages.QrScanPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="#1E293B">
     <Grid RowDefinitions="*,Auto">
 
         <!-- Illustration + text -->
-        <VerticalStackLayout Grid.Row="0"
-                             HorizontalOptions="Center" VerticalOptions="Center"
-                             Spacing="20" Margin="32,0">
-            <Border WidthRequest="120" HeightRequest="120"
+        <Grid Grid.Row="0">
+            <zxing:CameraBarcodeReaderView x:Name="CameraScanner"
+                                           BarcodesDetected="OnBarcodesDetected" />
+            <BoxView BackgroundColor="#66000000" />
+            <Border WidthRequest="260"
+                    HeightRequest="260"
                     HorizontalOptions="Center"
-                    StrokeShape="RoundRectangle 18"
-                    BackgroundColor="#334155" StrokeThickness="0">
-                <Label Text="QR" FontSize="40" FontAttributes="Bold" TextColor="#94A3B8"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Label Text="Сканирование QR-кода"
-                   TextColor="White" FontSize="20" FontAttributes="Bold"
-                   HorizontalOptions="Center" />
-            <Label Text="Сфотографируйте QR-код на стенде или выберите фото из галереи"
-                   TextColor="#94A3B8" FontSize="14"
-                   HorizontalTextAlignment="Center" HorizontalOptions="Center"
-                   LineBreakMode="WordWrap" />
-        </VerticalStackLayout>
+                    VerticalOptions="Center"
+                    Stroke="#38BDF8"
+                    StrokeThickness="3"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 28" />
+            <VerticalStackLayout HorizontalOptions="Center"
+                                 VerticalOptions="Start"
+                                 Margin="28,92,28,0"
+                                 Spacing="8">
+                <Label Text="Наведите камеру на QR-код"
+                       TextColor="White"
+                       FontSize="20"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Код будет распознан автоматически"
+                       TextColor="#CBD5E1"
+                       FontSize="14"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
 
         <!-- Action buttons -->
         <VerticalStackLayout Grid.Row="1" Spacing="12" Padding="24,0,24,52">
-            <Button Text="Сфотографировать QR"
-                    Clicked="OnCapturePhotoClicked"
+            <Button Text="Повторить сканирование"
+                    Clicked="OnRestartScanClicked"
                     BackgroundColor="#0E7490" TextColor="White"
                     FontSize="15" FontAttributes="Bold"
                     HeightRequest="52" CornerRadius="14" />

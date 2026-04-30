@@ -15,6 +15,7 @@ public enum AdminMainTab  { Map, Management }
 public enum ManagementTab { Users, Departments, Schedule }
 
 public enum AdminAction { None, AddNode, AddTransition, AddElevator, AddStaircase, AddExit, AddEvacuationExit, AddOther, AddFireExtinguisher, AddQrAnchor, ConnectNode, DisconnectNode, DrawCorridor, MoveNode, DrawBoundary }
+public enum MobileAdminPanel { Add, Edit, Style, Emergency, Save }
 
 
 public class AdminViewModel : INotifyPropertyChanged
@@ -66,6 +67,7 @@ public class AdminViewModel : INotifyPropertyChanged
     private Building?      _selectedBuilding;
     private Floor?         _selectedFloor;
     private AdminAction    _currentAction;
+    private MobileAdminPanel _mobilePanel = MobileAdminPanel.Add;
     private NavNode?       _selectedNode;
     private string         _statusText = "";
 
@@ -228,11 +230,37 @@ public class AdminViewModel : INotifyPropertyChanged
         set { _qrCurrentUrl = value; OnPropertyChanged(); }
     }
 
+    public byte[]? QrCurrentPngBytes => _qrCurrentPngBytes;
+
+    public string QrPngFileName => $"QR_{GetSafeQrFileNameBase()}.png";
+
     public bool IsConnectMode    => CurrentAction == AdminAction.ConnectNode;
     public bool IsDisconnectMode => CurrentAction == AdminAction.DisconnectNode;
     public bool IsCorridorMode   => CurrentAction == AdminAction.DrawCorridor;
     public bool IsMoveMode       => CurrentAction == AdminAction.MoveNode;
     public bool IsBoundaryMode   => CurrentAction == AdminAction.DrawBoundary;
+
+    public MobileAdminPanel MobilePanel
+    {
+        get => _mobilePanel;
+        set
+        {
+            if (_mobilePanel == value) return;
+            _mobilePanel = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsMobileAddPanel));
+            OnPropertyChanged(nameof(IsMobileEditPanel));
+            OnPropertyChanged(nameof(IsMobileStylePanel));
+            OnPropertyChanged(nameof(IsMobileEmergencyPanel));
+            OnPropertyChanged(nameof(IsMobileSavePanel));
+        }
+    }
+
+    public bool IsMobileAddPanel       => _mobilePanel == MobileAdminPanel.Add;
+    public bool IsMobileEditPanel      => _mobilePanel == MobileAdminPanel.Edit;
+    public bool IsMobileStylePanel     => _mobilePanel == MobileAdminPanel.Style;
+    public bool IsMobileEmergencyPanel => _mobilePanel == MobileAdminPanel.Emergency;
+    public bool IsMobileSavePanel      => _mobilePanel == MobileAdminPanel.Save;
 
     public bool IsEmergencyActive   => _emergencyService.IsEmergencyActive;
     public bool IsEmergencyInactive => !_emergencyService.IsEmergencyActive;
@@ -247,6 +275,8 @@ public class AdminViewModel : INotifyPropertyChanged
         get => _statusText;
         private set { _statusText = value; OnPropertyChanged(); }
     }
+
+    public void SetStatusText(string message) => StatusText = message;
 
     // ---- Commands ----
 
@@ -296,6 +326,7 @@ public class AdminViewModel : INotifyPropertyChanged
     public Command ToggleMultiSelectModeCommand   { get; }
     public Command ClearMultiSelectionCommand     { get; }
     public Command RemoveIconFromSelectionCommand { get; }
+    public Command<string> SwitchMobilePanelCommand { get; }
 
     // ── Students ──
     public ObservableCollection<StudentRowVm> Students { get; } = new();
@@ -954,6 +985,17 @@ public class AdminViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(IsEmergencyInactive));
             OnPropertyChanged(nameof(IsSelectedBuildingEmergencyActive));
             OnPropertyChanged(nameof(IsSelectedBuildingEmergencyInactive));
+        });
+        SwitchMobilePanelCommand = new Command<string>(panel =>
+        {
+            MobilePanel = panel switch
+            {
+                "Edit"      => MobileAdminPanel.Edit,
+                "Style"     => MobileAdminPanel.Style,
+                "Emergency" => MobileAdminPanel.Emergency,
+                "Save"      => MobileAdminPanel.Save,
+                _           => MobileAdminPanel.Add,
+            };
         });
 
         // Tab switching
@@ -1888,6 +1930,8 @@ public class AdminViewModel : INotifyPropertyChanged
         QrCurrentUrl          = content;
         QrCodeImageSource     = ImageSource.FromStream(() => new MemoryStream(_qrCurrentPngBytes));
         QrPopupVisible        = true;
+        OnPropertyChanged(nameof(QrCurrentPngBytes));
+        OnPropertyChanged(nameof(QrPngFileName));
         ((Command)DownloadQrCodeCommand).ChangeCanExecute();
         ((Command)CopyQrUrlCommand).ChangeCanExecute();
         await Task.CompletedTask;
@@ -1964,6 +2008,16 @@ public class AdminViewModel : INotifyPropertyChanged
         {
             StatusText = $"Ошибка сохранения QR: {ex.Message}";
         }
+    }
+
+    private string GetSafeQrFileNameBase()
+    {
+        var safe = string.Concat(QrPopupNodeName.Split(Path.GetInvalidFileNameChars()));
+        if (!string.IsNullOrWhiteSpace(safe))
+            return safe;
+        return string.IsNullOrWhiteSpace(_qrCurrentNodeId)
+            ? "code"
+            : _qrCurrentNodeId[..Math.Min(8, _qrCurrentNodeId.Length)];
     }
 
 #if WINDOWS

@@ -35,6 +35,11 @@ public class MainViewModel : INotifyPropertyChanged
     private string _pickerTarget = "start"; // "start" or "end"
     private string _pickerSearchText = string.Empty;
     private List<FloorNodeGroup> _nodesByFloor = new();
+    private List<NavNode> _recentPickerNodes = new();
+    private System.Threading.Timer? _searchDebounceTimer;
+    // Cached flat list of searchable nodes for current building (rebuilt only when building changes)
+    private List<NavNode> _searchableNodes = new();
+    private string _searchableBuildingId = "";
     private ObservableCollection<NavNode> _routeNodesOnFloor = new();
     private ObservableCollection<NavNode> _nodesOnCurrentFloor = new();
     private ObservableCollection<NavEdge> _edgesOnCurrentFloor = new();
@@ -104,6 +109,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             if (_selectedBuilding == value) return;
             _selectedBuilding = value;
+            _searchableBuildingId = ""; // invalidate cache
             OnPropertyChanged();
             OnPropertyChanged(nameof(Floors));
             OnPropertyChanged(nameof(SelectedBuildingAddress));
@@ -232,9 +238,9 @@ public class MainViewModel : INotifyPropertyChanged
     /// <summary>Максимальный зум для текущего здания.</summary>
     public float MapMaxZoom => _selectedBuilding?.Id switch
     {
-        "BuildingA" => 1.6f,
-        "BuildingB" => 1.8f,
-        _           => 1.8f,
+        "BuildingA" => 1.44f,
+        "BuildingB" => 1.62f,
+        _           => 1.62f,
     };
 
     // ── Emergency confirmation UX ────────────────────────────────────────────
@@ -356,7 +362,40 @@ public class MainViewModel : INotifyPropertyChanged
     public List<FloorNodeGroup> NodesByFloor
     {
         get => _nodesByFloor;
-        private set { _nodesByFloor = value; OnPropertyChanged(); }
+        private set
+        {
+            _nodesByFloor = value;
+            OnPropertyChanged();
+            _selectedPickerFloorIndex = 0;
+            OnPropertyChanged(nameof(SelectedPickerFloorIndex));
+            OnPropertyChanged(nameof(PickerFloorNodes));
+        }
+    }
+
+    private int _selectedPickerFloorIndex;
+    /// <summary>Index of the currently selected floor tab in the picker.</summary>
+    public int SelectedPickerFloorIndex
+    {
+        get => _selectedPickerFloorIndex;
+        set
+        {
+            if (_selectedPickerFloorIndex == value) return;
+            _selectedPickerFloorIndex = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PickerFloorNodes));
+        }
+    }
+
+    /// <summary>Nodes for the picker: search results when searching, empty when not (recent section handles idle).</summary>
+    public IEnumerable<NavNode> PickerFloorNodes
+    {
+        get
+        {
+            bool searching = !string.IsNullOrWhiteSpace(_pickerSearchText);
+            if (!searching)
+                return Array.Empty<NavNode>();
+            return _nodesByFloor.SelectMany(g => g.AllNodes);
+        }
     }
 
     /// <summary>Live search text typed in the picker popup.</summary>
@@ -367,9 +406,35 @@ public class MainViewModel : INotifyPropertyChanged
         {
             _pickerSearchText = value;
             OnPropertyChanged();
-            RebuildPickerList();
+            OnPropertyChanged(nameof(HasRecentNodes));
+
+            // Debounce: rebuild list after 150ms of inactivity
+            _searchDebounceTimer?.Dispose();
+            _searchDebounceTimer = new System.Threading.Timer(_ =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    RebuildPickerList();
+                    OnPropertyChanged(nameof(PickerFloorNodes));
+                    OnPropertyChanged(nameof(PickerNotFound));
+                    OnPropertyChanged(nameof(HasRecentNodes));
+                });
+            }, null, 150, System.Threading.Timeout.Infinite);
         }
     }
+
+    /// <summary>Recently selected nodes (max 3), persisted across sessions.</summary>
+    public List<NavNode> RecentPickerNodes
+    {
+        get => _recentPickerNodes;
+        private set { _recentPickerNodes = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasRecentNodes)); }
+    }
+
+    /// <summary>True when recent nodes exist and user is not searching.</summary>
+    public bool HasRecentNodes => _recentPickerNodes.Count > 0 && string.IsNullOrWhiteSpace(_pickerSearchText);
+
+    /// <summary>True when search is active but yields no results.</summary>
+    public bool PickerNotFound => !string.IsNullOrWhiteSpace(_pickerSearchText) && !PickerFloorNodes.Any();
 
     /// <summary>Filtered route nodes for the current floor (for SvgView overlay).</summary>
     public ObservableCollection<NavNode> RouteNodesOnFloor
@@ -476,6 +541,7 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand OpenStartPickerCommand  { get; }
     public ICommand OpenEndPickerCommand    { get; }
     public ICommand SelectPickerNodeCommand { get; }
+    public ICommand SelectPickerFloorCommand { get; }
     public ICommand ClosePickerCommand      { get; }
     public ICommand SetTappedAsStartCommand { get; }
     public ICommand SetTappedAsEndCommand   { get; }
@@ -571,6 +637,14 @@ public class MainViewModel : INotifyPropertyChanged
             _pickerSearchText = string.Empty;
             OnPropertyChanged(nameof(PickerSearchText));
             RebuildPickerList();
+            // Auto-select first floor tab
+            if (_nodesByFloor.Count > 0)
+            {
+                _nodesByFloor[0].IsExpanded = true;
+                _selectedPickerFloorIndex = 0;
+                OnPropertyChanged(nameof(SelectedPickerFloorIndex));
+                OnPropertyChanged(nameof(PickerFloorNodes));
+            }
             IsPickerOpen = true;
         });
         OpenEndPickerCommand    = new Command(() =>
@@ -580,6 +654,14 @@ public class MainViewModel : INotifyPropertyChanged
             _pickerSearchText = string.Empty;
             OnPropertyChanged(nameof(PickerSearchText));
             RebuildPickerList();
+            // Auto-select first floor tab
+            if (_nodesByFloor.Count > 0)
+            {
+                _nodesByFloor[0].IsExpanded = true;
+                _selectedPickerFloorIndex = 0;
+                OnPropertyChanged(nameof(SelectedPickerFloorIndex));
+                OnPropertyChanged(nameof(PickerFloorNodes));
+            }
             IsPickerOpen = true;
         });
         SelectPickerNodeCommand = new Command<NavNode>(n =>
@@ -589,9 +671,19 @@ public class MainViewModel : INotifyPropertyChanged
             if (_pickerTarget == "start" && _isEmergencyActive && (n.IsExit || n.IsEvacuationExit)) return;
             if (_pickerTarget == "start") StartNode = n;
             else                          EndNode   = n;
+            AddRecentNode(n);
             IsPickerOpen = false;
         });
         ClosePickerCommand = new Command(() => IsPickerOpen = false);
+
+        SelectPickerFloorCommand = new Command<FloorNodeGroup>(g =>
+        {
+            if (g == null) return;
+            // Collapse all, then expand the selected one
+            foreach (var fg in _nodesByFloor) fg.IsExpanded = false;
+            g.IsExpanded = true;
+            SelectedPickerFloorIndex = _nodesByFloor.IndexOf(g);
+        });
 
         SetTappedAsStartCommand = new Command(() =>
         {
@@ -861,6 +953,7 @@ public class MainViewModel : INotifyPropertyChanged
             await _scheduleService.LoadAsync();
             await _departmentService.LoadAsync();
             await _emergencyService.LoadAsync();
+            LoadRecentNodes();
 
             // Start background polling of the emergency server (every 30 s)
             _pollingCts = new CancellationTokenSource();
@@ -897,7 +990,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
     /// <summary>
     /// Rebuilds <see cref="NodesByFloor"/> applying current search text.
-    /// Groups are initially collapsed; when a query is active all are expanded and empty floors hidden.
+    /// Uses cached flat list of searchable nodes for fast search.
     /// </summary>
     private void RebuildPickerList()
     {
@@ -907,58 +1000,104 @@ public class MainViewModel : INotifyPropertyChanged
             return;
         }
 
+        // Rebuild cache only when building changes
+        if (_searchableBuildingId != _selectedBuilding.Id)
+        {
+            bool excludeExitsForStart = _isEmergencyActive && _pickerTarget == "start";
+            _searchableNodes = _graphService.Graph.Nodes
+                .Where(n => n.BuildingId == _selectedBuilding.Id
+                            && !n.IsWaypoint
+                            && !n.IsTransition
+                            && !n.IsFireExtinguisher
+                            && !n.IsQrAnchor
+                            && !(excludeExitsForStart && (n.IsExit || n.IsEvacuationExit)))
+                .OrderBy(n => n.Name)
+                .ToList();
+            _searchableBuildingId = _selectedBuilding.Id;
+        }
+
         bool searching = !string.IsNullOrWhiteSpace(_pickerSearchText);
 
-        NodesByFloor = _selectedBuilding.Floors
-            .Select(f =>
-            {
-                // В режиме ЧС выходы и запасные выходы нельзя выбрать как точку отправки
-                bool excludeExitsForStart = _isEmergencyActive && _pickerTarget == "start";
+        if (!searching)
+        {
+            // Group by floor, all collapsed
+            NodesByFloor = _searchableNodes
+                .GroupBy(n => n.FloorNumber)
+                .OrderBy(g => g.Key)
+                .Select(g =>
+                {
+                    var floor = _selectedBuilding.Floors.FirstOrDefault(f => f.Number == g.Key);
+                    var group = new FloorNodeGroup(floor?.Name ?? $"этаж {g.Key}", g, isExpanded: false);
+                    group.SelectFloorCommand = SelectPickerFloorCommand;
+                    return group;
+                })
+                .ToList();
+        }
+        else
+        {
+            // Search the flat list once, then group
+            var q = _pickerSearchText.Trim().ToLowerInvariant();
+            var matched = _searchableNodes
+                .Where(n => NodeMatchesSearchFast(n, q))
+                .ToList();
 
-                var nodes = _graphService.Graph.Nodes
-                    .Where(n => n.BuildingId == _selectedBuilding.Id
-                                && n.FloorNumber == f.Number
-                                && !n.IsWaypoint
-                                && !n.IsFireExtinguisher
-                                && !n.IsQrAnchor
-                                && !(excludeExitsForStart && (n.IsExit || n.IsEvacuationExit)))
-                    .OrderBy(n => n.Name);
-
-                var filtered = searching
-                    ? nodes.Where(n => NodeMatchesSearch(n, _pickerSearchText))
-                    : nodes;
-
-                // When searching: expand all non-empty groups; otherwise start collapsed.
-                return new FloorNodeGroup(f.Name, filtered, isExpanded: searching);
-            })
-            .Where(g => !searching || g.AllNodes.Count > 0)
-            .ToList();
+            NodesByFloor = matched
+                .GroupBy(n => n.FloorNumber)
+                .OrderBy(g => g.Key)
+                .Select(g =>
+                {
+                    var floor = _selectedBuilding.Floors.FirstOrDefault(f => f.Number == g.Key);
+                    var group = new FloorNodeGroup(floor?.Name ?? $"этаж {g.Key}", g, isExpanded: true);
+                    group.SelectFloorCommand = SelectPickerFloorCommand;
+                    return group;
+                })
+                .ToList();
+        }
     }
 
     /// <summary>
-    /// Smart node search: returns true when the node name matches the query.
-    /// Supports substring, multi-word, abbreviation (initials) and numeric room matching.
+    /// Smart search: digit-only queries match numeric tokens by prefix,
+    /// text queries keep the old flexible contains/multi-word/abbreviation logic.
     /// </summary>
-    private static bool NodeMatchesSearch(NavNode node, string query)
+    private static bool NodeMatchesSearchFast(NavNode node, string q)
     {
-        if (string.IsNullOrWhiteSpace(query)) return true;
+        if (string.IsNullOrEmpty(q)) return true;
+        bool isDigitQuery = q.All(char.IsDigit);
+        return isDigitQuery
+            ? (MatchNumericTokenPrefix(node.Name, q) || MatchNumericTokenPrefix(node.SearchTags, q))
+            : (MatchText(node.Name, q) || MatchText(node.SearchTags, q));
 
-        var q    = query.Trim().ToLowerInvariant();
+        static bool MatchNumericTokenPrefix(string? text, string q)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return false;
 
-        // Проверяем и основное имя, и доп теги
-        bool MatchText(string text)
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (!char.IsDigit(text[i])) continue;
+
+                int start = i;
+                while (i < text.Length && char.IsDigit(text[i]))
+                    i++;
+
+                int length = i - start;
+                if (length >= q.Length &&
+                    string.Compare(text, start, q, 0, q.Length, StringComparison.Ordinal) == 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool MatchText(string? text, string q)
         {
             if (string.IsNullOrWhiteSpace(text)) return false;
             var t = text.ToLowerInvariant();
 
-            // 1) Direct substring
             if (t.Contains(q)) return true;
 
-            // 2) All query words appear somewhere
             var qWords = q.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (qWords.Length > 1 && qWords.All(w => t.Contains(w))) return true;
 
-            // 3) Abbreviation: each query char matches first char of a word
             var tWords = t.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (tWords.Length >= q.Length)
             {
@@ -966,15 +1105,10 @@ public class MainViewModel : INotifyPropertyChanged
                 if (initials.Contains(q)) return true;
             }
 
-            // 4) Translit / partial without spaces
             if (t.Replace(" ", "").Contains(q.Replace(" ", ""))) return true;
 
             return false;
         }
-
-        if (MatchText(node.Name))       return true;
-        if (MatchText(node.SearchTags)) return true;
-        return false;
     }
 
     private void RefreshFloorOverlay()
@@ -1571,6 +1705,45 @@ public class MainViewModel : INotifyPropertyChanged
                 });
                 return item;
             }));
+    }
+
+    // ── Recent picker nodes (max 3, persisted) ────────────────────────────────
+
+    private const string RecentNodesKey = "recent_picker_nodes";
+
+    private void AddRecentNode(NavNode node)
+    {
+        // Remove if already present, then insert at top
+        _recentPickerNodes.RemoveAll(n => n.Id == node.Id);
+        _recentPickerNodes.Insert(0, node);
+        // Keep max 3
+        if (_recentPickerNodes.Count > 3)
+            _recentPickerNodes = _recentPickerNodes.Take(3).ToList();
+        SaveRecentNodes();
+        OnPropertyChanged(nameof(RecentPickerNodes));
+        OnPropertyChanged(nameof(HasRecentNodes));
+    }
+
+    private void LoadRecentNodes()
+    {
+        var saved = Preferences.Default.Get(RecentNodesKey, string.Empty);
+        if (string.IsNullOrEmpty(saved)) { _recentPickerNodes = new(); return; }
+        try
+        {
+            var ids = saved.Split(',');
+            _recentPickerNodes = ids
+                .Select(id => _graphService.Graph.GetNode(id))
+                .Where(n => n != null)
+                .Take(3)
+                .ToList()!;
+        }
+        catch { _recentPickerNodes = new(); }
+    }
+
+    private void SaveRecentNodes()
+    {
+        var ids = string.Join(",", _recentPickerNodes.Take(3).Select(n => n.Id));
+        Preferences.Default.Set(RecentNodesKey, ids);
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
