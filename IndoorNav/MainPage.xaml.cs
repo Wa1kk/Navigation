@@ -111,6 +111,14 @@ public partial class MainPage : ContentPage
                 _ = HideNodePopupAsync();
         }
 
+        if (e.PropertyName == nameof(MainViewModel.IsEmergencyNotificationVisible))
+        {
+            if (_vm.IsEmergencyNotificationVisible)
+                SetSafeAreaColor(Color.FromArgb("#CC000000"));
+            else
+                SetSafeAreaColor(null);
+        }
+
         if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
         {
             SetSidebarExpanded(_vm.IsSidebarExpanded);
@@ -286,6 +294,25 @@ public partial class MainPage : ContentPage
             overlay.HeightAnchor.ConstraintEqualTo(bottomInset).Active = true;
         else
             overlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+
+        var topOverlay = new UIKit.UIView
+        {
+            Tag = SafeAreaOverlayTag,
+            TranslatesAutoresizingMaskIntoConstraints = false,
+            BackgroundColor = nativeColor,
+            UserInteractionEnabled = false
+        };
+        window.AddSubview(topOverlay);
+
+        topOverlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+        topOverlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+        topOverlay.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+
+        var topInset = window.SafeAreaInsets.Top;
+        if (topInset > 0)
+            topOverlay.HeightAnchor.ConstraintEqualTo(topInset).Active = true;
+        else
+            topOverlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
 #endif
     }
 

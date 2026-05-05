@@ -1023,52 +1023,55 @@
              FULL-SCREEN EMERGENCY NOTIFICATION OVERLAY
              Appears when server pushes ЧС alert; spams every 4 s until confirmed.
              ═══════════════════════════════════════ -->
-        <Grid Grid.ColumnSpan="2"
-              IsVisible="{Binding IsEmergencyNotificationVisible}"
-              BackgroundColor="#CC000000"
-              ZIndex="200">
-            <Border HorizontalOptions="Center" VerticalOptions="Center"
-                    BackgroundColor="#B91C1C"
-                    Padding="28,24"
-                    StrokeShape="RoundRectangle 20"
-                    StrokeThickness="0"
-                    MaximumWidthRequest="400">
-                <Border.Shadow>
-                    <Shadow Brush="Black" Offset="0,6" Radius="20" Opacity="0.5" />
-                </Border.Shadow>
-                <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
-                    <Label Text="🚨"
-                           FontSize="52"
-                           HorizontalOptions="Center" />
-                    <Label Text="ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ"
-                           FontSize="20" FontAttributes="Bold"
-                           TextColor="White"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center" />
-                    <Label Text="Немедленно покиньте здание!"
-                           FontSize="15"
-                           TextColor="#FCA5A5"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center" />
-                    <Label Text="Следуйте по маршруту эвакуации.&#x0A;Не пользуйтесь лифтами."
-                           FontSize="13"
-                           TextColor="#FEE2E2"
-                           HorizontalOptions="Center"
-                           HorizontalTextAlignment="Center"
-                           LineBreakMode="WordWrap" />
-                    <Button Text="✔  Понял, эвакуируюсь"
-                            Command="{Binding ConfirmEmergencyNotificationCommand}"
-                            BackgroundColor="White"
-                            TextColor="#B91C1C"
-                            FontAttributes="Bold"
-                            FontSize="15"
-                            CornerRadius="12"
-                            HeightRequest="50"
-                            HorizontalOptions="Fill"
-                            Margin="0,8,0,0" />
-                </VerticalStackLayout>
-            </Border>
-        </Grid>
+        <controls:BlurOverlay x:Name="EmergencyNotificationOverlay"
+                              Grid.ColumnSpan="2"
+                              IsVisible="{Binding IsEmergencyNotificationVisible}"
+                              BackgroundColor="#CC000000"
+                              ZIndex="200">
+            <Grid BackgroundColor="#CC000000">
+                <Border HorizontalOptions="Center" VerticalOptions="Center"
+                        BackgroundColor="#B91C1C"
+                        Padding="28,24"
+                        StrokeShape="RoundRectangle 20"
+                        StrokeThickness="0"
+                        MaximumWidthRequest="400">
+                    <Border.Shadow>
+                        <Shadow Brush="Black" Offset="0,6" Radius="20" Opacity="0.5" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
+                        <Label Text="🚨"
+                               FontSize="52"
+                               HorizontalOptions="Center" />
+                        <Label Text="ЧРЕЗВЫЧАЙНАЯ СИТУАЦИЯ"
+                               FontSize="20" FontAttributes="Bold"
+                               TextColor="White"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Немедленно покиньте здание!"
+                               FontSize="15"
+                               TextColor="#FCA5A5"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="Следуйте по маршруту эвакуации.&#x0A;Не пользуйтесь лифтами."
+                               FontSize="13"
+                               TextColor="#FEE2E2"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               LineBreakMode="WordWrap" />
+                        <Button Text="✔  Понял, эвакуируюсь"
+                                Command="{Binding ConfirmEmergencyNotificationCommand}"
+                                BackgroundColor="White"
+                                TextColor="#B91C1C"
+                                FontAttributes="Bold"
+                                FontSize="15"
+                                CornerRadius="12"
+                                HeightRequest="50"
+                                HorizontalOptions="Fill"
+                                Margin="0,8,0,0" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+        </controls:BlurOverlay>
 
         <!-- ═══════════════════════════════════════
              FULL-SCREEN OVERLAYS (MainGrid level — covers safe areas)

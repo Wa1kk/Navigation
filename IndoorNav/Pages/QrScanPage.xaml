@@ -22,8 +22,8 @@
                     StrokeShape="RoundRectangle 28" />
             <VerticalStackLayout HorizontalOptions="Center"
                                  VerticalOptions="Start"
-                                 Margin="28,92,28,0"
-                                 Spacing="8">
+                                 Margin="28,56,28,0"
+                                 Spacing="6">
                 <Label Text="Наведите камеру на QR-код"
                        TextColor="White"
                        FontSize="20"
@@ -37,7 +37,11 @@
         </Grid>
 
         <!-- Action buttons -->
-        <VerticalStackLayout Grid.Row="1" Spacing="12" Padding="24,0,24,52">
+        <VerticalStackLayout Grid.Row="1"
+                             Spacing="12"
+                             Padding="24,20,24,52"
+                             BackgroundColor="#1E293B"
+                             ZIndex="10">
             <Button Text="Повторить сканирование"
                     Clicked="OnRestartScanClicked"
                     BackgroundColor="#0E7490" TextColor="White"
@@ -57,7 +61,7 @@
         <Button Text="✕"
                 Clicked="OnCloseClicked"
                 HorizontalOptions="Start" VerticalOptions="Start"
-                Margin="16,44,0,0"
+                Margin="8,28,0,0"
                 BackgroundColor="#80334155" TextColor="White"
                 CornerRadius="22" WidthRequest="44" HeightRequest="44"
                 FontSize="18" Padding="0" />

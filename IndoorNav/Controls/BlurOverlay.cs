@@ -94,10 +94,15 @@ public class BlurOverlay : ContentView
         blurView.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
 
         // Tint overlay (затемнение поверх blur)
+        var tintColor = BackgroundColor ?? Color.FromRgba(0, 0, 0, 0x33);
         var tintView = new UIKit.UIView
         {
             TranslatesAutoresizingMaskIntoConstraints = false,
-            BackgroundColor = UIKit.UIColor.FromRGBA(0, 0, 0, 0x33),
+            BackgroundColor = UIKit.UIColor.FromRGBA(
+                (nfloat)tintColor.Red,
+                (nfloat)tintColor.Green,
+                (nfloat)tintColor.Blue,
+                (nfloat)tintColor.Alpha),
             Tag = TintTag
         };
         uiView.InsertSubview(tintView, 1);
