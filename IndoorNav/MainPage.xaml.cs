@@ -47,6 +47,20 @@ public partial class MainPage : ContentPage
                 insets.Bottom);
         }
     }
+
+    /// <summary>
+    /// When ЧС is active, paint the top safe area (Dynamic Island) red.
+    /// Uses the same UIWindow overlay approach as SetSafeAreaColor for other overlays.
+    /// </summary>
+    private void ApplyEmergencySafeArea()
+    {
+#if IOS || MACCATALYST
+        if (_vm.IsEmergencyActive)
+            SetSafeAreaColor(Color.FromArgb("#DC2626"), topOnly: true);
+        else
+            SetSafeAreaColor(null, topOnly: true);
+#endif
+    }
 #endif
 
     private void OnVmPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -117,6 +131,11 @@ public partial class MainPage : ContentPage
                 SetSafeAreaColor(Color.FromArgb("#CC000000"));
             else
                 SetSafeAreaColor(null);
+        }
+
+        if (e.PropertyName == nameof(MainViewModel.IsEmergencyActive))
+        {
+            ApplyEmergencySafeArea();
         }
 
         if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
@@ -250,21 +269,33 @@ public partial class MainPage : ContentPage
     // the home indicator and dynamic island zones with a solid color.
 
     private const int SafeAreaOverlayTag = 888;
+    private const int SafeAreaTopTag = 889;
 
     /// <summary>
     /// Sets a solid color in the iOS safe area zones (home indicator + dynamic island).
     /// Pass null to remove the overlay.
+    /// When topOnly is true, only the top safe area (Dynamic Island) is affected.
     /// </summary>
-    private void SetSafeAreaColor(Color? color)
+    private void SetSafeAreaColor(Color? color, bool topOnly = false)
     {
 #if IOS || MACCATALYST
         var window = this.Window?.Handler?.PlatformView as UIKit.UIWindow;
         if (window == null) return;
 
-        // Remove existing overlay
-        foreach (var v in window.Subviews)
-            if (v.Tag == SafeAreaOverlayTag)
-                v.RemoveFromSuperview();
+        if (topOnly)
+        {
+            // Remove only top overlay
+            foreach (var v in window.Subviews)
+                if (v.Tag == SafeAreaTopTag)
+                    v.RemoveFromSuperview();
+        }
+        else
+        {
+            // Remove all safe area overlays
+            foreach (var v in window.Subviews)
+                if (v.Tag == SafeAreaOverlayTag || v.Tag == SafeAreaTopTag)
+                    v.RemoveFromSuperview();
+        }
 
         if (color == null) return;
 
@@ -274,30 +305,33 @@ public partial class MainPage : ContentPage
             (nfloat)color.Blue,
             (nfloat)color.Alpha);
 
-        var overlay = new UIKit.UIView
+        if (!topOnly)
         {
-            Tag = SafeAreaOverlayTag,
-            TranslatesAutoresizingMaskIntoConstraints = false,
-            BackgroundColor = nativeColor,
-            UserInteractionEnabled = false
-        };
-        window.AddSubview(overlay);
+            // Bottom safe area overlay (home indicator)
+            var overlay = new UIKit.UIView
+            {
+                Tag = SafeAreaOverlayTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(overlay);
 
-        // Pin to window bottom edge — covers home indicator safe area
-        overlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
-        overlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
-        overlay.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+            overlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            overlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            overlay.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
 
-        // Height = bottom safe area inset (home indicator height ~34pt)
-        var bottomInset = window.SafeAreaInsets.Bottom;
-        if (bottomInset > 0)
-            overlay.HeightAnchor.ConstraintEqualTo(bottomInset).Active = true;
-        else
-            overlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+            var bottomInset = window.SafeAreaInsets.Bottom;
+            if (bottomInset > 0)
+                overlay.HeightAnchor.ConstraintEqualTo(bottomInset).Active = true;
+            else
+                overlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+        }
 
+        // Top safe area overlay (Dynamic Island)
         var topOverlay = new UIKit.UIView
         {
-            Tag = SafeAreaOverlayTag,
+            Tag = SafeAreaTopTag,
             TranslatesAutoresizingMaskIntoConstraints = false,
             BackgroundColor = nativeColor,
             UserInteractionEnabled = false

@@ -175,7 +175,8 @@
             <Grid Grid.Row="0">
 
                 <!-- Emergency banner -->
-                <Border HorizontalOptions="Fill"
+                <Border x:Name="EmergencyBanner"
+                        HorizontalOptions="Fill"
                         BackgroundColor="#DC2626" Padding="14,10"
                         StrokeThickness="0"
                         IsVisible="{Binding IsEmergencyBannerVisible}">
@@ -185,7 +186,8 @@
                 </Border>
 
                 <!-- Blocking-mode hint banner (mutually exclusive with emergency banner) -->
-                <Border HorizontalOptions="Fill"
+                <Border x:Name="BlockingBanner"
+                        HorizontalOptions="Fill"
                         BackgroundColor="#DC2626" Padding="14,10"
                         StrokeThickness="0"
                         IsVisible="{Binding IsBlockingMode}">
