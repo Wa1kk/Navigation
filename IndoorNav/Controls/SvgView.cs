@@ -303,9 +303,11 @@ public class SvgView : SKCanvasView
         if (r.Right < minVisibleW)                dx = minVisibleW - r.Right;
         else if (r.Left > _canvasW - minVisibleW) dx = (_canvasW - minVisibleW) - r.Left;
 
-        // Вертикаль: аналогично по вертикали.
+        // Вертикаль: аналогично по вертикали, но ограничиваем прокрутку вниз на 15% экрана.
+        float bottomLimit = _canvasH * 0.15f;
         if (r.Bottom < minVisibleH)               dy = minVisibleH - r.Bottom;
         else if (r.Top > _canvasH - minVisibleH)  dy = (_canvasH - minVisibleH) - r.Top;
+        else if (r.Top < bottomLimit && r.Height > _canvasH) dy = bottomLimit - r.Top;
 
         if (MathF.Abs(dx) > 0.5f || MathF.Abs(dy) > 0.5f)
             _matrix = _matrix.PostConcat(SKMatrix.CreateTranslation(dx, dy));
@@ -497,8 +499,8 @@ public class SvgView : SKCanvasView
     /// <summary>Масштаб при начальном "вписывании" карты. Используется как динамический минимум зума.</summary>
     private float _fitScale = 0.143f;
 
-    /// <summary>Минимальный масштаб = масштаб по умолчанию при открытии (FitMatrix). Нельзя отдалить дальше чем начальный вид.</summary>
-    private float MinZoom => _fitScale;
+    /// <summary>Минимальный масштаб — на 15% ниже начального, чтобы можно было немного отдалиться.</summary>
+    private float MinZoom => _fitScale * 0.85f;
 
     /// <summary>Максимальный масштаб (насколько можно приблизить карту). Перезаписывается через MaxZoomLevel.</summary>
     public static readonly BindableProperty MaxZoomLevelProperty =

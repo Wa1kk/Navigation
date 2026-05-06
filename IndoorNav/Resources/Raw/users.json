@@ -38,5 +38,13 @@
     "Role": 1,
     "GroupId": "beccbfa9-6ea3-4101-b647-c5ab6225a8ab",
     "DisplayName": "\u0418\u043B\u044C\u044F"
+  },
+  {
+    "Id": "test-admin-001",
+    "Username": "test",
+    "PasswordHash": "807e4b424aac45cd184ed017d89c262e0ca66fe2e36dea95dadb62b806cd62f6",
+    "Role": 0,
+    "GroupId": "",
+    "DisplayName": "Test Admin"
   }
 ]

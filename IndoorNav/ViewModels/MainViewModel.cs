@@ -20,6 +20,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly ScheduleService _scheduleService;
     private readonly DepartmentService _departmentService;
     private readonly QrService _qrService;
+    private readonly NotificationService _notificationService;
 
     private Building? _selectedBuilding;
     private Floor? _selectedFloor;
@@ -572,7 +573,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     // ── Constructor ─────────────────────────────────────────────────────────
 
-    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService, DepartmentService departmentService, QrService qrService)
+    public MainViewModel(NavGraphService graphService, AuthService authService, EmergencyService emergencyService, ScheduleService scheduleService, DepartmentService departmentService, QrService qrService, NotificationService notificationService)
     {
         _graphService       = graphService;
         _authService        = authService;
@@ -580,6 +581,7 @@ public class MainViewModel : INotifyPropertyChanged
         _scheduleService    = scheduleService;
         _departmentService  = departmentService;
         _qrService          = qrService;
+        _notificationService = notificationService;
 
         // Subscribe to emergency state changes
         _emergencyService.EmergencyChanged += OnEmergencyChanged;
@@ -897,6 +899,7 @@ public class MainViewModel : INotifyPropertyChanged
         ConfirmEmergencyNotificationCommand = new Command(() =>
         {
             StopEmergencySpam();
+            _notificationService.StopEmergencySpam();
             // Proceed to the normal "pick your location" ЧС flow
             var scheduleNode = TryAutoSelectBuildingFromSchedule();
             IsEmergencyActive = _emergencyService.IsActiveForBuilding(_selectedBuilding?.Id);
@@ -1547,6 +1550,7 @@ public class MainViewModel : INotifyPropertyChanged
             PendingBlockNode = null;
             OnPropertyChanged(nameof(BlockedNodeIds));
             StopEmergencySpam();
+            _notificationService.StopEmergencySpam();
             if (!_emergencyService.IsEmergencyActive)
             {
                 ShowEmergencyConfirmation = false;
@@ -1561,6 +1565,12 @@ public class MainViewModel : INotifyPropertyChanged
         {
             StartEmergencySpam();
         });
+
+        // Start local notification spam loop (3 s background, 5 s foreground)
+        var buildingName = e.BuildingId != null
+            ? Buildings.FirstOrDefault(b => b.Id == e.BuildingId)?.Name
+            : null;
+        _notificationService.StartEmergencySpam(buildingName);
     }
 
     // ── Emergency spam loop ────────────────────────────────────────────────────

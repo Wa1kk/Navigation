@@ -8,13 +8,15 @@ public partial class App : Application
     private readonly AuthService _authService;
     private readonly SplashPage  _splashPage;
     private readonly LoginPage   _loginPage;
+    private readonly NotificationService _notificationService;
 
-    public App(AuthService authService, SplashPage splashPage, LoginPage loginPage)
+    public App(AuthService authService, SplashPage splashPage, LoginPage loginPage, NotificationService notificationService)
     {
         InitializeComponent();
         _authService = authService;
         _splashPage  = splashPage;
         _loginPage   = loginPage;
+        _notificationService = notificationService;
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
@@ -36,6 +38,7 @@ public partial class App : Application
         _ = Task.Run(async () =>
         {
             await _authService.InitAsync();
+            await _notificationService.InitializeAsync();
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -53,5 +56,23 @@ public partial class App : Application
         });
 
         return window;
+    }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        _notificationService.OnAppForegrounded();
+    }
+
+    protected override void OnResume()
+    {
+        base.OnResume();
+        _notificationService.OnAppForegrounded();
+    }
+
+    protected override void OnSleep()
+    {
+        base.OnSleep();
+        _notificationService.OnAppBackgrounded();
     }
 }

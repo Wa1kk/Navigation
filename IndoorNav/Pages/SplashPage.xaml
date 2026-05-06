@@ -6,30 +6,20 @@
              BackgroundColor="#0F172A"
              Shell.NavBarIsVisible="False">
 
-    <Grid RowDefinitions="*,Auto,*" VerticalOptions="Fill">
-        <VerticalStackLayout Grid.Row="1" Spacing="12" VerticalOptions="Center" HorizontalOptions="Center">
-            <!-- Location pin icon -->
-            <Border HorizontalOptions="Center"
-                    BackgroundColor="#0E3A5F"
-                    StrokeShape="RoundRectangle 24"
-                    StrokeThickness="0"
-                    WidthRequest="96" HeightRequest="96"
-                    Padding="0">
-                <Image Source="splash.svg"
-                       WidthRequest="56" HeightRequest="56"
-                       HorizontalOptions="Center" VerticalOptions="Center" />
-            </Border>
-            <Label Text="IndoorNav"
-                   FontSize="28" FontAttributes="Bold" TextColor="White"
-                   HorizontalOptions="Center" Margin="0,8,0,0" />
-            <Label Text="Навигация по зданиям"
-                   FontSize="13" TextColor="#64748B"
-                   HorizontalOptions="Center" Margin="0,0,0,32" />
-            <ActivityIndicator IsRunning="True"
-                               Color="#38BDF8"
-                               WidthRequest="28" HeightRequest="28"
-                               HorizontalOptions="Center" />
-        </VerticalStackLayout>
+    <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+        <!-- Pin icon — same SVG as native splash screen, rendered at BaseSize -->
+        <Image Source="navpin"
+               HorizontalOptions="Center" VerticalOptions="Center"
+               Aspect="AspectFit" />
+
+        <!-- Loading indicator at bottom, appears after delay -->
+        <ActivityIndicator x:Name="LoadingIndicator"
+                            IsRunning="False"
+                            Color="#38BDF8"
+                            WidthRequest="24" HeightRequest="24"
+                            HorizontalOptions="Center"
+                            VerticalOptions="End"
+                            Margin="0,0,0,60" />
     </Grid>
 
 </ContentPage>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using Plugin.LocalNotification;
 using IndoorNav.Services;
 using IndoorNav.ViewModels;
 using IndoorNav.Pages;
@@ -19,6 +20,7 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .UseSkiaSharp()
+            .UseLocalNotification()
 #if ANDROID || IOS
             .UseBarcodeReader()
 #endif
@@ -41,6 +43,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ScheduleService>();
         builder.Services.AddSingleton<DepartmentService>();
         builder.Services.AddSingleton<QrService>();
+        builder.Services.AddSingleton<NotificationService>();
 
         // ViewModels
         builder.Services.AddSingleton<MainViewModel>();

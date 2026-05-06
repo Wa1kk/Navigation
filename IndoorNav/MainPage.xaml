@@ -369,7 +369,7 @@
                     </Border>
 
                     <!-- Address pill (top-left overlay) — tap opens building picker -->
-                    <Border HorizontalOptions="Start" VerticalOptions="Start"
+                    <Border x:Name="AddressPill" HorizontalOptions="Start" VerticalOptions="Start"
                             Margin="12,12,12,12" Padding="12,8"
                             StrokeShape="RoundRectangle 18"
                             BackgroundColor="White"
@@ -387,7 +387,7 @@
                     </Border>
 
                         <!-- Floor selector (right side of map) - with scroll support -->
-                        <Border HorizontalOptions="End" VerticalOptions="Start"
+                        <Border x:Name="FloorSelector" HorizontalOptions="End" VerticalOptions="Start"
                                 Margin="0,14,14,0" Padding="3,4"
                                 WidthRequest="36"
                                 MaximumHeightRequest="360"
@@ -495,7 +495,7 @@
                 <VerticalStackLayout IsVisible="{Binding ShowSearchPanel}" Spacing="8">
 
                 <!-- Route input bar (PHONE – vertical stack) -->
-                <Border Padding="12,12"
+                <Border x:Name="RouteInputBar" Padding="12,12"
                         IsVisible="{OnIdiom Phone=True, Default=False}"
                         StrokeShape="RoundRectangle 16"
                         BackgroundColor="White"
@@ -519,13 +519,21 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <!-- QR scan button -->
-                            <Button Grid.Column="2"
-                                    Text="📷"
-                                    Command="{Binding ScanQrCommand}"
-                                    BackgroundColor="#0E7490" TextColor="White"
-                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
-                                    Padding="0" FontSize="16"
-                                    ToolTipProperties.Text="Отсканировать QR-код" />
+                            <Border x:Name="QrScanButton"
+                                    Grid.Column="2"
+                                    BackgroundColor="#1B2432"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    WidthRequest="44" HeightRequest="44"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    ToolTipProperties.Text="Отсканировать QR-код">
+                                <Image Source="scanbutton" Aspect="AspectFit" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ScanQrCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
                         </Grid>
                         <!-- ДО — скрыто в режиме ЧС -->
                         <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
@@ -542,13 +550,20 @@
                                     <TapGestureRecognizer Command="{Binding OpenEndPickerCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
-                            <Button Grid.Column="2"
-                                    Text="👤"
-                                    Command="{Binding ToggleUserMenuCommand}"
-                                    BackgroundColor="#1E293B" TextColor="White"
-                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
-                                    Padding="0" FontSize="16"
-                                    IsVisible="{Binding ShowMobileUserMenuButton}" />
+                            <Border x:Name="UserMenuButton" Grid.Column="2"
+                                    BackgroundColor="#1B2432"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    WidthRequest="44" HeightRequest="44"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    IsVisible="{Binding ShowMobileUserMenuButton}">
+                                <Image Source="logbutton" Aspect="AspectFit" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleUserMenuCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
                         </Grid>
                         <!-- ЧС + user menu (emergency mode, phone) -->
                         <Grid ColumnDefinitions="36,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsEmergencyActive}">
@@ -561,17 +576,24 @@
                                        FontSize="14" TextColor="#991B1B"
                                        LineBreakMode="TailTruncation" />
                             </Border>
-                            <Button Grid.Column="2"
-                                    Text="👤"
-                                    Command="{Binding ToggleUserMenuCommand}"
-                                    BackgroundColor="#1E293B" TextColor="White"
-                                    CornerRadius="10" WidthRequest="44" HeightRequest="44"
-                                    Padding="0" FontSize="16"
-                                    IsVisible="{Binding ShowMobileUserMenuButton}" />
+                            <Border Grid.Column="2"
+                                    BackgroundColor="#1B2432"
+                                    StrokeShape="RoundRectangle 10"
+                                    StrokeThickness="0"
+                                    WidthRequest="44" HeightRequest="44"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    IsVisible="{Binding ShowMobileUserMenuButton}">
+                                <Image Source="logbutton" Aspect="AspectFit" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToggleUserMenuCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
                         </Grid>
                         <!-- Обычные кнопки маршрута -->
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsNormalMode}">
-                            <Button Grid.Column="0" Text="Построить маршрут"
+                            <Button x:Name="BuildRouteButton" Grid.Column="0" Text="Построить маршрут"
                                     Command="{Binding BuildRouteCommand}"
                                     BackgroundColor="#2563EB" TextColor="White"
                                     FontSize="14" HeightRequest="48" CornerRadius="10" />
@@ -620,13 +642,20 @@
                                     <TapGestureRecognizer Command="{Binding OpenStartPickerCommand}" />
                                 </Border.GestureRecognizers>
                             </Border>
-                            <Button Grid.Column="2"
-                                    Text="📷"
-                                    Command="{Binding ScanQrCommand}"
-                                    BackgroundColor="#0E7490" TextColor="White"
-                                    CornerRadius="8" WidthRequest="38" HeightRequest="38"
-                                    Padding="0" FontSize="15"
-                                    ToolTipProperties.Text="Ввести QR-ссылку" />
+                            <Border Grid.Column="2"
+                                    BackgroundColor="#1B2432"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    WidthRequest="44" HeightRequest="44"
+                                    Padding="10"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Center"
+                                    ToolTipProperties.Text="Ввести QR-ссылку">
+                                <Image Source="scanbutton" Aspect="AspectFit" />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ScanQrCommand}" />
+                                </Border.GestureRecognizers>
+                            </Border>
                         </Grid>
 
                         <!-- ДО row — скрыто в режиме ЧС -->
@@ -1207,6 +1236,118 @@
                         FontSize="15" HeightRequest="48" CornerRadius="22" />
             </VerticalStackLayout>
         </Border>
+
+        <!-- ═══════════════════════════════════════
+             TUTORIAL OVERLAY (first launch only)
+             ═══════════════════════════════════════ -->
+        <Grid x:Name="TutorialOverlay"
+              Grid.ColumnSpan="2"
+              IsVisible="False"
+              ZIndex="500"
+              BackgroundColor="#B3000000"
+              HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnTutorialTap" />
+            </Grid.GestureRecognizers>
+
+            <!-- Spotlight cutout (white border around target element) -->
+            <Border x:Name="TutorialSpotlight"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="#FACC15" StrokeThickness="3"
+                    BackgroundColor="Transparent"
+                    HorizontalOptions="Start" VerticalOptions="Start"
+                    IsVisible="False"
+                    InputTransparent="True" />
+
+            <!-- Arrow image -->
+            <Image x:Name="TutorialArrow"
+                   WidthRequest="60" HeightRequest="80"
+                   HorizontalOptions="Start" VerticalOptions="Start"
+                   IsVisible="False"
+                   InputTransparent="True" />
+
+            <!-- Description label -->
+            <Border x:Name="TutorialLabelBorder"
+                    HorizontalOptions="Start" VerticalOptions="Start"
+                    Padding="14,10"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#FACC15"
+                    StrokeThickness="0"
+                    IsVisible="False"
+                    InputTransparent="True"
+                    MaximumWidthRequest="280">
+                <Label x:Name="TutorialLabel"
+                       FontSize="14" FontAttributes="Bold"
+                       TextColor="#0F172A"
+                       LineBreakMode="WordWrap"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+
+            <!-- Step indicator + skip button (top-right) -->
+            <VerticalStackLayout x:Name="TutorialControls"
+                                 HorizontalOptions="End" VerticalOptions="Start"
+                                 Margin="0,16,16,0" Spacing="8">
+                <Button x:Name="TutorialSkipButton"
+                        Text="Пропустить"
+                        Clicked="OnTutorialSkip"
+                        BackgroundColor="#334155" TextColor="#94A3B8"
+                        FontSize="13" CornerRadius="20"
+                        HeightRequest="40" Padding="20,0" />
+                <Label x:Name="TutorialStepLabel"
+                       FontSize="12" TextColor="#94A3B8"
+                       HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════
+             NOTIFICATION PERMISSION DIALOG
+             Shown after tutorial completion.
+             ═══════════════════════════════════════ -->
+        <Grid x:Name="NotificationPermissionOverlay"
+              Grid.ColumnSpan="2"
+              IsVisible="False"
+              ZIndex="600"
+              BackgroundColor="#B3000000"
+              HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Border HorizontalOptions="Center" VerticalOptions="Center"
+                    BackgroundColor="White" Padding="28,24"
+                    StrokeShape="RoundRectangle 20"
+                    StrokeThickness="0"
+                    MaximumWidthRequest="380">
+                <Border.Shadow>
+                    <Shadow Brush="Black" Offset="0,6" Radius="20" Opacity="0.3" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="18" HorizontalOptions="Center">
+                    <Label Text="🔔"
+                           FontSize="48"
+                           HorizontalOptions="Center" />
+                    <Label Text="Разрешите отправлять уведомления"
+                           FontSize="19" FontAttributes="Bold"
+                           TextColor="#0F172A"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="В случае чрезвычайной ситуации мы пришлём вам уведомление об эвакуации. Никаких других уведомлений не будет."
+                           FontSize="14" TextColor="#475569"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap"
+                           HorizontalOptions="Center" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,4,0,0">
+                        <Button Grid.Column="0"
+                                Text="Позже"
+                                Clicked="OnNotificationDeclined"
+                                BackgroundColor="#F1F5F9" TextColor="#475569"
+                                FontSize="15" HeightRequest="50" CornerRadius="12" />
+                        <Button Grid.Column="1"
+                                Text="Разрешить"
+                                Clicked="OnNotificationAccepted"
+                                BackgroundColor="#2563EB" TextColor="White"
+                                FontAttributes="Bold"
+                                FontSize="15" HeightRequest="50" CornerRadius="12" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
 
     </Grid>
 </ContentPage>

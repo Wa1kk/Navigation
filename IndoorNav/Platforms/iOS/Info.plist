@@ -16,15 +16,10 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
@@ -49,5 +44,11 @@
 	<string>Для сохранения QR-кодов навигационных точек в Фото</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Для выбора изображения с QR-кодом из галереи</string>
+
+	<!-- Push / local notification support -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

@@ -1,4 +1,5 @@
 ﻿using IndoorNav.Models;
+using IndoorNav.Services;
 using IndoorNav.ViewModels;
 
 namespace IndoorNav;
@@ -6,11 +7,13 @@ namespace IndoorNav;
 public partial class MainPage : ContentPage
 {
     private readonly MainViewModel _vm;
+    private readonly NotificationService _notificationService;
 
-    public MainPage(MainViewModel vm)
+    public MainPage(MainViewModel vm, NotificationService notificationService)
     {
         InitializeComponent();
         _vm = vm;
+        _notificationService = notificationService;
         BindingContext = vm;
         MainCanvas.NodeTapped += OnNodeTapped;
         _vm.PropertyChanged += OnVmPropertyChanged;
@@ -26,6 +29,22 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
         Services.EdgeColorService.SetEdgeColor(this, "#FFFFFF");
+
+        // Show tutorial on first launch (or reset for test user)
+        if (!_tutorialShown)
+        {
+            var isTestUser = _vm.CurrentUserName == "Test Admin";
+            var tutorialDone = Preferences.Default.Get("tutorial_completed", false);
+
+            if (!tutorialDone || isTestUser)
+            {
+                _tutorialShown = true;
+                // Reset for test user so it shows every time
+                if (isTestUser)
+                    Preferences.Default.Set("tutorial_completed", false);
+                Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(800), () => StartTutorial());
+            }
+        }
     }
 
 #if IOS || MACCATALYST
@@ -135,7 +154,9 @@ public partial class MainPage : ContentPage
 
         if (e.PropertyName == nameof(MainViewModel.IsEmergencyActive))
         {
+#if IOS || MACCATALYST
             ApplyEmergencySafeArea();
+#endif
         }
 
         if (e.PropertyName == nameof(MainViewModel.IsSidebarExpanded))
@@ -165,7 +186,7 @@ public partial class MainPage : ContentPage
     private void ShowNodePickerBlur()
     {
         NodePickerBackdrop.IsVisible = true;
-        SetSafeAreaColor(Colors.White);
+        SetSafeAreaColor(Colors.White, bottomOnly: true);
         // Position sheet below screen, make visible, animate to bottom
         PickerSheet.TranslationY = ScreenHeight;
         PickerSheet.IsVisible = true;
@@ -185,7 +206,7 @@ public partial class MainPage : ContentPage
                 {
                     PickerSheet.IsVisible = false;
                     PickerSheet.TranslationY = 0;
-                    SetSafeAreaColor(null);
+                    SetSafeAreaColor(null, bottomOnly: true);
                 });
             });
         NodePickerBackdrop.IsVisible = false;
@@ -265,18 +286,21 @@ public partial class MainPage : ContentPage
     }
 
     // ── Native iOS safe area color overlay ──────────────────────────────────
-    // Adds a UIView pinned to UIWindow (like BlurOverlay) to cover
-    // the home indicator and dynamic island zones with a solid color.
+    // Adds UIViews pinned to UIWindow SafeAreaLayoutGuide so they auto-update on rotation.
 
     private const int SafeAreaOverlayTag = 888;
     private const int SafeAreaTopTag = 889;
+    private const int SafeAreaLeftTag = 890;
+    private const int SafeAreaRightTag = 891;
 
     /// <summary>
-    /// Sets a solid color in the iOS safe area zones (home indicator + dynamic island).
-    /// Pass null to remove the overlay.
+    /// Sets a solid color in iOS safe area zones.
+    /// Uses SafeAreaLayoutGuide so overlays auto-resize on rotation.
+    /// Pass null to remove the overlays.
     /// When topOnly is true, only the top safe area (Dynamic Island) is affected.
+    /// When bottomOnly is true, only the bottom safe area (home indicator) is affected.
     /// </summary>
-    private void SetSafeAreaColor(Color? color, bool topOnly = false)
+    private void SetSafeAreaColor(Color? color, bool topOnly = false, bool bottomOnly = false)
     {
 #if IOS || MACCATALYST
         var window = this.Window?.Handler?.PlatformView as UIKit.UIWindow;
@@ -284,16 +308,21 @@ public partial class MainPage : ContentPage
 
         if (topOnly)
         {
-            // Remove only top overlay
             foreach (var v in window.Subviews)
                 if (v.Tag == SafeAreaTopTag)
                     v.RemoveFromSuperview();
         }
+        else if (bottomOnly)
+        {
+            foreach (var v in window.Subviews)
+                if (v.Tag == SafeAreaOverlayTag)
+                    v.RemoveFromSuperview();
+        }
         else
         {
-            // Remove all safe area overlays
             foreach (var v in window.Subviews)
-                if (v.Tag == SafeAreaOverlayTag || v.Tag == SafeAreaTopTag)
+                if (v.Tag == SafeAreaOverlayTag || v.Tag == SafeAreaTopTag
+                    || v.Tag == SafeAreaLeftTag || v.Tag == SafeAreaRightTag)
                     v.RemoveFromSuperview();
         }
 
@@ -305,48 +334,98 @@ public partial class MainPage : ContentPage
             (nfloat)color.Blue,
             (nfloat)color.Alpha);
 
-        if (!topOnly)
+        var guide = window.SafeAreaLayoutGuide;
+
+        if (topOnly)
         {
-            // Bottom safe area overlay (home indicator)
-            var overlay = new UIKit.UIView
+            // Top safe area overlay only
+            var topOverlay = new UIKit.UIView
+            {
+                Tag = SafeAreaTopTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(topOverlay);
+            topOverlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            topOverlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            topOverlay.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+            topOverlay.BottomAnchor.ConstraintEqualTo(guide.TopAnchor).Active = true;
+        }
+        else if (bottomOnly)
+        {
+            // Bottom safe area overlay only (home indicator)
+            var bottom = new UIKit.UIView
             {
                 Tag = SafeAreaOverlayTag,
                 TranslatesAutoresizingMaskIntoConstraints = false,
                 BackgroundColor = nativeColor,
                 UserInteractionEnabled = false
             };
-            window.AddSubview(overlay);
-
-            overlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
-            overlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
-            overlay.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
-
-            var bottomInset = window.SafeAreaInsets.Bottom;
-            if (bottomInset > 0)
-                overlay.HeightAnchor.ConstraintEqualTo(bottomInset).Active = true;
-            else
-                overlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+            window.AddSubview(bottom);
+            bottom.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            bottom.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            bottom.TopAnchor.ConstraintEqualTo(guide.BottomAnchor).Active = true;
+            bottom.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
         }
-
-        // Top safe area overlay (Dynamic Island)
-        var topOverlay = new UIKit.UIView
-        {
-            Tag = SafeAreaTopTag,
-            TranslatesAutoresizingMaskIntoConstraints = false,
-            BackgroundColor = nativeColor,
-            UserInteractionEnabled = false
-        };
-        window.AddSubview(topOverlay);
-
-        topOverlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
-        topOverlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
-        topOverlay.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
-
-        var topInset = window.SafeAreaInsets.Top;
-        if (topInset > 0)
-            topOverlay.HeightAnchor.ConstraintEqualTo(topInset).Active = true;
         else
-            topOverlay.HeightAnchor.ConstraintEqualTo(50).Active = true;
+        {
+            // Bottom safe area overlay (home indicator)
+            var bottom = new UIKit.UIView
+            {
+                Tag = SafeAreaOverlayTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(bottom);
+            bottom.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            bottom.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            bottom.TopAnchor.ConstraintEqualTo(guide.BottomAnchor).Active = true;
+            bottom.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+
+            // Left safe area overlay
+            var left = new UIKit.UIView
+            {
+                Tag = SafeAreaLeftTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(left);
+            left.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            left.TrailingAnchor.ConstraintEqualTo(guide.LeadingAnchor).Active = true;
+            left.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+            left.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+
+            // Right safe area overlay
+            var right = new UIKit.UIView
+            {
+                Tag = SafeAreaRightTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(right);
+            right.LeadingAnchor.ConstraintEqualTo(guide.TrailingAnchor).Active = true;
+            right.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            right.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+            right.BottomAnchor.ConstraintEqualTo(window.BottomAnchor).Active = true;
+
+            // Top safe area overlay (Dynamic Island)
+            var topOverlay = new UIKit.UIView
+            {
+                Tag = SafeAreaTopTag,
+                TranslatesAutoresizingMaskIntoConstraints = false,
+                BackgroundColor = nativeColor,
+                UserInteractionEnabled = false
+            };
+            window.AddSubview(topOverlay);
+            topOverlay.LeadingAnchor.ConstraintEqualTo(window.LeadingAnchor).Active = true;
+            topOverlay.TrailingAnchor.ConstraintEqualTo(window.TrailingAnchor).Active = true;
+            topOverlay.TopAnchor.ConstraintEqualTo(window.TopAnchor).Active = true;
+            topOverlay.BottomAnchor.ConstraintEqualTo(guide.TopAnchor).Active = true;
+        }
 #endif
     }
 
@@ -528,5 +607,241 @@ public partial class MainPage : ContentPage
             MainCanvas.ApplyOrQueueZoom(() => MainCanvas.ZoomToSvgPoint(node.X, node.Y, zoomOut));
         else
             MainCanvas.ApplyOrQueueZoom(null);
+    }
+
+    // ── First-launch tutorial ──────────────────────────────────────────────
+
+    private bool _tutorialShown;
+    private int _tutorialStep;
+
+    private void StartTutorial()
+    {
+        _tutorialStep = 0;
+
+#if IOS || MACCATALYST
+        SetSafeAreaColor(Color.FromArgb("#B3000000"));
+#endif
+        TutorialOverlay.IsVisible = true;
+        ShowTutorialStep();
+    }
+
+    private void ShowTutorialStep()
+    {
+        // 6 steps: AddressPill, FloorSelector, RouteInputBar, QrScanButton, BuildRouteButton, UserMenuButton
+        var totalSteps = 6;
+        if (_tutorialStep >= totalSteps)
+        {
+            EndTutorial();
+            return;
+        }
+
+        Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(300), () =>
+        {
+            // Move skip button simultaneously with step (steps 0-1: bottom, steps 2+: top-right)
+            if (_tutorialStep >= 2)
+            {
+                TutorialControls.VerticalOptions = LayoutOptions.Start;
+                TutorialControls.Margin = new Thickness(0, 16, 16, 0);
+            }
+            else
+            {
+                TutorialControls.VerticalOptions = LayoutOptions.End;
+                TutorialControls.Margin = new Thickness(0, 0, 16, 40);
+            }
+
+            PositionTutorialStep(_tutorialStep);
+            TutorialStepLabel.Text = $"{_tutorialStep + 1} / {totalSteps}";
+        });
+    }
+
+    private VisualElement? GetTutorialTarget(int step) => step switch
+    {
+        0 => AddressPill,
+        1 => FloorSelector,
+        2 => RouteInputBar,
+        3 => QrScanButton,
+        4 => BuildRouteButton,
+        5 => UserMenuButton,
+        _ => null
+    };
+
+    private void PositionTutorialStep(int step)
+    {
+        var target = GetTutorialTarget(step);
+        if (target == null || !target.IsVisible)
+        {
+            _tutorialStep++;
+            ShowTutorialStep();
+            return;
+        }
+
+        var (tx, ty, tw, th) = GetTargetBounds(target);
+        var overlayW = TutorialOverlay.Width;
+        var overlayH = TutorialOverlay.Height;
+
+        // Spotlight
+        var sp = 6;
+        TutorialSpotlight.Margin = new Thickness(tx - sp, ty - sp, 0, 0);
+        TutorialSpotlight.WidthRequest = tw + sp * 2;
+        TutorialSpotlight.HeightRequest = th + sp * 2;
+        TutorialSpotlight.IsVisible = true;
+
+        // Determine arrow direction and description based on logical position
+        string desc;
+        double arrowX, arrowY, labelX, labelY;
+
+        switch (step)
+        {
+            case 0: // AddressPill — top-left, arrow below pointing up at it, text below arrow
+                desc = "Нажмите сюда, чтобы выбрать нужный корпус";
+                TutorialArrow.Source = "tutorial_arrow_up";
+                TutorialArrow.WidthRequest = 50;
+                TutorialArrow.HeightRequest = 70;
+                arrowX = tx + tw / 2 - 25;
+                arrowY = ty + th + 8;
+                labelX = tx + tw / 2 - 130;
+                labelY = arrowY + 75;
+                break;
+
+            case 1: // FloorSelector — top-right, arrow to the left pointing right at it, text to the left
+                desc = "Здесь можно переключить этаж";
+                TutorialArrow.Source = "tutorial_arrow_right";
+                TutorialArrow.WidthRequest = 100;
+                TutorialArrow.HeightRequest = 50;
+                arrowX = tx - 110;
+                arrowY = ty + th / 2 - 25;
+                labelX = Math.Max(12, arrowX - 280);
+                labelY = ty + th / 2 - 20;
+                break;
+
+            case 2: // RouteInputBar — bottom, arrow above pointing down at it, text above arrow
+                desc = "Здесь задаётся маршрут: откуда и куда";
+                TutorialArrow.Source = "tutorial_arrow_down";
+                TutorialArrow.WidthRequest = 50;
+                TutorialArrow.HeightRequest = 70;
+                arrowX = tx + tw / 2 - 25;
+                arrowY = ty - 78;
+                labelX = tx + tw / 2 - 130;
+                labelY = Math.Max(12, arrowY - 50);
+                break;
+
+            case 3: // QrScanButton — bottom-right, arrow above pointing down, text to the left
+                desc = "Отсканируйте QR-код для определения местоположения";
+                TutorialArrow.Source = "tutorial_arrow_down";
+                TutorialArrow.WidthRequest = 50;
+                TutorialArrow.HeightRequest = 70;
+                arrowX = tx + tw / 2 - 25;
+                arrowY = ty - 78;
+                labelX = Math.Max(12, tx - 280);
+                labelY = Math.Max(12, arrowY - 50);
+                break;
+
+            case 4: // BuildRouteButton — bottom, arrow above pointing down, text above
+                desc = "Нажмите, чтобы построить маршрут";
+                TutorialArrow.Source = "tutorial_arrow_down";
+                TutorialArrow.WidthRequest = 50;
+                TutorialArrow.HeightRequest = 70;
+                arrowX = tx + tw / 2 - 25;
+                arrowY = ty - 78;
+                labelX = tx + tw / 2 - 130;
+                labelY = Math.Max(12, arrowY - 50);
+                break;
+
+            case 5: // UserMenuButton — bottom-right, arrow above pointing down, text to the left
+                desc = "Здесь профиль и выход из аккаунта";
+                TutorialArrow.Source = "tutorial_arrow_down";
+                TutorialArrow.WidthRequest = 50;
+                TutorialArrow.HeightRequest = 70;
+                arrowX = tx + tw / 2 - 25;
+                arrowY = ty - 78;
+                labelX = Math.Max(12, tx - 280);
+                labelY = Math.Max(12, arrowY - 50);
+                break;
+
+            default:
+                desc = "";
+                arrowX = arrowY = labelX = labelY = 0;
+                break;
+        }
+
+        // Clamp label to screen bounds
+        labelX = Math.Max(12, Math.Min(labelX, overlayW - 290));
+        labelY = Math.Max(12, Math.Min(labelY, overlayH - 60));
+
+        TutorialArrow.Margin = new Thickness(arrowX, arrowY, 0, 0);
+        TutorialArrow.IsVisible = true;
+
+        TutorialLabel.Text = desc;
+        TutorialLabelBorder.Margin = new Thickness(labelX, labelY, 0, 0);
+        TutorialLabelBorder.IsVisible = true;
+    }
+
+    private (double X, double Y, double W, double H) GetTargetBounds(VisualElement target)
+    {
+#if IOS || MACCATALYST
+        var nativeTarget = target.Handler?.PlatformView as UIKit.UIView;
+        var nativeOverlay = TutorialOverlay.Handler?.PlatformView as UIKit.UIView;
+        if (nativeTarget != null && nativeOverlay != null && nativeTarget.Superview != null)
+        {
+            var frame = nativeTarget.Superview.ConvertRectToView(nativeTarget.Frame, nativeOverlay);
+            return (frame.X, frame.Y, frame.Width, frame.Height);
+        }
+#endif
+        // Fallback: walk visual tree
+        var targetX = target.X;
+        var targetY = target.Y;
+        var targetW = target.Width;
+        var targetH = target.Height;
+        var parent = target.Parent as VisualElement;
+        while (parent != null && parent != MainGrid)
+        {
+            targetX += parent.X;
+            targetY += parent.Y;
+            parent = parent.Parent as VisualElement;
+        }
+        return (targetX, targetY, targetW, targetH);
+    }
+
+    private void OnTutorialTap(object? sender, TappedEventArgs e)
+    {
+        _tutorialStep++;
+        ShowTutorialStep();
+    }
+
+    private void OnTutorialSkip(object? sender, EventArgs e)
+    {
+        EndTutorial();
+    }
+
+    private void EndTutorial()
+    {
+        TutorialOverlay.IsVisible = false;
+        TutorialSpotlight.IsVisible = false;
+        TutorialArrow.IsVisible = false;
+        TutorialLabelBorder.IsVisible = false;
+        Preferences.Default.Set("tutorial_completed", true);
+
+#if IOS || MACCATALYST
+        SetSafeAreaColor(null);
+#endif
+
+        // Show notification permission dialog after tutorial (only once)
+        if (!_notificationService.WasPermissionRequested)
+        {
+            NotificationPermissionOverlay.IsVisible = true;
+        }
+    }
+
+    private async void OnNotificationAccepted(object? sender, EventArgs e)
+    {
+        NotificationPermissionOverlay.IsVisible = false;
+        await _notificationService.RequestPermissionAsync();
+    }
+
+    private void OnNotificationDeclined(object? sender, EventArgs e)
+    {
+        NotificationPermissionOverlay.IsVisible = false;
+        // Mark as requested so we don't ask again
+        Preferences.Default.Set("notification_permission_requested", true);
     }
 }
