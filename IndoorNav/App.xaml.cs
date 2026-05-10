@@ -9,14 +9,16 @@ public partial class App : Application
     private readonly SplashPage  _splashPage;
     private readonly LoginPage   _loginPage;
     private readonly NotificationService _notificationService;
+    private readonly EmergencyService _emergencyService;
 
-    public App(AuthService authService, SplashPage splashPage, LoginPage loginPage, NotificationService notificationService)
+    public App(AuthService authService, SplashPage splashPage, LoginPage loginPage, NotificationService notificationService, EmergencyService emergencyService)
     {
         InitializeComponent();
         _authService = authService;
         _splashPage  = splashPage;
         _loginPage   = loginPage;
         _notificationService = notificationService;
+        _emergencyService = emergencyService;
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
@@ -39,6 +41,16 @@ public partial class App : Application
         {
             await _authService.InitAsync();
             await _notificationService.InitializeAsync();
+
+            // Load emergency state early so we can check IsEmergencyActive
+            await _emergencyService.LoadAsync();
+
+            // If emergency was active before app was killed, restore notification spam
+            if (_emergencyService.IsEmergencyActive || _notificationService.IsEmergencySpamActive)
+            {
+                await _notificationService.CheckPermissionAsync();
+                _notificationService.RestartSpamFromPersistedState();
+            }
 
             MainThread.BeginInvokeOnMainThread(() =>
             {

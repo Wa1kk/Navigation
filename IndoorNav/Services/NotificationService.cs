@@ -7,10 +7,13 @@ namespace IndoorNav.Services;
 /// Manages local push notifications for emergency (ЧС) alerts.
 /// Only sends evacuation notifications — no other notifications are ever sent.
 /// When ЧС is active: sends notifications every 3 s (app in background) or 5 s (app in foreground).
+/// Uses iOS UNTimeIntervalNotificationTrigger for background notifications that survive app kill.
 /// </summary>
 public class NotificationService
 {
     private const string PermissionPreferenceKey = "notification_permission_requested";
+    private const string EmergencySpamKey = "emergency_spam_active";
+    private const string EmergencyBuildingKey = "emergency_spam_building";
 
     private CancellationTokenSource? _spamCts;
     private string? _currentBuildingName;
@@ -22,13 +25,37 @@ public class NotificationService
     /// <summary>Whether the user has granted notification permission.</summary>
     public bool HasPermission { get; private set; }
 
+    /// <summary>Whether emergency spam is currently active.</summary>
+    public bool IsEmergencySpamActive => Preferences.Default.Get(EmergencySpamKey, false);
+
     // ── App lifecycle tracking ─────────────────────────────────────────────
 
     /// <summary>Call when the app moves to the foreground.</summary>
-    public void OnAppForegrounded() => _isAppInForeground = true;
+    public void OnAppForegrounded()
+    {
+        _isAppInForeground = true;
+        // When coming back to foreground, cancel iOS scheduled triggers
+        // and switch to in-app loop for more responsive notifications
+        CancelIosScheduledNotifications();
+        if (IsEmergencySpamActive && _spamCts == null)
+            RestartSpamFromPersistedState();
+    }
 
     /// <summary>Call when the app moves to the background.</summary>
-    public void OnAppBackgrounded() => _isAppInForeground = false;
+    public void OnAppBackgrounded()
+    {
+        _isAppInForeground = false;
+        // Stop in-app loop and schedule iOS repeating notifications
+        // that work even when the app is suspended/killed
+        if (_spamCts != null)
+        {
+            _spamCts?.Cancel();
+            _spamCts?.Dispose();
+            _spamCts = null;
+        }
+        if (IsEmergencySpamActive)
+            ScheduleIosRepeatingNotification(_currentBuildingName);
+    }
 
     // ── Permission ─────────────────────────────────────────────────────────
 
@@ -74,6 +101,7 @@ public class NotificationService
     /// <summary>
     /// Start sending emergency notifications repeatedly.
     /// Interval: 3 s when app is in background, 5 s when in foreground.
+    /// Persists state so notifications resume after app restart.
     /// </summary>
     public void StartEmergencySpam(string? buildingName = null)
     {
@@ -83,6 +111,11 @@ public class NotificationService
         if (_spamCts != null && !_spamCts.IsCancellationRequested) return;
 
         _currentBuildingName = buildingName;
+
+        // Persist spam state for restart
+        Preferences.Default.Set(EmergencySpamKey, true);
+        Preferences.Default.Set(EmergencyBuildingKey, buildingName ?? string.Empty);
+
         _spamCts?.Dispose();
         _spamCts = new CancellationTokenSource();
         var ct = _spamCts.Token;
@@ -112,6 +145,25 @@ public class NotificationService
         _spamCts?.Cancel();
         _spamCts?.Dispose();
         _spamCts = null;
+
+        // Clear persisted state
+        Preferences.Default.Set(EmergencySpamKey, false);
+        Preferences.Default.Remove(EmergencyBuildingKey);
+
+        // Cancel any scheduled iOS notifications
+        CancelIosScheduledNotifications();
+    }
+
+    /// <summary>
+    /// Restart spam loop from persisted state (called on app launch/resume).
+    /// </summary>
+    public void RestartSpamFromPersistedState()
+    {
+        if (!IsEmergencySpamActive) return;
+
+        var buildingName = Preferences.Default.Get(EmergencyBuildingKey, string.Empty);
+        _currentBuildingName = string.IsNullOrEmpty(buildingName) ? null : buildingName;
+        StartEmergencySpam(_currentBuildingName);
     }
 
     /// <summary>
@@ -143,6 +195,46 @@ public class NotificationService
             // best-effort
         }
     }
+
+    // ── iOS native repeating notifications (work when app is killed) ────────
+
+#if IOS || MACCATALYST
+    private void ScheduleIosRepeatingNotification(string? buildingName)
+    {
+        try
+        {
+            var title = "🚨 Чрезвычайная ситуация";
+            var body = string.IsNullOrEmpty(buildingName)
+                ? "Немедленно покиньте здание! Следуйте по маршруту эвакуации."
+                : $"Немедленно покиньте корпус «{buildingName}»! Следуйте по маршруту эвакуации.";
+
+            var content = new UserNotifications.UNMutableNotificationContent();
+            content.Title = title;
+            content.Body = body;
+            content.Sound = UserNotifications.UNNotificationSound.DefaultCriticalSound;
+            content.UserInfo = new Foundation.NSDictionary("returningData", new Foundation.NSString("emergency"));
+
+            // Repeat every 3 seconds while in background
+            var trigger = UserNotifications.UNTimeIntervalNotificationTrigger.CreateTrigger(3, true);
+
+            var request = UserNotifications.UNNotificationRequest.FromIdentifier("emergency_spam", content, trigger);
+            UserNotifications.UNUserNotificationCenter.Current.AddNotificationRequest(request, null);
+        }
+        catch { /* best-effort */ }
+    }
+
+    private void CancelIosScheduledNotifications()
+    {
+        try
+        {
+            UserNotifications.UNUserNotificationCenter.Current.RemoveAllPendingNotificationRequests();
+        }
+        catch { /* best-effort */ }
+    }
+#else
+    private void ScheduleIosRepeatingNotification(string? buildingName) { }
+    private void CancelIosScheduledNotifications() { }
+#endif
 
     // ── Initialization ─────────────────────────────────────────────────────
 

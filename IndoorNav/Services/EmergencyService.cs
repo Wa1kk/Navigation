@@ -22,18 +22,9 @@ public class EmergencyService
     public event EventHandler<EmergencyChangedArgs>? EmergencyChanged;
 
     private readonly HashSet<string> _activeBuildings = new();
+    private bool _isLoaded;
 
-    private static string GetProjectRootPath()
-    {
-        var basePath = AppContext.BaseDirectory;
-        var dir = new DirectoryInfo(basePath);
-        while (dir != null && !File.Exists(Path.Combine(dir.FullName, "IndoorNav.csproj")))
-            dir = dir.Parent;
-        return dir?.FullName ?? basePath;
-    }
-
-    private static string StatePath =>
-        Path.Combine(GetProjectRootPath(), "Resources", "Raw", "emergency_state.json");
+    private const string StatePreferenceKey = "emergency_active_buildings";
 
     /// <summary>True if ANY building is in emergency mode.</summary>
     public bool IsEmergencyActive => _activeBuildings.Count > 0;
@@ -50,10 +41,12 @@ public class EmergencyService
     /// <summary>Load persisted emergency state. Call once on app startup.</summary>
     public async Task LoadAsync()
     {
+        if (_isLoaded) return;
+        _isLoaded = true;
         try
         {
-            if (!File.Exists(StatePath)) return;
-            var json = await File.ReadAllTextAsync(StatePath);
+            var json = Preferences.Default.Get(StatePreferenceKey, string.Empty);
+            if (string.IsNullOrEmpty(json)) return;
             var ids  = JsonSerializer.Deserialize<List<string>>(json);
             if (ids == null || ids.Count == 0) return;
             foreach (var id in ids)
@@ -68,7 +61,7 @@ public class EmergencyService
         try
         {
             var json = JsonSerializer.Serialize(_activeBuildings.ToList());
-            File.WriteAllText(StatePath, json);
+            Preferences.Default.Set(StatePreferenceKey, json);
         }
         catch { /* best-effort */ }
     }
